@@ -83,3 +83,18 @@ Analytics Domain depends on all operational data.
 AI Domain depends on analytics and historical data.
 
 Blockchain Domain depends on final academic records.
+
+AUMS Core
+│
+├── Institution Registry
+│
+└── Database Registry
+
+Institution Database
+│
+├── Users
+├── Students
+├── Faculty
+├── Attendance
+├── Results
+└── Alumni

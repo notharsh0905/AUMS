@@ -343,6 +343,117 @@ Academic history is preserved permanently.
 
 ---
 
+# Decision #17: UUID v7
+
+Status: Approved
+
+Decision:
+All primary keys will use UUID v7.
+
+Reason:
+
+* Time ordered
+* Better indexing performance
+* Better scalability
+* Modern database standard
+* Suitable for distributed systems
+
+Impact:
+
+All major tables use UUID v7
+Better PostgreSQL performance compared to UUID v4
+
+# Decision #18: File Storage Architecture
+
+Status: Approved
+
+Decision:
+Files will not be stored directly in PostgreSQL.
+
+Architecture:
+
+File Storage (MinIO/S3)
++
+Database Metadata
+
+Reason:
+
+* Better scalability
+* Better performance
+* Easier backup management
+* Suitable for large files
+
+Impact:
+All uploaded content will use the File Storage Domain.
+
+Examples:
+
+* Assignments
+* Certificates
+* Marksheets
+* Medical Certificates
+* Research Papers
+* Images
+
+---
+
+# Decision #19 (Updated)
+
+Status: Approved
+
+Decision
+
+AUMS will use:
+
+One Database Per Institution
+
+Example:
+
+CSJMU
+└── csjmu_db
+
+PSIT
+└── psit_db
+
+DPS
+└── dps_db
+
+Instead of:
+
+aums_db
+├── CSJMU
+├── PSIT
+└── DPS
+
+---
+
+# Decision #20
+
+Database Isolation Model
+
+Approved.
+
+AUMS Core Database
++Separate PostgreSQL Database Per Institution
+
+---
+
+# Decision #21: Migration Strategy
+
+Status: Approved
+
+Decision
+
+AUMS will use:
+
+Raw SQL Migrations
+
+instead of:
+
+ORM Auto Migrations
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:

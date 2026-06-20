@@ -18,7 +18,7 @@ Architecture:
 
 ## Design Principles
 
-1. Multi-Tenant Support
+1. Multi-Database Tenant Architecture
 2. Role-Based Access Control (RBAC)
 3. Lifelong Digital Identity
 4. Institution Independence
