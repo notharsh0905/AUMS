@@ -454,6 +454,60 @@ ORM Auto Migrations
 
 ---
 
+# Decision #22: Unified User Experience
+
+AUMS will have:
+
+One Login
+↓
+One Dashboard
+↓
+Role-Based Navigation
+↓
+Access To Relevant Modules
+
+Instead of:
+
+Student Portal
+
+Faculty Portal
+
+Parent Portal
+
+Alumni Portal
+
+Admin Portal
+
+E-Office Portal
+
+as completely separate applications.
+
+---
+
+# Decision #23: API Architecture
+
+Status: Approved
+
+Decision
+
+AUMS will use:
+
+REST API
+
+Initial architecture:
+
+Frontend (Next.js)
+
+↓
+
+REST API (Go + Gin)
+
+↓
+
+PostgreSQL
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:
