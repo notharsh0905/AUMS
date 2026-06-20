@@ -1,15 +1,335 @@
-## What is decisions.md?
+# AUMS Architecture Decisions Log
 
-Very important.
+This document records all major architectural and technical decisions made during the development of AUMS.
 
-Every major decision goes here.
+The purpose of this document is to preserve the reasoning behind important choices so future development remains consistent and maintainable.
+
+---
+
+# Decision #1: AUMS Will Support Multiple Institution Types
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+AUMS will support:
+
+* Schools
+* Colleges
+* Universities
+
+Reason:
+
+Building exclusively for universities would create limitations in the future.
+
+By designing the platform around institution types, the same system can be used by multiple educational organizations without redesigning the database.
+
+Impact:
+
+* Academic structure must be flexible.
+* Institution configuration becomes mandatory.
+* Future scalability increases significantly.
+
+---
+
+# Decision #2: Multi-Tenant Architecture
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+AUMS will support multiple institutions within a single platform.
 
 Example:
 
-Decision #1
-
-Use PostgreSQL
+* CSJMU
+* PSIT
+* DPS School
+* Future Institutions
 
 Reason:
-Supports relational architecture.
-Years later you'll know why you chose something.
+
+The platform should evolve into an Education Operating System rather than a single university ERP.
+
+Impact:
+
+* Every major record must belong to an institution.
+* Institution isolation must be enforced.
+* Permissions must respect institution boundaries.
+
+---
+
+# Decision #3: Department Autonomy with Central Governance
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+Departments operate independently while remaining under institutional governance.
+
+Examples:
+
+* Computer Science
+* Electronics
+* Management
+* Law
+* Medical
+
+Reason:
+
+Departments often manage their own faculty, subjects, events, notices, and workflows.
+
+Impact:
+
+* Department-level administration required.
+* Separate departmental dashboards required.
+* Department-specific analytics required.
+
+---
+
+# Decision #4: Role-Based Access Control (RBAC)
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+AUMS will use Role-Based Access Control.
+
+Roles:
+
+* Student
+* Faculty
+* Parent
+* Alumni
+* HOD
+* Dean
+* Registrar
+* Admin
+* Super Admin
+
+Permissions will control actions rather than hardcoding roles.
+
+Reason:
+
+RBAC is scalable and flexible.
+
+Impact:
+
+* Roles table required.
+* Permissions table required.
+* Role-Permission mapping required.
+
+---
+
+# Decision #5: Lifelong Digital Identity
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+Users retain a single account throughout their relationship with an institution.
+
+Example:
+
+Student
+→ Alumni
+→ Mentor
+→ Recruiter
+
+Reason:
+
+Identity should remain permanent while roles evolve.
+
+Impact:
+
+* Master users table required.
+* Role assignment becomes dynamic.
+* Alumni migration becomes unnecessary.
+
+---
+
+# Decision #6: User Master Table with Profile Tables
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+AUMS will use:
+
+users (master table)
+
+and separate profile tables:
+
+* student_profiles
+* faculty_profiles
+* parent_profiles
+* alumni_profiles
+
+Reason:
+
+Shared information belongs in users.
+
+Role-specific information belongs in profile tables.
+
+Impact:
+
+* Cleaner database design.
+* Easier future expansion.
+
+---
+
+# Decision #7: Existing Alumni Onboarding
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+AUMS will support alumni who graduated before the platform existed.
+
+Reason:
+
+Universities already have large alumni networks.
+
+Impact:
+
+* Alumni import system required.
+* Alumni claim workflow required.
+* Alumni verification workflow required.
+
+---
+
+# Decision #8: Session-Based Attendance
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+Attendance will be recorded per session rather than per day.
+
+Examples:
+
+09:00 – DBMS
+
+10:00 – Operating Systems
+
+11:00 – Lab
+
+Reason:
+
+More accurate and reflects real institutional operations.
+
+Impact:
+
+* Timetable integration required.
+* Attendance records increase significantly.
+
+---
+
+# Decision #9: Manual + AI Assisted Timetable Generation
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+Timetables are created manually but AI can provide suggestions and detect conflicts.
+
+Reason:
+
+Human control remains necessary while AI reduces workload.
+
+Impact:
+
+* Timetable engine required.
+* Conflict detection engine required.
+* Future optimization module possible.
+
+---
+
+# Decision #10: Technology Stack
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Frontend:
+
+* Next.js
+* TypeScript
+* Tailwind CSS
+* shadcn/ui
+
+Backend:
+
+* Go
+* Gin Framework
+
+Database:
+
+* PostgreSQL
+
+AI:
+
+* Python
+* FastAPI
+* Scikit-Learn
+
+Reason:
+
+Provides a balance of performance, maintainability, scalability, and learning value.
+
+---
+
+# Decision #11: Development Strategy
+
+Date: Initial Architecture Phase
+
+Status: Approved
+
+Decision:
+
+Build AUMS as a Modular Monolith initially.
+
+Future migration to microservices remains possible.
+
+Reason:
+
+Reduces complexity while preserving scalability.
+
+Impact:
+
+* Faster development.
+* Easier debugging.
+* Better learning experience.
+
+---
+
+# Future Decisions
+
+The following topics remain undecided:
+
+* Examination Architecture
+* Result Processing Engine
+* E-Office Architecture
+* Notification Architecture
+* Analytics Architecture
+* AI Architecture
+* Blockchain Architecture
+* Deployment Architecture
