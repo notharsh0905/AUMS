@@ -321,6 +321,28 @@ Impact:
 
 ---
 
+# Decision #12
+
+Students may belong to multiple institutions/programs.
+
+# Decision #13
+
+Admission Workflow will be included.
+
+# Decision #14
+
+Student Documents will be managed by AUMS.
+
+# Decision #15
+
+Students may enroll in multiple programs.
+
+# Decision #16
+
+Academic history is preserved permanently.
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:
