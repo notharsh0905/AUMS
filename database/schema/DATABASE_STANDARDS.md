@@ -134,3 +134,41 @@ Only password hashes.
 Sensitive documents must be encrypted.
 
 PII access must be logged.
+
+## Primary Keys
+
+UUID v7 everywhere
+
+## Audit Columns
+
+Every table must have:
+
+created_at TIMESTAMPTZ NOT NULL
+
+updated_at TIMESTAMPTZ NOT NULL
+
+### Optional later:
+
+created_by UUID
+
+updated_by UUID
+
+## Naming Convention
+
+### Tables:
+
+snake_case
+
+plural
+
+### Examples:
+
+students
+
+faculty_members
+
+attendance_sessions
+
+### Columns:
+
+snake_case
