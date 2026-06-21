@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS login_audit_logs CASCADE;
+
+DROP TABLE IF EXISTS audit_logs CASCADE;
+
+DROP TABLE IF EXISTS audit_events CASCADE;
+
+DROP TYPE IF EXISTS login_status;
+
+DROP TYPE IF EXISTS audit_action;

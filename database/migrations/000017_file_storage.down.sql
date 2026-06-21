@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS file_access_logs CASCADE;
+
+DROP TABLE IF EXISTS file_versions CASCADE;
+
+DROP TABLE IF EXISTS files CASCADE;
+
+DROP TABLE IF EXISTS storage_buckets CASCADE;
+
+DROP TYPE IF EXISTS file_status;

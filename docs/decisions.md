@@ -973,6 +973,145 @@ Status: Approved
 
 ---
 
+# Decision #37: Immutable Audit Architecture
+
+Status: Approved
+
+Decision
+
+All critical user and system actions must be recorded in audit logs.
+
+Audit records are append-only and should never be physically deleted.
+
+Reason
+
+Provides:
+
+* Accountability
+* Security
+* Compliance
+* Investigation Support
+
+Impact
+
+Every major domain must generate audit events.
+
+---
+
+# Decision #38: JSONB Audit Snapshots
+
+Status: Approved
+
+Decision
+
+Audit logs will store before and after values using PostgreSQL JSONB.
+
+Architecture
+
+old_values JSONB
+
+new_values JSONB
+
+Reason
+
+Allows tracking of entity changes without creating audit tables for every domain.
+
+Impact
+
+Audit system remains generic and scalable.
+
+---
+
+# Decision #39: External Object Storage Architecture
+
+Status: Approved
+
+Decision
+
+Files will be stored in object storage rather than PostgreSQL.
+
+Architecture
+
+MinIO / S3
++
+Metadata Database
+
+Reason
+
+* Better scalability
+* Better performance
+* Easier backup strategy
+* Supports large files
+
+Impact
+
+Database stores metadata only.
+
+Physical files remain in object storage.
+
+---
+
+# Decision #40: Analytics as AI Foundation
+
+Status: Approved
+
+Decision
+
+Analytics will act as the data foundation for AI systems.
+
+Architecture
+
+Operational Data
+↓
+Analytics
+↓
+AI Models
+
+Reason
+
+AI models should not directly query operational tables.
+
+Impact
+
+Student Risk Prediction
+
+Placement Prediction
+
+Attendance Forecasting
+
+Performance Analysis
+
+will consume analytics data.
+
+---
+
+# Decision #41: Configuration-Driven Platform
+
+Status: Approved
+
+Decision
+
+AUMS behavior should be controlled through configuration rather than source code changes.
+
+Architecture
+
+Platform Settings
++
+Institution Settings
++
+Feature Flags
+
+Reason
+
+Allows institutions to customize behavior without modifying application code.
+
+Impact
+
+New configuration options can be added without redeploying the platform.
+
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:
