@@ -622,6 +622,116 @@ Users, Students, Faculty, Alumni, Academic Records and other critical entities w
 
 ---
 
+# Decision #28: Academic Hierarchy Structure
+Status: Approved
+
+Decision
+
+AUMS will use the following academic hierarchy:
+
+Institution
+
+↓
+
+School
+
+↓
+
+Department
+
+↓
+
+Program
+
+
+Examples:
+
+School of Engineering
+
+↓
+
+Computer Science Department
+
+↓
+
+### B.Tech Computer Science
+
+School of Management
+
+↓
+
+MBA Program
+
+Reason
+
+Provides flexibility for universities, colleges, and schools.
+
+Impact
+
+* schools table required
+* departments table required
+* programs table required
+
+---
+
+# Decision #29: Student Domain Architecture
+Status: Approved
+
+Decision
+
+Student information will be split into:
+
+* student_profiles
+* student_enrollments
+* student_documents
+* student_guardians
+* student_status_history
+
+Reason
+
+A student may:
+
+*  Enroll in multiple programs
+*  Change programs
+*  Graduate
+*  Become alumni
+
+Academic history must never be lost.
+
+Impact
+
+Student records become enrollment-based instead of program-based.
+
+---
+
+# Decision #30: Institution Database Isolation
+Status: Approved
+
+Decision
+
+Institution databases will not store institution_id
+in most business tables.
+
+Reason
+
+Each institution owns a dedicated PostgreSQL database.
+
+Examples
+
+csjmu_db
+psit_db
+dps_db
+
+Therefore institution ownership is already implied.
+
+Impact
+
+* Reduces redundancy.
+* Smaller indexes.
+* Cleaner schema.
+* Better performance.
+
+---
 # Future Decisions
 
 The following topics remain undecided:
