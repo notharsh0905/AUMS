@@ -508,6 +508,120 @@ PostgreSQL
 
 ---
 
+# Decision #24: Identity Architecture
+Status: Approved
+
+Decision
+
+AUMS will use a Master Users Table.
+
+All authenticated persons will exist in the users table.
+
+Examples:
+
+* Student
+* Faculty
+* Parent
+* Alumni
+* Registrar
+* HOD
+* Dean
+* Admin
+
+Role-specific data will be stored in profile tables.
+
+Reason
+
+Provides a single identity source of truth.
+
+Impact
+
+* users table required
+* RBAC becomes centralized
+* Lifelong identity becomes possible
+
+---
+
+# Decision #25: Role-Permission Authorization Model
+Status: Approved
+
+Decision
+
+Authorization will use:
+
+Users
+
+↓
+
+Roles
+
+↓
+
+Permissions
+
+Architecture:
+
+* users
+* user_roles
+* roles
+* role_permissions
+* permissions
+
+Reason
+
+Permissions are more scalable than hardcoded roles.
+
+Impact
+
+Fine-grained access control across all modules.
+
+---
+
+# Decision #26: Session Management
+Status: Approved
+
+Decision
+
+AUMS will maintain server-side user sessions.
+
+Session metadata will be stored in user_sessions.
+
+Reason
+
+Supports:
+
+* Web
+* Mobile
+* AI Assistant
+* Future SSO
+
+Impact
+
+user_sessions table required.
+
+---
+
+# Decision #27: Soft Delete Policy
+Status: Approved
+
+Decision
+
+Major business entities will use soft deletion.
+
+Implementation:
+
+deleted_at TIMESTAMPTZ
+
+Reason
+
+Educational records must be preserved.
+
+Impact
+
+Users, Students, Faculty, Alumni, Academic Records and other critical entities will not be physically deleted.
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:
