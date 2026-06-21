@@ -264,17 +264,29 @@ ON course_results(enrollment_id);
 CREATE INDEX idx_course_results_offering
 ON course_results(course_offering_id);
 
+CREATE INDEX idx_course_results_status
+ON course_results(result_status);
+
 CREATE INDEX idx_semester_results_enrollment
 ON semester_results(enrollment_id);
 
 CREATE INDEX idx_semester_results_semester
 ON semester_results(semester_id);
 
+CREATE INDEX idx_semester_results_status
+ON semester_results(result_status);
+
 CREATE INDEX idx_program_results_enrollment
 ON program_results(enrollment_id);
+
+CREATE INDEX idx_program_results_status
+ON program_results(result_status);
 
 CREATE INDEX idx_transcripts_enrollment
 ON transcripts(enrollment_id);
 
 CREATE INDEX idx_transcripts_number
 ON transcripts(transcript_number);
+
+CREATE INDEX idx_transcripts_generated_by
+ON transcripts(generated_by);

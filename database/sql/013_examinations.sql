@@ -102,6 +102,12 @@ CREATE TABLE exam_schedules (
         REFERENCES exams(exam_id)
         ON DELETE CASCADE,
 
+        CONSTRAINT uq_exam_schedule
+UNIQUE (
+    exam_id,
+    exam_date
+),
+
     CONSTRAINT fk_exam_schedule_room
         FOREIGN KEY (room_id)
         REFERENCES rooms(room_id)
@@ -185,6 +191,12 @@ CREATE TABLE exam_attempts (
         REFERENCES faculty_profiles(faculty_profile_id)
         ON DELETE SET NULL,
 
+    CONSTRAINT uq_exam_attempt
+UNIQUE (
+    exam_registration_id,
+    attempt_number
+),
+
     CONSTRAINT chk_attempt_number
         CHECK (attempt_number > 0),
 
@@ -216,3 +228,9 @@ ON exam_registrations(enrollment_id);
 
 CREATE INDEX idx_exam_attempt_registration
 ON exam_attempts(exam_registration_id);
+
+CREATE INDEX idx_exam_schedule_exam
+ON exam_schedules(exam_id);
+
+CREATE INDEX idx_exam_attempt_evaluator
+ON exam_attempts(evaluator_id);

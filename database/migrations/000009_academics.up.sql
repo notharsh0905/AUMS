@@ -188,7 +188,7 @@ CREATE TABLE student_course_registrations (
 
     student_course_registration_id UUID PRIMARY KEY,
 
-    student_profile_id UUID NOT NULL,
+    enrollment_id UUID NOT NULL,
 
     course_offering_id UUID NOT NULL,
 
@@ -203,13 +203,13 @@ CREATE TABLE student_course_registrations (
 
     CONSTRAINT uq_student_course_registration
         UNIQUE (
-            student_profile_id,
+            enrollment_id,
             course_offering_id
         ),
 
-    CONSTRAINT fk_scr_student
-        FOREIGN KEY (student_profile_id)
-        REFERENCES student_profiles(student_profile_id)
+    CONSTRAINT fk_scr_enrollment
+        FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments(enrollment_id)
         ON DELETE RESTRICT,
 
     CONSTRAINT fk_scr_course_offering
@@ -271,8 +271,8 @@ ON course_offerings(semester_id);
 CREATE INDEX idx_faculty_course_allocations_faculty
 ON faculty_course_allocations(faculty_profile_id);
 
-CREATE INDEX idx_student_course_registrations_student
-ON student_course_registrations(student_profile_id);
+CREATE INDEX idx_student_course_registrations_enrollment
+ON student_course_registrations(enrollment_id);
 
 CREATE INDEX idx_student_course_registrations_offering
 ON student_course_registrations(course_offering_id);

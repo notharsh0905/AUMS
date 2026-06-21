@@ -60,6 +60,12 @@ CREATE TABLE assignments (
         REFERENCES faculty_profiles(faculty_profile_id)
         ON DELETE RESTRICT,
 
+    CONSTRAINT chk_assignment_dates
+        CHECK (
+        publish_at IS NULL
+        OR due_at > publish_at
+        ),
+
     CONSTRAINT chk_assignment_marks
         CHECK (total_marks > 0)
 );
@@ -205,6 +211,9 @@ ON assignment_submissions(assignment_id);
 
 CREATE INDEX idx_assignment_submissions_enrollment
 ON assignment_submissions(enrollment_id);
+
+CREATE INDEX idx_assignment_submissions_status
+ON assignment_submissions(submission_status);
 
 CREATE INDEX idx_assignment_grades_submission
 ON assignment_grades(assignment_submission_id);
