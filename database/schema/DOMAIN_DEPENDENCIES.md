@@ -1,100 +1,231 @@
 # AUMS Domain Dependencies
 
-This document defines how database domains depend on each other.
+This document defines the dependency relationships between AUMS domains.
 
-## Dependency Flow
+## Core Platform Layer
 
-Institution Domain
+```text
+Core Domain
+│
+├── Institutions
+├── Institution Domains
+├── Database Registry
+├── Platform Settings
+└── Feature Flags
+```
 
-↓
+All institution databases depend on the Core Domain.
 
+---
+
+## Identity Layer
+
+```text
 Identity Domain
-
-↓
-
-Student Domain
-
-↓
-
-Faculty Domain
-
-↓
-
-Academic Domain
-
-↓
-
-Timetable Domain
-
-↓
-
-Attendance Domain
-
-↓
-
-Assignment Domain
-
-↓
-
-Examination Domain
-
-↓
-
-Result Domain
-
-↓
-
-Notification Domain
-
-↓
-
-Analytics Domain
-
-↓
-
-AI Domain
-
-↓
-
-Blockchain Domain
-
-## Why This Order Exists
-
-Institution Domain provides organizational structure.
-
-Identity Domain provides authentication and authorization.
-
-Student and Faculty Domains provide user profiles.
-
-Academic Domain defines programs, levels, and subjects.
-
-Timetable Domain defines scheduling.
-
-Attendance Domain depends on timetable sessions.
-
-Assignment Domain depends on students, faculty, and subjects.
-
-Examination Domain depends on academics.
-
-Result Domain depends on examinations.
-
-Analytics Domain depends on all operational data.
-
-AI Domain depends on analytics and historical data.
-
-Blockchain Domain depends on final academic records.
-
-AUMS Core
-│
-├── Institution Registry
-│
-└── Database Registry
-
-Institution Database
 │
 ├── Users
+├── Roles
+├── Permissions
+├── User Roles
+├── Role Permissions
+└── User Sessions
+```
+
+Identity is the foundation for all user-based domains.
+
+---
+
+## People Layer
+
+```text
+Identity
+│
 ├── Students
 ├── Faculty
-├── Attendance
-├── Results
+├── Parents
 └── Alumni
+```
+
+Dependencies:
+
+```text
+Students  → Identity + Institutions
+Faculty   → Identity + Institutions
+Parents   → Identity + Students
+Alumni    → Identity
+```
+
+---
+
+## Academic Layer
+
+```text
+Academic Domain
+│
+├── Subjects
+├── Curriculum
+├── Program Curriculum
+├── Course Offerings
+├── Faculty Allocations
+└── Student Registrations
+```
+
+Dependencies:
+
+```text
+Academic
+    → Institutions
+    → Students
+    → Faculty
+```
+
+---
+
+## Operations Layer
+
+```text
+Timetable
+Attendance
+Assignments
+Examinations
+Results
+```
+
+Dependencies:
+
+```text
+Timetable
+    → Academic
+
+Attendance
+    → Academic
+    → Timetable
+
+Assignments
+    → Academic
+    → Students
+    → Faculty
+
+Examinations
+    → Academic
+
+Results
+    → Examinations
+    → Academic
+```
+
+---
+
+## Platform Services Layer
+
+```text
+Notifications
+Analytics
+AI
+Blockchain
+Audit
+File Storage
+```
+
+Dependencies:
+
+```text
+Notifications
+    → All Operational Domains
+
+Analytics
+    → All Academic and Operational Domains
+
+AI
+    → Analytics
+    → Historical Data
+
+Blockchain
+    → Results
+    → Certificates
+    → Academic Records
+
+Audit
+    → Entire System
+
+File Storage
+    → Entire System
+```
+
+---
+
+## Complete Dependency Graph
+
+```text
+Core
+│
+├── Identity
+│
+├── Institutions
+│
+├── Students
+├── Faculty
+├── Parents
+├── Alumni
+│
+├── Academics
+│
+├── Timetable
+│
+├── Attendance
+│
+├── Assignments
+│
+├── Examinations
+│
+├── Results
+│
+├── Notifications
+│
+├── Analytics
+│
+├── AI
+│
+├── Blockchain
+│
+├── Audit
+│
+└── File Storage
+```
+
+---
+
+## Database Architecture
+
+```text
+aums_core
+│
+├── institutions
+├── institution_domains
+├── institution_database_registry
+├── platform_settings
+├── feature_flags
+└── institution_feature_flags
+```
+
+Institution Database:
+
+```text
+identity
+students
+faculty
+parents
+alumni
+academics
+timetable
+attendance
+assignments
+examinations
+results
+notifications
+analytics
+ai
+blockchain
+audit
+file_storage
+```
