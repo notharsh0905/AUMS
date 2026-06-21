@@ -229,3 +229,15 @@ blockchain
 audit
 file_storage
 ```
+
+Result Domain
+↓
+Notification Domain
+↓
+Audit Domain
+↓
+Analytics Domain
+↓
+AI Domain
+↓
+Blockchain Domain

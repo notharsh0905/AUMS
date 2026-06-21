@@ -930,6 +930,49 @@ Result calculations remain independent
 from examination execution.
 
 ---
+
+# Decision #36: Event-Driven Notification Architecture
+
+Status: Approved
+
+Decision
+
+AUMS notifications will be event-driven.
+
+Architecture:
+
+Notification Event
+↓
+Notification
+↓
+Delivery Channel
+
+Supported Channels:
+
+* In-App
+* Email
+* SMS
+
+Future Channels:
+
+* Push Notifications
+* WhatsApp
+
+Reason
+
+Separates business events from delivery mechanisms.
+
+Impact
+
+Notification system becomes scalable and extensible.
+
+---
+
+# Decision #36: Event-Driven Notification Architecture
+Status: Approved
+
+---
+
 # Future Decisions
 
 The following topics remain undecided:
