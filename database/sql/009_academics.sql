@@ -188,7 +188,7 @@ CREATE TABLE student_course_registrations (
 
     student_course_registration_id UUID PRIMARY KEY,
 
-    student_profile_id UUID NOT NULL,
+    enrollment_id UUID NOT NULL,
 
     course_offering_id UUID NOT NULL,
 
@@ -213,8 +213,8 @@ CREATE TABLE student_course_registrations (
         ON DELETE RESTRICT,
 
     CONSTRAINT fk_scr_course_offering
-        FOREIGN KEY (course_offering_id)
-        REFERENCES course_offerings(course_offering_id)
+        FOREIGN KEY (enrollment_id)
+        REFERENCES student_enrollments(enrollment_id)
         ON DELETE RESTRICT
 );
 
