@@ -1109,6 +1109,32 @@ Impact
 
 New configuration options can be added without redeploying the platform.
 
+---
+
+# Decision #42: Migration Validation Policy
+
+Status: Approved
+
+Decision
+
+All schema changes must be validated through full migration execution on a clean PostgreSQL database before being accepted.
+
+Validation Requirements
+
+* Fresh database creation
+* Full migration execution
+* Foreign key validation
+* Index validation
+* Rollback validation (future)
+
+Reason
+
+Database correctness must be proven through execution rather than design review alone.
+
+Impact
+
+No migration may be merged without successful execution testing.
+
 
 ---
 
