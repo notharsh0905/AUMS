@@ -732,6 +732,204 @@ Impact
 * Better performance.
 
 ---
+
+# Decision #31: Enrollment-Centric Academic Architecture
+
+Status: Approved
+
+Decision
+
+Academic activities will be linked to student_enrollments
+instead of student_profiles.
+
+Examples:
+
+* Attendance
+* Assignments
+* Examinations
+* Results
+* Course Registrations
+
+Reason
+
+A student may have multiple enrollments across
+multiple programs.
+
+Examples:
+
+Student
+
+├── B.Tech CSE
+
+└── MBA
+
+Academic records belong to a specific enrollment,
+not to the student identity.
+
+Impact
+
+All academic domains must reference:
+
+student_enrollments.enrollment_id
+
+instead of:
+
+student_profiles.student_profile_id
+
+---
+
+# Decision #32: Parent Users Are First-Class Citizens
+Status: Approved
+
+Decision
+
+Parents will have user accounts and login access.
+
+Architecture
+
+users
+
+   ↓
+
+parent_profiles
+
+↓
+
+student_parent_relationships
+
+Reason
+
+Parents need access to:
+
+* Attendance
+* Results
+* Notifications
+* Leave Requests
+* Fee Information
+
+Impact
+
+student_guardians table deprecated.
+
+Parent relationships handled through:
+
+parent_profiles
+student_parent_relationships
+
+---
+
+# Decision #33: Credit-Based Academic System
+
+Status: Approved
+
+Decision
+
+AUMS will use a credit-based academic model.
+
+Architecture
+
+Program
+
+    ↓
+
+Curriculum
+
+    ↓
+
+Course
+
+    ↓
+
+Course Offering
+
+    ↓
+
+Student Registration
+
+Reason
+
+Supports:
+
+* AKTU
+* CSJMU
+* CBCS
+* NEP
+* International Universities
+
+Impact
+* Attendance
+* Assignments
+* Examinations
+* Results
+
+all depend on course_offerings.
+Decision #34: Session-Based Attendance Architecture
+Status: Approved
+
+Decision
+
+Attendance will be recorded against actual class sessions
+instead of timetable templates.
+
+Architecture
+
+Timetable Entry
+      ↓
+Class Session
+      ↓
+Attendance Record
+
+Reason
+
+Supports:
+
+*  Cancellations
+*  Rescheduling
+*  Extra Classes
+*  Faculty Substitutions
+
+Impact
+
+attendance_records reference class_sessions.
+
+---
+
+# Decision #35: Result Processing Architecture
+Status: Approved
+
+Decision
+
+Results will be processed in multiple stages.
+
+Exam Attempts
+
+      ↓
+
+Course Results
+
+      ↓
+
+Semester Results
+
+      ↓
+
+Program Results
+
+      ↓
+      
+Transcript
+
+Reason
+
+Supports SGPA, CGPA, transcripts,
+backlogs, and degree completion.
+
+Impact
+
+Result calculations remain independent
+from examination execution.
+
+---
 # Future Decisions
 
 The following topics remain undecided:

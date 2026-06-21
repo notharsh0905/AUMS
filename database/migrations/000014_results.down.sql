@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS transcripts CASCADE;
+
+DROP TABLE IF EXISTS program_results CASCADE;
+
+DROP TABLE IF EXISTS semester_results CASCADE;
+
+DROP TABLE IF EXISTS course_results CASCADE;
+
+DROP TABLE IF EXISTS grade_scales CASCADE;
+
+DROP TYPE IF EXISTS result_status;
