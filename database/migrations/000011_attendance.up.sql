@@ -22,7 +22,7 @@ CREATE TYPE session_status AS ENUM (
 
 CREATE TABLE class_sessions (
 
-```
+
 class_session_id UUID PRIMARY KEY,
 
 timetable_entry_id UUID NOT NULL,
@@ -64,7 +64,7 @@ CONSTRAINT fk_session_faculty
     FOREIGN KEY (conducted_by)
     REFERENCES faculty_profiles(faculty_profile_id)
     ON DELETE SET NULL
-```
+
 
 );
 
@@ -74,7 +74,7 @@ CONSTRAINT fk_session_faculty
 
 CREATE TABLE attendance_records (
 
-```
+
 attendance_record_id UUID PRIMARY KEY,
 
 class_session_id UUID NOT NULL,
@@ -114,7 +114,7 @@ CONSTRAINT fk_attendance_marked_by
     FOREIGN KEY (marked_by)
     REFERENCES faculty_profiles(faculty_profile_id)
     ON DELETE SET NULL
-```
+
 
 );
 
@@ -124,7 +124,7 @@ CONSTRAINT fk_attendance_marked_by
 
 CREATE TABLE attendance_exceptions (
 
-```
+
 attendance_exception_id UUID PRIMARY KEY,
 
 enrollment_id UUID NOT NULL,
@@ -157,7 +157,7 @@ CONSTRAINT fk_exception_approved_by
     FOREIGN KEY (approved_by)
     REFERENCES faculty_profiles(faculty_profile_id)
     ON DELETE SET NULL
-```
+
 
 );
 

@@ -30,7 +30,7 @@ CREATE TYPE timetable_entry_type AS ENUM (
 
 CREATE TABLE time_slots (
 
-```
+
 time_slot_id UUID PRIMARY KEY,
 
 slot_name VARCHAR(100) NOT NULL,
@@ -48,7 +48,7 @@ CONSTRAINT chk_time_slot
 
 CONSTRAINT uq_time_slot
     UNIQUE (start_time, end_time)
-```
+
 
 );
 
@@ -58,7 +58,7 @@ CONSTRAINT uq_time_slot
 
 CREATE TABLE working_days (
 
-```
+
 working_day_id UUID PRIMARY KEY,
 
 day_name day_of_week NOT NULL,
@@ -71,7 +71,7 @@ updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
 CONSTRAINT uq_working_day
     UNIQUE (day_name)
-```
+
 
 );
 
@@ -81,7 +81,7 @@ CONSTRAINT uq_working_day
 
 CREATE TABLE timetables (
 
-```
+
 timetable_id UUID PRIMARY KEY,
 
 timetable_name VARCHAR(255) NOT NULL,
@@ -117,7 +117,7 @@ CONSTRAINT fk_timetable_semester
     FOREIGN KEY (semester_id)
     REFERENCES semesters(semester_id)
     ON DELETE RESTRICT
-```
+
 
 );
 
@@ -127,7 +127,7 @@ CONSTRAINT fk_timetable_semester
 
 CREATE TABLE timetable_entries (
 
-```
+
 timetable_entry_id UUID PRIMARY KEY,
 
 timetable_id UUID NOT NULL,
@@ -199,7 +199,7 @@ CONSTRAINT fk_tt_entry_slot
     FOREIGN KEY (time_slot_id)
     REFERENCES time_slots(time_slot_id)
     ON DELETE RESTRICT
-```
+
 
 );
 
@@ -209,7 +209,7 @@ CONSTRAINT fk_tt_entry_slot
 
 CREATE TABLE faculty_availability (
 
-```
+
 faculty_availability_id UUID PRIMARY KEY,
 
 faculty_profile_id UUID NOT NULL,
@@ -245,7 +245,7 @@ CONSTRAINT fk_faculty_availability_slot
     FOREIGN KEY (time_slot_id)
     REFERENCES time_slots(time_slot_id)
     ON DELETE RESTRICT
-```
+
 
 );
 
