@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"aums/backend/internal/auth"
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
 
@@ -39,6 +40,20 @@ func New(application *app.Application) *gin.Engine {
 	users.RegisterRoutes(
 		api.Group("/users"),
 		userHandler,
+	)
+
+	authService := auth.NewService(
+		application.Config,
+		userRepository,
+	)
+
+	authHandler := auth.NewHandler(
+		authService,
+	)
+
+	auth.RegisterRoutes(
+		api.Group("/auth"),
+		authHandler,
 	)
 
 	return router

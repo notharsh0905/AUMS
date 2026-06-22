@@ -1,0 +1,44 @@
+package roles
+
+import (
+	"context"
+
+	"aums/backend/internal/db/generated"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+type Repository struct {
+	db      *pgxpool.Pool
+	queries *generated.Queries
+}
+
+func NewRepository(
+	db *pgxpool.Pool,
+) *Repository {
+
+	return &Repository{
+		db:      db,
+		queries: generated.New(db),
+	}
+}
+
+func (r *Repository) GetByCode(
+	ctx context.Context,
+	roleCode string,
+) (generated.Role, error) {
+
+	return r.queries.GetRoleByCode(
+		ctx,
+		roleCode,
+	)
+}
+
+func (r *Repository) List(
+	ctx context.Context,
+) ([]generated.Role, error) {
+
+	return r.queries.ListRoles(
+		ctx,
+	)
+}
