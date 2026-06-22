@@ -21,3 +21,9 @@ SELECT *
 FROM user_sessions
 WHERE user_id = $1
 AND revoked_at IS NULL;
+
+-- name: GetSessionByRefreshTokenHash :one
+SELECT *
+FROM user_sessions
+WHERE refresh_token_hash = $1
+  AND revoked_at IS NULL;

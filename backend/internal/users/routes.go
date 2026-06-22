@@ -11,4 +11,9 @@ func RegisterRoutes(
 		"",
 		handler.ListUsers,
 	)
+
+	router.POST(
+		"",
+		handler.CreateUser,
+	)
 }

@@ -23,7 +23,7 @@ minio:
   secret_key: minioadmin
   use_ssl: false
 
-  jwt:
+jwt:
   secret: aums-super-secret-key-change-in-production
   issuer: aums
   access_token_duration_minutes: 15

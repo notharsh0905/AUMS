@@ -53,6 +53,30 @@ func (q *Queries) DeleteSession(ctx context.Context, sessionID pgtype.UUID) erro
 	return err
 }
 
+const getSessionByRefreshTokenHash = `-- name: GetSessionByRefreshTokenHash :one
+SELECT session_id, user_id, refresh_token_hash, device_name, ip_address, user_agent, expires_at, revoked_at, created_at
+FROM user_sessions
+WHERE refresh_token_hash = $1
+  AND revoked_at IS NULL
+`
+
+func (q *Queries) GetSessionByRefreshTokenHash(ctx context.Context, refreshTokenHash string) (UserSession, error) {
+	row := q.db.QueryRow(ctx, getSessionByRefreshTokenHash, refreshTokenHash)
+	var i UserSession
+	err := row.Scan(
+		&i.SessionID,
+		&i.UserID,
+		&i.RefreshTokenHash,
+		&i.DeviceName,
+		&i.IpAddress,
+		&i.UserAgent,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getSessionsByUser = `-- name: GetSessionsByUser :many
 SELECT session_id, user_id, refresh_token_hash, device_name, ip_address, user_agent, expires_at, revoked_at, created_at
 FROM user_sessions

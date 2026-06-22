@@ -11,4 +11,14 @@ func RegisterRoutes(
 		"/login",
 		handler.Login,
 	)
+
+	router.POST(
+		"/refresh",
+		handler.Refresh,
+	)
+
+	router.POST(
+		"/logout",
+		handler.Logout,
+	)
 }

@@ -51,5 +51,49 @@ func (h *Handler) ListUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	c.JSON(
+		http.StatusOK,
+		ToResponses(users),
+	)
+}
+
+func (h *Handler) CreateUser(
+	c *gin.Context,
+) {
+
+	var req CreateUserRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	user, err := h.service.Create(
+		c.Request.Context(),
+		req,
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		http.StatusCreated,
+		ToResponse(user),
+	)
 }

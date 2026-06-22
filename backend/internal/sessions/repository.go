@@ -56,3 +56,14 @@ func (r *Repository) GetByUser(
 		userID,
 	)
 }
+
+func (r *Repository) GetByRefreshTokenHash(
+	ctx context.Context,
+	hash string,
+) (generated.UserSession, error) {
+
+	return r.queries.GetSessionByRefreshTokenHash(
+		ctx,
+		hash,
+	)
+}

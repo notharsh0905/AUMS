@@ -59,3 +59,87 @@ func (h *Handler) Login(
 		resp,
 	)
 }
+
+func (h *Handler) Refresh(
+	c *gin.Context,
+) {
+
+	var req RefreshRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	resp, err := h.service.Refresh(
+		c.Request.Context(),
+		req,
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusUnauthorized,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		resp,
+	)
+}
+
+func (h *Handler) Logout(
+	c *gin.Context,
+) {
+
+	var req LogoutRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	err := h.service.Logout(
+		c.Request.Context(),
+		req,
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.JSON(
+		http.StatusOK,
+		gin.H{
+			"message": "logged out successfully",
+		},
+	)
+}
