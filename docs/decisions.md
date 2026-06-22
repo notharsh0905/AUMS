@@ -1135,6 +1135,46 @@ Impact
 
 No migration may be merged without successful execution testing.
 
+---
+
+# Decision #43
+
+SUPER_ADMIN receives all permissions.
+
+Reason:
+Avoid manual maintenance.
+
+Status:
+Accepted
+
+---
+
+# Decision #44
+
+INSTITUTION_ADMIN receives all permissions except platform governance permissions.
+
+Status:
+Accepted
+
+---
+
+# Decision #45
+
+Feature Flags are only used for optional modules.
+
+Core academic modules are never feature flags.
+
+Status:
+Accepted
+
+---
+
+# Decision #46
+
+Soft delete strategy uses deleted_at.
+
+Status:
+Accepted
 
 ---
 
