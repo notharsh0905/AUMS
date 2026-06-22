@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"aums/backend/configs"
+	"aums/backend/pkg/app"
 	"aums/backend/pkg/cache"
 	"aums/backend/pkg/database"
 	"aums/backend/pkg/logger"
@@ -46,11 +47,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_ = minioClient
-
 	l.Info("minio connected")
 
-	router := server.New()
+	application := &app.Application{
+		Config: cfg,
+		Logger: l,
+		DB:     db,
+		Redis:  redisClient,
+		MinIO:  minioClient,
+	}
+
+	_ = application
+
+	router := server.New(application)
 
 	l.Info("server initialized")
 
