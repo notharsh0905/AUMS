@@ -4,7 +4,11 @@ import (
 	"net/http"
 
 	"aums/backend/internal/auth"
+	"aums/backend/internal/middleware"
+	"aums/backend/internal/permissions"
+	"aums/backend/internal/roles"
 	"aums/backend/internal/sessions"
+	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
 
@@ -38,6 +42,36 @@ func New(application *app.Application) *gin.Engine {
 		application.DB,
 	)
 
+	userRolesRepository := userroles.NewRepository(
+		application.DB,
+	)
+
+	userRolesService := userroles.NewService(
+		userRolesRepository,
+	)
+
+	rolesRepository := roles.NewRepository(
+		application.DB,
+	)
+
+	rolesService := roles.NewService(
+		rolesRepository,
+	)
+	rolesHandler := roles.NewHandler(
+		rolesService,
+	)
+
+	permissionsRepository := permissions.NewRepository(
+		application.DB,
+	)
+
+	permissionsService := permissions.NewService(
+		permissionsRepository,
+	)
+
+	permissionsHandler := permissions.NewHandler(
+		permissionsService,
+	)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -50,11 +84,73 @@ func New(application *app.Application) *gin.Engine {
 		userService,
 	)
 
+	usersGroup := api.Group("/users")
+
+	usersGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	usersGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
 	users.RegisterRoutes(
-		api.Group("/users"),
+		usersGroup,
 		userHandler,
 	)
 
+	// ==========================================
+	// ROLES MODULE
+	// ==========================================
+
+	rolesGroup := api.Group("/roles")
+
+	rolesGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	rolesGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	roles.RegisterRoutes(
+		rolesGroup,
+		rolesHandler,
+	)
+
+	// ==========================================
+	// PERMISSIONS MODULE
+	// ==========================================
+
+	permissionsGroup := api.Group("/permissions")
+
+	permissionsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	permissionsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	permissions.RegisterRoutes(
+		permissionsGroup,
+		permissionsHandler,
+	)
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================

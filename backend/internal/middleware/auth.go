@@ -56,6 +56,9 @@ func Auth(
 			return
 		}
 
+		println("JWT USER ID:")
+		println(claims.UserID)
+
 		c.Set(
 			"user_id",
 			claims.UserID,
