@@ -44,7 +44,15 @@ type Config struct {
 	Database DatabaseConfig `mapstructure:"database"`
 	Redis    RedisConfig    `mapstructure:"redis"`
 	MinIO    MinIOConfig    `mapstructure:"minio"`
+	JWT      JWTConfig      `mapstructure:"jwt"`
 	Logging  LoggingConfig  `mapstructure:"logging"`
+}
+
+type JWTConfig struct {
+	Secret                     string `mapstructure:"secret"`
+	Issuer                     string `mapstructure:"issuer"`
+	AccessTokenDurationMinutes int    `mapstructure:"access_token_duration_minutes"`
+	RefreshTokenDurationHours  int    `mapstructure:"refresh_token_duration_hours"`
 }
 
 func Load() (*Config, error) {
