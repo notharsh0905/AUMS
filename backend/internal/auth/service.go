@@ -9,22 +9,30 @@ import (
 	aumsjwt "aums/backend/pkg/jwt"
 	"aums/backend/pkg/password"
 
+	"aums/backend/internal/sessions"
 	"aums/backend/internal/users"
 )
 
 type Service struct {
-	config         *configs.Config
+	config *configs.Config
+
 	userRepository *users.Repository
+
+	sessionRepository *sessions.Repository
 }
 
 func NewService(
 	config *configs.Config,
 	userRepository *users.Repository,
+	sessionRepository *sessions.Repository,
 ) *Service {
 
 	return &Service{
-		config:         config,
+		config: config,
+
 		userRepository: userRepository,
+
+		sessionRepository: sessionRepository,
 	}
 }
 

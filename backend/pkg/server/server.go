@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"aums/backend/internal/auth"
+	"aums/backend/internal/sessions"
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
 
@@ -25,9 +26,21 @@ func New(application *app.Application) *gin.Engine {
 
 	api := router.Group("/api/v1")
 
+	// ==========================================
+	// REPOSITORIES
+	// ==========================================
+
 	userRepository := users.NewRepository(
 		application.DB,
 	)
+
+	sessionRepository := sessions.NewRepository(
+		application.DB,
+	)
+
+	// ==========================================
+	// USERS MODULE
+	// ==========================================
 
 	userService := users.NewService(
 		userRepository,
@@ -42,9 +55,14 @@ func New(application *app.Application) *gin.Engine {
 		userHandler,
 	)
 
+	// ==========================================
+	// AUTH MODULE
+	// ==========================================
+
 	authService := auth.NewService(
 		application.Config,
 		userRepository,
+		sessionRepository,
 	)
 
 	authHandler := auth.NewHandler(
