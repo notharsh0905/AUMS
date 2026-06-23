@@ -6,6 +6,7 @@ import (
 	"aums/backend/internal/auth"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
+	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
 	"aums/backend/internal/sessions"
 	"aums/backend/internal/userroles"
@@ -104,6 +105,18 @@ func New(application *app.Application) *gin.Engine {
 		userHandler,
 	)
 
+	rolePermissionsRepository := rolepermissions.NewRepository(
+		application.DB,
+	)
+
+	rolePermissionsService := rolepermissions.NewService(
+		rolePermissionsRepository,
+	)
+
+	rolePermissionsHandler := rolepermissions.NewHandler(
+		rolePermissionsService,
+	)
+
 	// ==========================================
 	// ROLES MODULE
 	// ==========================================
@@ -126,6 +139,7 @@ func New(application *app.Application) *gin.Engine {
 	roles.RegisterRoutes(
 		rolesGroup,
 		rolesHandler,
+		rolePermissionsHandler,
 	)
 
 	// ==========================================
