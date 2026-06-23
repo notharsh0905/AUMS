@@ -9,6 +9,7 @@ import (
 	"aums/backend/internal/departments"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
+	"aums/backend/internal/programs"
 	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
 	"aums/backend/internal/schools"
@@ -120,6 +121,18 @@ func New(application *app.Application) *gin.Engine {
 
 	departmentHandler := departments.NewHandler(
 		departmentService,
+	)
+
+	programRepository := programs.NewRepository(
+		application.DB,
+	)
+
+	programService := programs.NewService(
+		programRepository,
+	)
+
+	programHandler := programs.NewHandler(
+		programService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -284,6 +297,30 @@ func New(application *app.Application) *gin.Engine {
 	departments.RegisterRoutes(
 		departmentsGroup,
 		departmentHandler,
+	)
+
+	// ==========================================
+	// PROGRAMS MODULE
+	// ==========================================
+
+	programsGroup := api.Group("/programs")
+
+	programsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	programsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	programs.RegisterRoutes(
+		programsGroup,
+		programHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
