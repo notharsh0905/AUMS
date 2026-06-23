@@ -619,6 +619,10 @@ func New(application *app.Application) *gin.Engine {
 		facultyHandler,
 	)
 	// ==========================================
+	// FACULTY_COURSE_ALLOCATIONS MODULE
+	// ==========================================
+
+	// ==========================================
 	// AUTH MODULE
 	// ==========================================
 
