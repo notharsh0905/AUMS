@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"aums/backend/internal/academicyears"
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
@@ -133,6 +134,18 @@ func New(application *app.Application) *gin.Engine {
 
 	programHandler := programs.NewHandler(
 		programService,
+	)
+
+	academicYearRepository := academicyears.NewRepository(
+		application.DB,
+	)
+
+	academicYearService := academicyears.NewService(
+		academicYearRepository,
+	)
+
+	academicYearHandler := academicyears.NewHandler(
+		academicYearService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -321,6 +334,30 @@ func New(application *app.Application) *gin.Engine {
 	programs.RegisterRoutes(
 		programsGroup,
 		programHandler,
+	)
+
+	// ==========================================
+	// ACADEMIC YEARS MODULE
+	// ==========================================
+
+	academicYearsGroup := api.Group("/academic-years")
+
+	academicYearsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	academicYearsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	academicyears.RegisterRoutes(
+		academicYearsGroup,
+		academicYearHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
