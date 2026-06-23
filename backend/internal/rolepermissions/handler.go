@@ -1,9 +1,8 @@
 package rolepermissions
 
 import (
-	"net/http"
-
 	"aums/backend/internal/middleware"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -115,6 +114,65 @@ func (h *Handler) AssignPermissionToRole(
 	}
 
 	err = h.service.AssignPermissionToRole(
+		c.Request.Context(),
+		roleID,
+		permissionID,
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusInternalServerError,
+			gin.H{
+				"error": err.Error(),
+			},
+		)
+
+		return
+	}
+
+	c.Status(
+		http.StatusNoContent,
+	)
+}
+
+func (h *Handler) RemovePermissionFromRole(
+	c *gin.Context,
+) {
+
+	roleID, err := middleware.ParseUUID(
+		c.Param("id"),
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "invalid role id",
+			},
+		)
+
+		return
+	}
+
+	permissionID, err := middleware.ParseUUID(
+		c.Param("permissionId"),
+	)
+
+	if err != nil {
+
+		c.JSON(
+			http.StatusBadRequest,
+			gin.H{
+				"error": "invalid permission id",
+			},
+		)
+
+		return
+	}
+
+	err = h.service.RemovePermissionFromRole(
 		c.Request.Context(),
 		roleID,
 		permissionID,

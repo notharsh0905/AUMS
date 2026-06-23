@@ -75,6 +75,46 @@ func (q *Queries) GetRolePermissions(ctx context.Context, roleID pgtype.UUID) ([
 	return items, nil
 }
 
+const getUserPermissions = `-- name: GetUserPermissions :many
+SELECT DISTINCT
+    p.permission_id, p.permission_code, p.permission_name, p.description, p.created_at, p.updated_at, p.deleted_at
+FROM permissions p
+JOIN role_permissions rp
+    ON rp.permission_id = p.permission_id
+JOIN user_roles ur
+    ON ur.role_id = rp.role_id
+WHERE ur.user_id = $1
+ORDER BY p.permission_code
+`
+
+func (q *Queries) GetUserPermissions(ctx context.Context, userID pgtype.UUID) ([]Permission, error) {
+	rows, err := q.db.Query(ctx, getUserPermissions, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Permission{}
+	for rows.Next() {
+		var i Permission
+		if err := rows.Scan(
+			&i.PermissionID,
+			&i.PermissionCode,
+			&i.PermissionName,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removePermissionFromRole = `-- name: RemovePermissionFromRole :exec
 DELETE FROM role_permissions
 WHERE role_id = $1

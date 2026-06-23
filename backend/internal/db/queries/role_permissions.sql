@@ -26,3 +26,14 @@ ORDER BY p.permission_code;
 DELETE FROM role_permissions
 WHERE role_id = $1
 AND permission_id = $2;
+
+-- name: GetUserPermissions :many
+SELECT DISTINCT
+    p.*
+FROM permissions p
+JOIN role_permissions rp
+    ON rp.permission_id = p.permission_id
+JOIN user_roles ur
+    ON ur.role_id = rp.role_id
+WHERE ur.user_id = $1
+ORDER BY p.permission_code;

@@ -71,3 +71,14 @@ func (r *Repository) RemovePermissionFromRole(
 		},
 	)
 }
+
+func (r *Repository) GetUserPermissions(
+	ctx context.Context,
+	userID pgtype.UUID,
+) ([]generated.Permission, error) {
+
+	return r.queries.GetUserPermissions(
+		ctx,
+		userID,
+	)
+}

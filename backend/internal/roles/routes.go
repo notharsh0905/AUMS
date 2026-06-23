@@ -26,4 +26,9 @@ func RegisterRoutes(
 		"/:id/permissions",
 		rolePermissionsHandler.AssignPermissionToRole,
 	)
+
+	router.DELETE(
+		"/:id/permissions/:permissionId",
+		rolePermissionsHandler.RemovePermissionFromRole,
+	)
 }
