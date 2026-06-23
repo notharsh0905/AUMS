@@ -11,6 +11,7 @@ import (
 	"aums/backend/internal/departments"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
+	"aums/backend/internal/programcurriculum"
 	"aums/backend/internal/programs"
 	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
@@ -197,6 +198,18 @@ func New(application *app.Application) *gin.Engine {
 
 	courseHandler := courses.NewHandler(
 		courseService,
+	)
+
+	programCurriculumRepository := programcurriculum.NewRepository(
+		application.DB,
+	)
+
+	programCurriculumService := programcurriculum.NewService(
+		programCurriculumRepository,
+	)
+
+	programCurriculumHandler := programcurriculum.NewHandler(
+		programCurriculumService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -504,6 +517,31 @@ func New(application *app.Application) *gin.Engine {
 	courses.RegisterRoutes(
 		coursesGroup,
 		courseHandler,
+	)
+	// ==========================================
+	// CURRICULUM MODULE
+	// ==========================================
+
+	curriculumGroup := api.Group(
+		"/program-curriculum",
+	)
+
+	curriculumGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	curriculumGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	programcurriculum.RegisterRoutes(
+		curriculumGroup,
+		programCurriculumHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
