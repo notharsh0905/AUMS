@@ -16,6 +16,8 @@ import (
 	"aums/backend/internal/schools"
 	"aums/backend/internal/semesters"
 	"aums/backend/internal/sessions"
+	"aums/backend/internal/studentenrollments"
+	"aums/backend/internal/students"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
@@ -159,6 +161,30 @@ func New(application *app.Application) *gin.Engine {
 
 	semesterHandler := semesters.NewHandler(
 		semesterService,
+	)
+
+	studentRepository := students.NewRepository(
+		application.DB,
+	)
+
+	studentService := students.NewService(
+		studentRepository,
+	)
+
+	studentHandler := students.NewHandler(
+		studentService,
+	)
+
+	studentEnrollmentRepository := studentenrollments.NewRepository(
+		application.DB,
+	)
+
+	studentEnrollmentService := studentenrollments.NewService(
+		studentEnrollmentRepository,
+	)
+
+	studentEnrollmentHandler := studentenrollments.NewHandler(
+		studentEnrollmentService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -395,6 +421,54 @@ func New(application *app.Application) *gin.Engine {
 	academicyears.RegisterRoutes(
 		academicYearsGroup,
 		academicYearHandler,
+	)
+	// ==========================================
+	// STUDENT MODULE
+	// ==========================================
+
+	studentsGroup := api.Group("/students")
+
+	studentsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	studentsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	students.RegisterRoutes(
+		studentsGroup,
+		studentHandler,
+	)
+
+	// ==========================================
+	// STUDENT ENROLLMENT MODULE
+	// ==========================================
+	studentEnrollmentsGroup := api.Group(
+		"/student-enrollments",
+	)
+
+	studentEnrollmentsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	studentEnrollmentsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	studentenrollments.RegisterRoutes(
+		studentEnrollmentsGroup,
+		studentEnrollmentHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
