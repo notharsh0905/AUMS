@@ -14,6 +14,7 @@ import (
 	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
 	"aums/backend/internal/schools"
+	"aums/backend/internal/semesters"
 	"aums/backend/internal/sessions"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
@@ -146,6 +147,18 @@ func New(application *app.Application) *gin.Engine {
 
 	academicYearHandler := academicyears.NewHandler(
 		academicYearService,
+	)
+
+	semesterRepository := semesters.NewRepository(
+		application.DB,
+	)
+
+	semesterService := semesters.NewService(
+		semesterRepository,
+	)
+
+	semesterHandler := semesters.NewHandler(
+		semesterService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -353,6 +366,30 @@ func New(application *app.Application) *gin.Engine {
 			userRolesService,
 			"SUPER_ADMIN",
 		),
+	)
+
+	// ==========================================
+	// SEMESTERS MODULE
+	// ==========================================
+
+	semestersGroup := api.Group("/semesters")
+
+	semestersGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	semestersGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	semesters.RegisterRoutes(
+		semestersGroup,
+		semesterHandler,
 	)
 
 	academicyears.RegisterRoutes(
