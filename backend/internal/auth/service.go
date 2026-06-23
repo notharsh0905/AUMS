@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"aums/backend/configs"
+	"aums/backend/internal/audit"
 	"aums/backend/internal/db/generated"
 	"aums/backend/internal/sessions"
 	"aums/backend/internal/users"
@@ -23,12 +24,15 @@ type Service struct {
 	userRepository *users.Repository
 
 	sessionRepository *sessions.Repository
+
+	auditService *audit.Service
 }
 
 func NewService(
 	config *configs.Config,
 	userRepository *users.Repository,
 	sessionRepository *sessions.Repository,
+	auditService *audit.Service,
 ) *Service {
 
 	return &Service{
@@ -37,6 +41,8 @@ func NewService(
 		userRepository: userRepository,
 
 		sessionRepository: sessionRepository,
+
+		auditService: auditService,
 	}
 }
 
@@ -64,6 +70,37 @@ func (s *Service) Login(
 	)
 
 	if err != nil {
+
+		loginAuditID, uuidErr := aumsuuid.New()
+		if uuidErr == nil {
+
+			_ = s.auditService.LogFailedLogin(
+				ctx,
+				generated.CreateLoginAuditLogParams{
+					LoginAuditLogID: loginAuditID,
+
+					UserID: user.UserID,
+
+					LoginTime: pgtype.Timestamptz{
+						Time:  time.Now(),
+						Valid: true,
+					},
+
+					LogoutTime: pgtype.Timestamptz{},
+
+					IpAddress: pgtype.Text{
+						String: req.IPAddress,
+						Valid:  req.IPAddress != "",
+					},
+
+					UserAgent: pgtype.Text{
+						String: req.UserAgent,
+						Valid:  req.UserAgent != "",
+					},
+				},
+			)
+		}
+
 		return nil, errors.New("invalid credentials")
 	}
 
@@ -123,6 +160,40 @@ func (s *Service) Login(
 	if err != nil {
 		return nil, err
 	}
+
+	loginAuditID, err := aumsuuid.New()
+	if err != nil {
+		return nil, err
+	}
+
+	println("IP:", req.IPAddress)
+	println("USER AGENT:", req.UserAgent)
+
+	_ = s.auditService.LogSuccessfulLogin(
+		ctx,
+		generated.CreateLoginAuditLogParams{
+			LoginAuditLogID: loginAuditID,
+
+			UserID: user.UserID,
+
+			LoginTime: pgtype.Timestamptz{
+				Time:  time.Now(),
+				Valid: true,
+			},
+
+			LogoutTime: pgtype.Timestamptz{},
+
+			IpAddress: pgtype.Text{
+				String: req.IPAddress,
+				Valid:  req.IPAddress != "",
+			},
+
+			UserAgent: pgtype.Text{
+				String: req.UserAgent,
+				Valid:  req.UserAgent != "",
+			},
+		},
+	)
 
 	return &LoginResponse{
 		AccessToken:  accessToken,

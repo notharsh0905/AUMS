@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
@@ -73,6 +74,16 @@ func New(application *app.Application) *gin.Engine {
 	permissionsHandler := permissions.NewHandler(
 		permissionsService,
 	)
+
+	auditRepository := audit.NewRepository(
+		application.DB,
+	)
+
+	auditService := audit.NewService(
+		auditRepository,
+	)
+	_ = auditService
+
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -173,6 +184,7 @@ func New(application *app.Application) *gin.Engine {
 		application.Config,
 		userRepository,
 		sessionRepository,
+		auditService,
 	)
 
 	authHandler := auth.NewHandler(

@@ -37,6 +37,10 @@ func (h *Handler) Login(
 		return
 	}
 
+	req.IPAddress = c.ClientIP()
+
+	req.UserAgent = c.Request.UserAgent()
+
 	resp, err := h.service.Login(
 		c.Request.Context(),
 		req,

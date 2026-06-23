@@ -3,6 +3,10 @@ package auth
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required"`
+
+	IPAddress string `json:"-"`
+
+	UserAgent string `json:"-"`
 }
 
 type LoginResponse struct {
