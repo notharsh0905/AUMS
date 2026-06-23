@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"aums/backend/internal/academicyears"
+	"aums/backend/internal/assignments"
+	"aums/backend/internal/assignmentsubmissions"
 	"aums/backend/internal/attendance"
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
@@ -313,6 +315,28 @@ func New(application *app.Application) *gin.Engine {
 	attendanceHandler := attendance.NewHandler(
 		attendanceService,
 	)
+
+	assignmentRepository := assignments.NewRepository(
+		application.DB,
+	)
+	assignmentService := assignments.NewService(
+		assignmentRepository,
+	)
+	assignmentHandler := assignments.NewHandler(
+		assignmentService,
+	)
+	assignmentSubmissionRepository :=
+		assignmentsubmissions.NewRepository(
+			application.DB,
+		)
+	assignmentSubmissionService :=
+		assignmentsubmissions.NewService(
+			assignmentSubmissionRepository,
+		)
+	assignmentSubmissionHandler :=
+		assignmentsubmissions.NewHandler(
+			assignmentSubmissionService,
+		)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -843,7 +867,51 @@ func New(application *app.Application) *gin.Engine {
 	// ==========================================
 	// ASSIGNMENTS MODULE
 	// ==========================================
+	assignmentsGroup := api.Group(
+		"/assignments",
+	)
 
+	assignmentsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	assignmentsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	assignments.RegisterRoutes(
+		assignmentsGroup,
+		assignmentHandler,
+	)
+	// ==========================================
+	// ASSIGNMENTS SUBMISSION MODULE
+	// ==========================================
+	assignmentSubmissionsGroup := api.Group(
+		"/assignment-submissions",
+	)
+
+	assignmentSubmissionsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	assignmentSubmissionsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	assignmentsubmissions.RegisterRoutes(
+		assignmentSubmissionsGroup,
+		assignmentSubmissionHandler,
+	)
 	// ==========================================
 	// EXAMS MODULE
 	// ==========================================
