@@ -7,6 +7,7 @@ import (
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
+	"aums/backend/internal/classsessions"
 	"aums/backend/internal/courseofferings"
 	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
@@ -292,6 +293,15 @@ func New(application *app.Application) *gin.Engine {
 
 	timetableHandler := timetable.NewHandler(
 		timetableService,
+	)
+	classSessionRepository := classsessions.NewRepository(
+		application.DB,
+	)
+	classSessionService := classsessions.NewService(
+		classSessionRepository,
+	)
+	classSessionHandler := classsessions.NewHandler(
+		classSessionService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -770,6 +780,31 @@ func New(application *app.Application) *gin.Engine {
 	timetableentries.RegisterRoutes(
 		timetableEntriesGroup,
 		timetableEntryHandler,
+	)
+
+	// ==========================================
+	// CLASS SESSIONS MODULE
+	// ==========================================
+	classSessionsGroup := api.Group(
+		"/class-sessions",
+	)
+
+	classSessionsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	classSessionsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	classsessions.RegisterRoutes(
+		classSessionsGroup,
+		classSessionHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
