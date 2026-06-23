@@ -1,4 +1,4 @@
-package campuses
+package schools
 
 import "github.com/gin-gonic/gin"
 
@@ -9,11 +9,11 @@ func RegisterRoutes(
 
 	router.GET(
 		"",
-		handler.ListCampuses,
+		handler.ListSchools,
 	)
 
 	router.POST(
 		"",
-		handler.CreateCampus,
+		handler.CreateSchool,
 	)
 }

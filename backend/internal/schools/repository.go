@@ -1,4 +1,4 @@
-package campuses
+package schools
 
 import (
 	"context"
@@ -25,19 +25,19 @@ func NewRepository(
 
 func (r *Repository) List(
 	ctx context.Context,
-) ([]generated.Campuse, error) {
+) ([]generated.School, error) {
 
-	return r.queries.ListCampuses(
+	return r.queries.ListSchools(
 		ctx,
 	)
 }
 
 func (r *Repository) Create(
 	ctx context.Context,
-	params generated.CreateCampusParams,
+	params generated.CreateSchoolParams,
 ) error {
 
-	return r.queries.CreateCampus(
+	return r.queries.CreateSchool(
 		ctx,
 		params,
 	)

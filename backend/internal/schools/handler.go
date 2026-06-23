@@ -1,4 +1,4 @@
-package campuses
+package schools
 
 import (
 	"net/http"
@@ -19,11 +19,11 @@ func NewHandler(
 	}
 }
 
-func (h *Handler) ListCampuses(
+func (h *Handler) ListSchools(
 	c *gin.Context,
 ) {
 
-	campuses, err := h.service.List(
+	schools, err := h.service.List(
 		c.Request.Context(),
 	)
 
@@ -41,15 +41,15 @@ func (h *Handler) ListCampuses(
 
 	c.JSON(
 		http.StatusOK,
-		campuses,
+		schools,
 	)
 }
 
-func (h *Handler) CreateCampus(
+func (h *Handler) CreateSchool(
 	c *gin.Context,
 ) {
 
-	var req CreateCampusRequest
+	var req CreateSchoolRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
@@ -83,7 +83,7 @@ func (h *Handler) CreateCampus(
 	c.JSON(
 		http.StatusCreated,
 		gin.H{
-			"message": "campus created successfully",
+			"message": "school created successfully",
 		},
 	)
 }

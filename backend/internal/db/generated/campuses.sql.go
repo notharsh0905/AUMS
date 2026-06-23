@@ -7,7 +7,61 @@ package generated
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createCampus = `-- name: CreateCampus :exec
+INSERT INTO campuses (
+    campus_id,
+    campus_code,
+    campus_name,
+    address_line_1,
+    address_line_2,
+    city,
+    state,
+    country,
+    postal_code
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9
+)
+`
+
+type CreateCampusParams struct {
+	CampusID     pgtype.UUID `json:"campus_id"`
+	CampusCode   string      `json:"campus_code"`
+	CampusName   string      `json:"campus_name"`
+	AddressLine1 pgtype.Text `json:"address_line_1"`
+	AddressLine2 pgtype.Text `json:"address_line_2"`
+	City         pgtype.Text `json:"city"`
+	State        pgtype.Text `json:"state"`
+	Country      pgtype.Text `json:"country"`
+	PostalCode   pgtype.Text `json:"postal_code"`
+}
+
+func (q *Queries) CreateCampus(ctx context.Context, arg CreateCampusParams) error {
+	_, err := q.db.Exec(ctx, createCampus,
+		arg.CampusID,
+		arg.CampusCode,
+		arg.CampusName,
+		arg.AddressLine1,
+		arg.AddressLine2,
+		arg.City,
+		arg.State,
+		arg.Country,
+		arg.PostalCode,
+	)
+	return err
+}
 
 const listCampuses = `-- name: ListCampuses :many
 SELECT campus_id, campus_code, campus_name, address_line_1, address_line_2, city, state, country, postal_code, created_at, updated_at, deleted_at
