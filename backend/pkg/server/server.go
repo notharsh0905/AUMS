@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"aums/backend/internal/academicyears"
+	"aums/backend/internal/attendance"
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
@@ -302,6 +303,15 @@ func New(application *app.Application) *gin.Engine {
 	)
 	classSessionHandler := classsessions.NewHandler(
 		classSessionService,
+	)
+	attendanceRepository := attendance.NewRepository(
+		application.DB,
+	)
+	attendanceService := attendance.NewService(
+		attendanceRepository,
+	)
+	attendanceHandler := attendance.NewHandler(
+		attendanceService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -806,6 +816,42 @@ func New(application *app.Application) *gin.Engine {
 		classSessionsGroup,
 		classSessionHandler,
 	)
+	// ==========================================
+	// ATTANDANCE MODULE
+	// ==========================================
+	attendanceGroup := api.Group(
+		"/attendance",
+	)
+
+	attendanceGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	attendanceGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	attendance.RegisterRoutes(
+		attendanceGroup,
+		attendanceHandler,
+	)
+	// ==========================================
+	// ASSIGNMENTS MODULE
+	// ==========================================
+
+	// ==========================================
+	// EXAMS MODULE
+	// ==========================================
+
+	// ==========================================
+	// RESULTS MODULE
+	// ==========================================
+
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================
