@@ -11,6 +11,7 @@ import (
 	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
 	"aums/backend/internal/faculty"
+	"aums/backend/internal/facultycourseallocations"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
 	"aums/backend/internal/programcurriculum"
@@ -236,6 +237,18 @@ func New(application *app.Application) *gin.Engine {
 
 	facultyHandler := faculty.NewHandler(
 		facultyService,
+	)
+
+	facultyAllocationRepository := facultycourseallocations.NewRepository(
+		application.DB,
+	)
+
+	facultyAllocationService := facultycourseallocations.NewService(
+		facultyAllocationRepository,
+	)
+
+	facultyAllocationHandler := facultycourseallocations.NewHandler(
+		facultyAllocationService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -621,6 +634,28 @@ func New(application *app.Application) *gin.Engine {
 	// ==========================================
 	// FACULTY_COURSE_ALLOCATIONS MODULE
 	// ==========================================
+
+	facultyAllocationsGroup := api.Group(
+		"/faculty-allocations",
+	)
+
+	facultyAllocationsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	facultyAllocationsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	facultycourseallocations.RegisterRoutes(
+		facultyAllocationsGroup,
+		facultyAllocationHandler,
+	)
 
 	// ==========================================
 	// AUTH MODULE
