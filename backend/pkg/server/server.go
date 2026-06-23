@@ -5,6 +5,7 @@ import (
 
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
+	"aums/backend/internal/campuses"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
 	"aums/backend/internal/rolepermissions"
@@ -82,7 +83,18 @@ func New(application *app.Application) *gin.Engine {
 	auditService := audit.NewService(
 		auditRepository,
 	)
-	_ = auditService
+
+	campusRepository := campuses.NewRepository(
+		application.DB,
+	)
+
+	campusService := campuses.NewService(
+		campusRepository,
+	)
+
+	campusHandler := campuses.NewHandler(
+		campusService,
+	)
 
 	// ==========================================
 	// USERS MODULE
@@ -176,6 +188,31 @@ func New(application *app.Application) *gin.Engine {
 		permissionsGroup,
 		permissionsHandler,
 	)
+
+	// ==========================================
+	// CAMPUSES MODULE
+	// ==========================================
+
+	campusesGroup := api.Group("/campuses")
+
+	campusesGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	campusesGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	campuses.RegisterRoutes(
+		campusesGroup,
+		campusHandler,
+	)
+
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================
