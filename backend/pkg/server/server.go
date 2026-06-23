@@ -21,6 +21,7 @@ import (
 	"aums/backend/internal/schools"
 	"aums/backend/internal/semesters"
 	"aums/backend/internal/sessions"
+	"aums/backend/internal/studentcourseregistrations"
 	"aums/backend/internal/studentenrollments"
 	"aums/backend/internal/students"
 	"aums/backend/internal/userroles"
@@ -250,6 +251,21 @@ func New(application *app.Application) *gin.Engine {
 	facultyAllocationHandler := facultycourseallocations.NewHandler(
 		facultyAllocationService,
 	)
+
+	studentCourseRegistrationRepository :=
+		studentcourseregistrations.NewRepository(
+			application.DB,
+		)
+
+	studentCourseRegistrationService :=
+		studentcourseregistrations.NewService(
+			studentCourseRegistrationRepository,
+		)
+
+	studentCourseRegistrationHandler :=
+		studentcourseregistrations.NewHandler(
+			studentCourseRegistrationService,
+		)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -657,6 +673,30 @@ func New(application *app.Application) *gin.Engine {
 		facultyAllocationHandler,
 	)
 
+	// ==========================================
+	// STUDENT COURSE REGISTRATION MODULE
+	// ==========================================
+	studentCourseRegistrationsGroup := api.Group(
+		"/student-course-registrations",
+	)
+
+	studentCourseRegistrationsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	studentCourseRegistrationsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	studentcourseregistrations.RegisterRoutes(
+		studentCourseRegistrationsGroup,
+		studentCourseRegistrationHandler,
+	)
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================
