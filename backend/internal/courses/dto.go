@@ -6,7 +6,7 @@ type CreateCourseRequest struct {
 
 	CourseType string `json:"course_type" binding:"required"`
 
-	Credits float64 `json:"credits"`
+	Credits string `json:"credits" binding:"required"`
 
 	ContactHours int32 `json:"contact_hours"`
 

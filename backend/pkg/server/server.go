@@ -7,6 +7,7 @@ import (
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
+	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
@@ -185,6 +186,17 @@ func New(application *app.Application) *gin.Engine {
 
 	studentEnrollmentHandler := studentenrollments.NewHandler(
 		studentEnrollmentService,
+	)
+	courseRepository := courses.NewRepository(
+		application.DB,
+	)
+
+	courseService := courses.NewService(
+		courseRepository,
+	)
+
+	courseHandler := courses.NewHandler(
+		courseService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -469,6 +481,29 @@ func New(application *app.Application) *gin.Engine {
 	studentenrollments.RegisterRoutes(
 		studentEnrollmentsGroup,
 		studentEnrollmentHandler,
+	)
+	// ==========================================
+	// COURSES MODULE
+	// ==========================================
+
+	coursesGroup := api.Group("/courses")
+
+	coursesGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	coursesGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	courses.RegisterRoutes(
+		coursesGroup,
+		courseHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
