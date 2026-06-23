@@ -24,6 +24,8 @@ import (
 	"aums/backend/internal/studentcourseregistrations"
 	"aums/backend/internal/studentenrollments"
 	"aums/backend/internal/students"
+	"aums/backend/internal/timetable"
+	"aums/backend/internal/timetableentries"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
@@ -266,6 +268,31 @@ func New(application *app.Application) *gin.Engine {
 		studentcourseregistrations.NewHandler(
 			studentCourseRegistrationService,
 		)
+
+	timetableEntryRepository :=
+		timetableentries.NewRepository(
+			application.DB,
+		)
+
+	timetableEntryService :=
+		timetableentries.NewService(
+			timetableEntryRepository,
+		)
+
+	timetableEntryHandler :=
+		timetableentries.NewHandler(
+			timetableEntryService,
+		)
+
+	timetableRepository := timetable.NewRepository(application.DB)
+
+	timetableService := timetable.NewService(
+		timetableRepository,
+	)
+
+	timetableHandler := timetable.NewHandler(
+		timetableService,
+	)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -696,6 +723,53 @@ func New(application *app.Application) *gin.Engine {
 	studentcourseregistrations.RegisterRoutes(
 		studentCourseRegistrationsGroup,
 		studentCourseRegistrationHandler,
+	)
+	// ==========================================
+	// TIME TABLE MODULE
+	// ==========================================
+	timetableGroup := api.Group("/timetables")
+
+	timetableGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	timetableGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	timetable.RegisterRoutes(
+		timetableGroup,
+		timetableHandler,
+	)
+	// ==========================================
+	// TIME TABLE ENTRIES MODULE
+	// ==========================================
+
+	timetableEntriesGroup := api.Group(
+		"/timetable-entries",
+	)
+
+	timetableEntriesGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	timetableEntriesGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	timetableentries.RegisterRoutes(
+		timetableEntriesGroup,
+		timetableEntryHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
