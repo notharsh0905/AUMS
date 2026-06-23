@@ -7,6 +7,7 @@ import (
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
+	"aums/backend/internal/courseofferings"
 	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
 	"aums/backend/internal/middleware"
@@ -210,6 +211,18 @@ func New(application *app.Application) *gin.Engine {
 
 	programCurriculumHandler := programcurriculum.NewHandler(
 		programCurriculumService,
+	)
+
+	courseOfferingRepository := courseofferings.NewRepository(
+		application.DB,
+	)
+
+	courseOfferingService := courseofferings.NewService(
+		courseOfferingRepository,
+	)
+
+	courseOfferingHandler := courseofferings.NewHandler(
+		courseOfferingService,
 	)
 	// ==========================================
 	// USERS MODULE
@@ -542,6 +555,30 @@ func New(application *app.Application) *gin.Engine {
 	programcurriculum.RegisterRoutes(
 		curriculumGroup,
 		programCurriculumHandler,
+	)
+	// ==========================================
+	// COURSEOFFERINGS MODULE
+	// ==========================================
+	courseOfferingsGroup := api.Group(
+		"/course-offerings",
+	)
+
+	courseOfferingsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	courseOfferingsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	courseofferings.RegisterRoutes(
+		courseOfferingsGroup,
+		courseOfferingHandler,
 	)
 	// ==========================================
 	// AUTH MODULE
