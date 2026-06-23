@@ -6,10 +6,12 @@ import (
 	"aums/backend/internal/audit"
 	"aums/backend/internal/auth"
 	"aums/backend/internal/campuses"
+	"aums/backend/internal/departments"
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
 	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
+	"aums/backend/internal/schools"
 	"aums/backend/internal/sessions"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
@@ -96,6 +98,29 @@ func New(application *app.Application) *gin.Engine {
 		campusService,
 	)
 
+	schoolRepository := schools.NewRepository(
+		application.DB,
+	)
+
+	schoolService := schools.NewService(
+		schoolRepository,
+	)
+
+	schoolHandler := schools.NewHandler(
+		schoolService,
+	)
+
+	departmentRepository := departments.NewRepository(
+		application.DB,
+	)
+
+	departmentService := departments.NewService(
+		departmentRepository,
+	)
+
+	departmentHandler := departments.NewHandler(
+		departmentService,
+	)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -213,6 +238,53 @@ func New(application *app.Application) *gin.Engine {
 		campusHandler,
 	)
 
+	// ==========================================
+	// SCHOOLS MODULE
+	// ==========================================
+
+	schoolsGroup := api.Group("/schools")
+
+	schoolsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	schoolsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	schools.RegisterRoutes(
+		schoolsGroup,
+		schoolHandler,
+	)
+
+	// ==========================================
+	// DEPARTMENTS MODULE
+	// ==========================================
+
+	departmentsGroup := api.Group("/departments")
+
+	departmentsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	departmentsGroup.Use(
+		middleware.RequireRole(
+			userRolesService,
+			"SUPER_ADMIN",
+		),
+	)
+
+	departments.RegisterRoutes(
+		departmentsGroup,
+		departmentHandler,
+	)
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================
