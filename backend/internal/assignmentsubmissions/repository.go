@@ -1,4 +1,4 @@
-package assignments
+package assignmentsubmissions
 
 import (
 	"context"
@@ -25,19 +25,19 @@ func NewRepository(
 
 func (r *Repository) List(
 	ctx context.Context,
-) ([]generated.Assignment, error) {
+) ([]generated.AssignmentSubmission, error) {
 
-	return r.queries.ListAssignments(
+	return r.queries.ListAssignmentSubmissions(
 		ctx,
 	)
 }
 
 func (r *Repository) Create(
 	ctx context.Context,
-	params generated.CreateAssignmentParams,
+	params generated.CreateAssignmentSubmissionParams,
 ) error {
 
-	return r.queries.CreateAssignment(
+	return r.queries.CreateAssignmentSubmission(
 		ctx,
 		params,
 	)
