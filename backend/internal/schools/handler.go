@@ -1,6 +1,7 @@
 package schools
 
 import (
+	"aums/backend/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,30 +19,57 @@ func NewHandler(
 		service: service,
 	}
 }
-
 func (h *Handler) ListSchools(
 	c *gin.Context,
 ) {
 
-	schools, err := h.service.List(
+	page := response.GetPage(c)
+	limit := response.GetLimit(c)
+
+	offset := (page - 1) * limit
+
+	schools, err := h.service.ListPaginated(
 		c.Request.Context(),
+		int32(limit),
+		int32(offset),
 	)
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	total, err := h.service.Count(
+		c.Request.Context(),
+	)
+
+	if err != nil {
+
+		response.Error(
+			c,
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+
+		return
+	}
+
+	response.SuccessWithMeta(
+		c,
 		http.StatusOK,
+		"schools fetched successfully",
 		schools,
+		response.PaginationMeta{
+			Page:  page,
+			Limit: limit,
+			Total: int(total),
+		},
 	)
 }
 
