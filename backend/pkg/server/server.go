@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	_ "aums/backend/docs"
 	"aums/backend/internal/academicyears"
 	"aums/backend/internal/assignments"
 	"aums/backend/internal/assignmentsubmissions"
@@ -41,6 +42,9 @@ import (
 	"aums/backend/internal/users"
 	"aums/backend/pkg/app"
 
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -56,6 +60,13 @@ func New(application *app.Application) *gin.Engine {
 			"version":     "v1",
 		})
 	})
+
+	router.GET(
+		"/swagger/*any",
+		ginSwagger.WrapHandler(
+			swaggerFiles.Handler,
+		),
+	)
 
 	api := router.Group("/api/v1")
 

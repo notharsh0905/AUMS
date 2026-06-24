@@ -1,3 +1,8 @@
+// @title AUMS API
+// @version 1.0
+// @description AI Powered Autonomous Management System API
+// @BasePath /api/v1
+
 package main
 
 import (
