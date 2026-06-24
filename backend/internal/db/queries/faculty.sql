@@ -30,3 +30,14 @@ VALUES (
     $10,
     $11
 );
+
+-- name: ListFacultyPaginated :many
+SELECT *
+FROM faculty_profiles
+ORDER BY employee_code
+LIMIT $1
+OFFSET $2;
+
+-- name: CountFaculty :one
+SELECT COUNT(*)
+FROM faculty_profiles;

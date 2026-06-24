@@ -22,3 +22,14 @@ VALUES (
     $6,
     $7
 );
+
+-- name: ListCoursesPaginated :many
+SELECT *
+FROM courses
+ORDER BY course_name
+LIMIT $1
+OFFSET $2;
+
+-- name: CountCourses :one
+SELECT COUNT(*)
+FROM courses;

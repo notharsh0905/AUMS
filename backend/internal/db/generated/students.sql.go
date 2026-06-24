@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countStudents = `-- name: CountStudents :one
+SELECT COUNT(*)
+FROM student_profiles
+`
+
+func (q *Queries) CountStudents(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countStudents)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createStudent = `-- name: CreateStudent :exec
 INSERT INTO student_profiles (
     student_profile_id,
@@ -69,6 +81,54 @@ ORDER BY created_at DESC
 
 func (q *Queries) ListStudents(ctx context.Context) ([]StudentProfile, error) {
 	rows, err := q.db.Query(ctx, listStudents)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []StudentProfile{}
+	for rows.Next() {
+		var i StudentProfile
+		if err := rows.Scan(
+			&i.StudentProfileID,
+			&i.UserID,
+			&i.AdmissionDate,
+			&i.DateOfBirth,
+			&i.Gender,
+			&i.BloodGroup,
+			&i.Nationality,
+			&i.Category,
+			&i.Religion,
+			&i.EmergencyContactName,
+			&i.EmergencyContactPhone,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStudentsPaginated = `-- name: ListStudentsPaginated :many
+SELECT student_profile_id, user_id, admission_date, date_of_birth, gender, blood_group, nationality, category, religion, emergency_contact_name, emergency_contact_phone, created_at, updated_at, deleted_at
+FROM student_profiles
+ORDER BY created_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListStudentsPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListStudentsPaginated(ctx context.Context, arg ListStudentsPaginatedParams) ([]StudentProfile, error) {
+	rows, err := q.db.Query(ctx, listStudentsPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

@@ -20,3 +20,14 @@ INSERT INTO student_profiles (
 VALUES (
     $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
 );
+
+-- name: ListStudentsPaginated :many
+SELECT *
+FROM student_profiles
+ORDER BY created_at DESC
+LIMIT $1
+OFFSET $2;
+
+-- name: CountStudents :one
+SELECT COUNT(*)
+FROM student_profiles;

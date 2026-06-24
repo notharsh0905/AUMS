@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countFaculty = `-- name: CountFaculty :one
+SELECT COUNT(*)
+FROM faculty_profiles
+`
+
+func (q *Queries) CountFaculty(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countFaculty)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createFaculty = `-- name: CreateFaculty :exec
 INSERT INTO faculty_profiles (
     faculty_profile_id,
@@ -79,6 +91,55 @@ ORDER BY employee_code
 
 func (q *Queries) ListFaculty(ctx context.Context) ([]FacultyProfile, error) {
 	rows, err := q.db.Query(ctx, listFaculty)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []FacultyProfile{}
+	for rows.Next() {
+		var i FacultyProfile
+		if err := rows.Scan(
+			&i.FacultyProfileID,
+			&i.UserID,
+			&i.EmployeeCode,
+			&i.DepartmentID,
+			&i.Designation,
+			&i.EmploymentType,
+			&i.JoiningDate,
+			&i.RelievingDate,
+			&i.Status,
+			&i.YearsOfExperience,
+			&i.OfficeLocation,
+			&i.Bio,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listFacultyPaginated = `-- name: ListFacultyPaginated :many
+SELECT faculty_profile_id, user_id, employee_code, department_id, designation, employment_type, joining_date, relieving_date, status, years_of_experience, office_location, bio, created_at, updated_at, deleted_at
+FROM faculty_profiles
+ORDER BY employee_code
+LIMIT $1
+OFFSET $2
+`
+
+type ListFacultyPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListFacultyPaginated(ctx context.Context, arg ListFacultyPaginatedParams) ([]FacultyProfile, error) {
+	rows, err := q.db.Query(ctx, listFacultyPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
