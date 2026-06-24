@@ -109,10 +109,10 @@ func (h *Handler) CreateCampus(
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusCreated,
-		gin.H{
-			"message": "campus created successfully",
-		},
+		"campus created successfully",
+		nil,
 	)
 }
