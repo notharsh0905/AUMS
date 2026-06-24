@@ -2,6 +2,7 @@ package students
 
 import (
 	"aums/backend/pkg/response"
+	"aums/backend/pkg/validator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -87,11 +88,21 @@ func (h *Handler) CreateStudent(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(req); err != nil {
+
+		response.Error(
+			c,
+			http.StatusBadRequest,
+			err.Error(),
 		)
 
 		return
