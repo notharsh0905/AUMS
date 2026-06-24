@@ -16,7 +16,7 @@ func RequireRole(
 ) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-
+		println("CHECKING ROLE:", roleCode)
 		userIDString := GetUserID(c)
 
 		userID, err := uuidpkg.Parse(
@@ -35,12 +35,13 @@ func RequireRole(
 			c.Abort()
 			return
 		}
-
+		println("USER ID:", userIDString)
 		hasRole, err := userRoleService.HasRole(
 			c.Request.Context(),
 			userID,
 			roleCode,
 		)
+		println("HAS ROLE RESULT:", hasRole)
 
 		if err != nil {
 

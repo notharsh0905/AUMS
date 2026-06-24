@@ -17,7 +17,7 @@ func RegisterRoutes(
 		"",
 		middleware.RequirePermission(
 			rolePermissionService,
-			"student.read",
+			"students.read",
 		),
 		handler.ListStudents,
 	)
@@ -26,7 +26,7 @@ func RegisterRoutes(
 		"",
 		middleware.RequirePermission(
 			rolePermissionService,
-			"student.create",
+			"students.create",
 		),
 		handler.CreateStudent,
 	)

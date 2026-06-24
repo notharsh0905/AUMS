@@ -30,11 +30,17 @@ func (s *Service) HasRole(
 		userID,
 	)
 
+	println("ROLES FOUND:", len(roles))
+
 	if err != nil {
 		return false, err
 	}
 
+	println("ROLES FOUND:", len(roles))
+
 	for _, role := range roles {
+
+		println("ROLE:", role.RoleCode)
 
 		if role.RoleCode == roleCode {
 			return true, nil
