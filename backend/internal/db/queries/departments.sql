@@ -18,3 +18,13 @@ VALUES (
     $4,
     $5
 );
+-- name: ListDepartmentsPaginated :many
+SELECT *
+FROM departments
+ORDER BY department_name
+LIMIT $1
+OFFSET $2;
+
+-- name: CountDepartments :one
+SELECT COUNT(*)
+FROM departments;
