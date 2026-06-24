@@ -82,11 +82,10 @@ func (h *Handler) CreateCampus(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
@@ -99,11 +98,10 @@ func (h *Handler) CreateCampus(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
