@@ -29,7 +29,29 @@ func (r *Repository) List(
 
 	return r.queries.ListPrograms(ctx)
 }
+func (r *Repository) ListPaginated(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]generated.Program, error) {
 
+	return r.queries.ListProgramsPaginated(
+		ctx,
+		generated.ListProgramsPaginatedParams{
+			Limit:  limit,
+			Offset: offset,
+		},
+	)
+}
+
+func (r *Repository) Count(
+	ctx context.Context,
+) (int64, error) {
+
+	return r.queries.CountPrograms(
+		ctx,
+	)
+}
 func (r *Repository) Create(
 	ctx context.Context,
 	params generated.CreateProgramParams,
