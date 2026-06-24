@@ -1,6 +1,7 @@
 package students
 
 import (
+	"aums/backend/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,18 +30,19 @@ func (h *Handler) ListStudents(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusOK,
+		"students fetched successfully",
 		students,
 	)
 }
@@ -70,20 +72,19 @@ func (h *Handler) CreateStudent(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusCreated,
-		gin.H{
-			"message": "student created successfully",
-		},
+		"student created successfully",
+		nil,
 	)
 }
