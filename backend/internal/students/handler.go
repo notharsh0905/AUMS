@@ -72,6 +72,21 @@ func (h *Handler) ListStudents(
 	)
 }
 
+// CreateStudent godoc
+//
+// @Summary Create student
+// @Description Create a new student profile
+// @Tags Students
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param request body CreateStudentRequest true "Student Payload"
+// @Success 201 {object} response.SuccessResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Failure 401 {object} response.ErrorResponse
+// @Failure 403 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Router /students [post]
 func (h *Handler) CreateStudent(
 	c *gin.Context,
 ) {
