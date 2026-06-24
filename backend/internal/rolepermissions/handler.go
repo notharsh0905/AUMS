@@ -1,7 +1,7 @@
 package rolepermissions
 
 import (
-	"aums/backend/internal/middleware"
+	uuidpkg "aums/backend/pkg/uuid"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +24,7 @@ func (h *Handler) GetRolePermissions(
 	c *gin.Context,
 ) {
 
-	roleID, err := middleware.ParseUUID(
+	roleID, err := uuidpkg.Parse(
 		c.Param("id"),
 	)
 
@@ -67,7 +67,7 @@ func (h *Handler) AssignPermissionToRole(
 	c *gin.Context,
 ) {
 
-	roleID, err := middleware.ParseUUID(
+	roleID, err := uuidpkg.Parse(
 		c.Param("id"),
 	)
 
@@ -97,7 +97,7 @@ func (h *Handler) AssignPermissionToRole(
 		return
 	}
 
-	permissionID, err := middleware.ParseUUID(
+	permissionID, err := uuidpkg.Parse(
 		request.PermissionID,
 	)
 
@@ -140,7 +140,7 @@ func (h *Handler) RemovePermissionFromRole(
 	c *gin.Context,
 ) {
 
-	roleID, err := middleware.ParseUUID(
+	roleID, err := uuidpkg.Parse(
 		c.Param("id"),
 	)
 
@@ -156,7 +156,7 @@ func (h *Handler) RemovePermissionFromRole(
 		return
 	}
 
-	permissionID, err := middleware.ParseUUID(
+	permissionID, err := uuidpkg.Parse(
 		c.Param("permissionId"),
 	)
 

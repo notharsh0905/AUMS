@@ -3,7 +3,9 @@ package middleware
 import (
 	"net/http"
 
+	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/userroles"
+	uuidpkg "aums/backend/pkg/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,14 +18,10 @@ func RequireRole(
 	return func(c *gin.Context) {
 
 		userIDString := GetUserID(c)
-		println("USER ID FROM JWT:")
-		println(userIDString)
-		userID, err := ParseUUID(
+
+		userID, err := uuidpkg.Parse(
 			userIDString,
 		)
-		if err != nil {
-			println("UUID PARSE ERROR:", err.Error())
-		}
 
 		if err != nil {
 
@@ -74,7 +72,7 @@ func RequireRole(
 	}
 }
 
-/*func RequirePermission(
+func RequirePermission(
 	rolePermissionService *rolepermissions.Service,
 	permissionCode string,
 ) gin.HandlerFunc {
@@ -83,7 +81,7 @@ func RequireRole(
 
 		userIDString := GetUserID(c)
 
-		userID, err := ParseUUID(
+		userID, err := uuidpkg.Parse(
 			userIDString,
 		)
 
@@ -134,4 +132,4 @@ func RequireRole(
 
 		c.Next()
 	}
-}*/
+}

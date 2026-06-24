@@ -1,6 +1,7 @@
 package uuid
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -8,9 +9,20 @@ func Parse(
 	value string,
 ) (pgtype.UUID, error) {
 
+	parsedUUID, err := uuid.Parse(value)
+	if err != nil {
+		return pgtype.UUID{}, err
+	}
+
 	var id pgtype.UUID
 
-	err := id.Scan(value)
+	err = id.Scan(
+		parsedUUID.String(),
+	)
 
-	return id, err
+	if err != nil {
+		return pgtype.UUID{}, err
+	}
+
+	return id, nil
 }
