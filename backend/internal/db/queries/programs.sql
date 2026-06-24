@@ -24,3 +24,14 @@ VALUES (
     $7,
     $8
 );
+
+-- name: ListProgramsPaginated :many
+SELECT *
+FROM programs
+ORDER BY program_name
+LIMIT $1
+OFFSET $2;
+
+-- name: CountPrograms :one
+SELECT COUNT(*)
+FROM programs;
