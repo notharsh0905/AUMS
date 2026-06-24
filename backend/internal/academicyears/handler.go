@@ -1,6 +1,7 @@
 package academicyears
 
 import (
+	"aums/backend/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,28 +24,55 @@ func (h *Handler) ListAcademicYears(
 	c *gin.Context,
 ) {
 
-	years, err := h.service.List(
+	page := response.GetPage(c)
+	limit := response.GetLimit(c)
+
+	offset := (page - 1) * limit
+
+	years, err := h.service.ListPaginated(
 		c.Request.Context(),
+		int32(limit),
+		int32(offset),
 	)
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	total, err := h.service.Count(
+		c.Request.Context(),
+	)
+
+	if err != nil {
+
+		response.Error(
+			c,
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+
+		return
+	}
+
+	response.SuccessWithMeta(
+		c,
 		http.StatusOK,
+		"academic years fetched successfully",
 		years,
+		response.PaginationMeta{
+			Page:  page,
+			Limit: limit,
+			Total: int(total),
+		},
 	)
 }
-
 func (h *Handler) CreateAcademicYear(
 	c *gin.Context,
 ) {
@@ -53,11 +81,10 @@ func (h *Handler) CreateAcademicYear(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
@@ -70,20 +97,19 @@ func (h *Handler) CreateAcademicYear(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusCreated,
-		gin.H{
-			"message": "academic year created successfully",
-		},
+		"academic year created successfully",
+		nil,
 	)
 }
