@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/students.CreateStudentRequest"
+                            "$ref": "#/definitions/internal_students.CreateStudentRequest"
                         }
                     }
                 ],
@@ -48,31 +48,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "$ref": "#/definitions/aums_backend_pkg_response.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/aums_backend_pkg_response.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/aums_backend_pkg_response.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/aums_backend_pkg_response.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/response.ErrorResponse"
+                            "$ref": "#/definitions/aums_backend_pkg_response.ErrorResponse"
                         }
                     }
                 }
@@ -80,7 +80,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "response.ErrorResponse": {
+        "aums_backend_pkg_response.ErrorResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -91,7 +91,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.SuccessResponse": {
+        "aums_backend_pkg_response.SuccessResponse": {
             "type": "object",
             "properties": {
                 "data": {},
@@ -103,7 +103,7 @@ const docTemplate = `{
                 }
             }
         },
-        "students.CreateStudentRequest": {
+        "internal_students.CreateStudentRequest": {
             "type": "object",
             "required": [
                 "user_id"
@@ -161,6 +161,8 @@ var SwaggerInfo = &swag.Spec{
 	Description:      "AI Powered Autonomous Management System API",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
+	LeftDelim:        "{{",
+	RightDelim:       "}}",
 }
 
 func init() {

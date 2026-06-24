@@ -1,13 +1,13 @@
 basePath: /api/v1
 definitions:
-  response.ErrorResponse:
+  aums_backend_pkg_response.ErrorResponse:
     properties:
       message:
         type: string
       success:
         type: boolean
     type: object
-  response.SuccessResponse:
+  aums_backend_pkg_response.SuccessResponse:
     properties:
       data: {}
       message:
@@ -15,7 +15,7 @@ definitions:
       success:
         type: boolean
     type: object
-  students.CreateStudentRequest:
+  internal_students.CreateStudentRequest:
     properties:
       admission_date:
         type: string
@@ -57,30 +57,30 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/students.CreateStudentRequest'
+          $ref: '#/definitions/internal_students.CreateStudentRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/response.SuccessResponse'
+            $ref: '#/definitions/aums_backend_pkg_response.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/response.ErrorResponse'
+            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create student
