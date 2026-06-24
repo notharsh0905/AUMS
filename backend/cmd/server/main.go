@@ -3,6 +3,10 @@
 // @description AI Powered Autonomous Management System API
 // @BasePath /api/v1
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 package main
 
 import (

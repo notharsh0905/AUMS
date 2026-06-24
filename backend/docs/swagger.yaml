@@ -1,4 +1,94 @@
+basePath: /api/v1
+definitions:
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  students.CreateStudentRequest:
+    properties:
+      admission_date:
+        type: string
+      blood_group:
+        type: string
+      category:
+        type: string
+      date_of_birth:
+        type: string
+      emergency_contact_name:
+        type: string
+      emergency_contact_phone:
+        type: string
+      gender:
+        type: string
+      nationality:
+        type: string
+      religion:
+        type: string
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
 info:
   contact: {}
-paths: {}
+  description: AI Powered Autonomous Management System API
+  title: AUMS API
+  version: "1.0"
+paths:
+  /students:
+    post:
+      consumes:
+      - application/json
+      description: Create a new student profile
+      parameters:
+      - description: Student Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/students.CreateStudentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create student
+      tags:
+      - Students
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
