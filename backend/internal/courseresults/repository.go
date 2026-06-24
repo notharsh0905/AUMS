@@ -4,6 +4,8 @@ import (
 	"context"
 
 	db "aums/backend/internal/db/generated"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Repository struct {
@@ -11,10 +13,11 @@ type Repository struct {
 }
 
 func NewRepository(
-	queries *db.Queries,
+	database *pgxpool.Pool,
 ) *Repository {
+
 	return &Repository{
-		queries: queries,
+		queries: db.New(database),
 	}
 }
 

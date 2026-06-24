@@ -12,6 +12,7 @@ import (
 	"aums/backend/internal/campuses"
 	"aums/backend/internal/classsessions"
 	"aums/backend/internal/courseofferings"
+	"aums/backend/internal/courseresults"
 	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
 	"aums/backend/internal/examattempts"
@@ -23,10 +24,12 @@ import (
 	"aums/backend/internal/middleware"
 	"aums/backend/internal/permissions"
 	"aums/backend/internal/programcurriculum"
+	"aums/backend/internal/programresults"
 	"aums/backend/internal/programs"
 	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/roles"
 	"aums/backend/internal/schools"
+	"aums/backend/internal/semesterresults"
 	"aums/backend/internal/semesters"
 	"aums/backend/internal/sessions"
 	"aums/backend/internal/studentcourseregistrations"
@@ -395,6 +398,38 @@ func New(application *app.Application) *gin.Engine {
 		examattempts.NewHandler(
 			examAttemptService,
 		)
+
+	courseResultsGroup := api.Group("/course-results")
+	semesterResultsGroup := api.Group("/semester-results")
+	programResultsGroup := api.Group("/program-results")
+
+	courseResultsRepo := courseresults.NewRepository(application.DB)
+	courseResultsService := courseresults.NewService(courseResultsRepo)
+	courseResultsHandler := courseresults.NewHandler(courseResultsService)
+
+	semesterResultsRepo := semesterresults.NewRepository(
+		application.DB,
+	)
+
+	semesterResultsService := semesterresults.NewService(
+		semesterResultsRepo,
+	)
+
+	semesterResultsHandler := semesterresults.NewHandler(
+		semesterResultsService,
+	)
+
+	programResultsRepo := programresults.NewRepository(
+		application.DB,
+	)
+
+	programResultsService := programresults.NewService(
+		programResultsRepo,
+	)
+
+	programResultsHandler := programresults.NewHandler(
+		programResultsService,
+	)
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -995,7 +1030,20 @@ func New(application *app.Application) *gin.Engine {
 	// ==========================================
 	// RESULTS MODULE
 	// ==========================================
+	courseresults.RegisterRoutes(
+		courseResultsGroup,
+		courseResultsHandler,
+	)
 
+	semesterresults.RegisterRoutes(
+		semesterResultsGroup,
+		semesterResultsHandler,
+	)
+
+	programresults.RegisterRoutes(
+		programResultsGroup,
+		programResultsHandler,
+	)
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================
