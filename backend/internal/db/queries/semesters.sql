@@ -22,3 +22,14 @@ VALUES (
     $6,
     $7
 );
+
+-- name: ListSemestersPaginated :many
+SELECT *
+FROM semesters
+ORDER BY semester_number
+LIMIT $1
+OFFSET $2;
+
+-- name: CountSemesters :one
+SELECT COUNT(*)
+FROM semesters;
