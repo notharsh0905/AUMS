@@ -688,6 +688,7 @@ func New(application *app.Application) *gin.Engine {
 	students.RegisterRoutes(
 		studentsGroup,
 		studentHandler,
+		rolePermissionsService,
 	)
 
 	// ==========================================
