@@ -24,8 +24,13 @@ func (h *Handler) ListStudents(
 	c *gin.Context,
 ) {
 
-	students, err := h.service.List(
+	page := response.GetPage(c)
+	limit := response.GetLimit(c)
+
+	students, total, err := h.service.ListPaginated(
 		c.Request.Context(),
+		page,
+		limit,
 	)
 
 	if err != nil {
@@ -39,11 +44,16 @@ func (h *Handler) ListStudents(
 		return
 	}
 
-	response.Success(
+	response.SuccessWithMeta(
 		c,
 		http.StatusOK,
 		"students fetched successfully",
 		students,
+		response.PaginationMeta{
+			Page:  page,
+			Limit: limit,
+			Total: int(total),
+		},
 	)
 }
 
