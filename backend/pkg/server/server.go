@@ -288,7 +288,9 @@ func New(application *app.Application) *gin.Engine {
 			timetableEntryService,
 		)
 
-	timetableRepository := timetable.NewRepository(application.DB)
+	timetableRepository :=
+		timetable.NewRepository(
+			application.DB)
 
 	timetableService := timetable.NewService(
 		timetableRepository,
