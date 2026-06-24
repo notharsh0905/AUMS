@@ -20,12 +20,12 @@ func NewService(
 
 func (s *Service) Create(
 	ctx context.Context,
-	params db.CreateCourseResultParams,
+	req CreateCourseResultRequest,
 ) error {
-	return s.repository.Create(
-		ctx,
-		params,
-	)
+
+	// conversion logic goes here
+
+	return nil
 }
 
 func (s *Service) List(
