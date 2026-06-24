@@ -130,3 +130,34 @@ func (s *Service) Create(
 		},
 	)
 }
+
+func (s *Service) ListPaginated(
+	ctx context.Context,
+	page int,
+	limit int,
+) (
+	[]generated.StudentProfile,
+	int64,
+	error,
+) {
+
+	students, err := s.repository.ListPaginated(
+		ctx,
+		page,
+		limit,
+	)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	total, err := s.repository.Count(
+		ctx,
+	)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return students, total, nil
+}
