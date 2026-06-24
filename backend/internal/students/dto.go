@@ -6,7 +6,7 @@ type CreateStudentRequest struct {
 	AdmissionDate string `json:"admission_date,omitempty"`
 	DateOfBirth   string `json:"date_of_birth,omitempty"`
 
-	Gender string `json:"gender,omitempty,oneof=MALE FEMALE OTHER"`
+	Gender string `json:"gender,omitempty" validate:"oneof=MALE FEMALE OTHER"`
 
 	BloodGroup string `json:"blood_group,omitempty"`
 
