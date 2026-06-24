@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countPrograms = `-- name: CountPrograms :one
+SELECT COUNT(*)
+FROM programs
+`
+
+func (q *Queries) CountPrograms(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countPrograms)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createProgram = `-- name: CreateProgram :exec
 INSERT INTO programs (
     program_id,
@@ -67,6 +79,51 @@ ORDER BY program_name
 
 func (q *Queries) ListPrograms(ctx context.Context) ([]Program, error) {
 	rows, err := q.db.Query(ctx, listPrograms)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Program{}
+	for rows.Next() {
+		var i Program
+		if err := rows.Scan(
+			&i.ProgramID,
+			&i.DepartmentID,
+			&i.ProgramCode,
+			&i.ProgramName,
+			&i.DegreeType,
+			&i.DurationValue,
+			&i.DurationUnit,
+			&i.TotalSemesters,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listProgramsPaginated = `-- name: ListProgramsPaginated :many
+SELECT program_id, department_id, program_code, program_name, degree_type, duration_value, duration_unit, total_semesters, created_at, updated_at, deleted_at
+FROM programs
+ORDER BY program_name
+LIMIT $1
+OFFSET $2
+`
+
+type ListProgramsPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListProgramsPaginated(ctx context.Context, arg ListProgramsPaginatedParams) ([]Program, error) {
+	rows, err := q.db.Query(ctx, listProgramsPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

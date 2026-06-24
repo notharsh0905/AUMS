@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countCampuses = `-- name: CountCampuses :one
+SELECT COUNT(*)
+FROM campuses
+`
+
+func (q *Queries) CountCampuses(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countCampuses)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCampus = `-- name: CreateCampus :exec
 INSERT INTO campuses (
     campus_id,
@@ -71,6 +83,52 @@ ORDER BY campus_name
 
 func (q *Queries) ListCampuses(ctx context.Context) ([]Campuse, error) {
 	rows, err := q.db.Query(ctx, listCampuses)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Campuse{}
+	for rows.Next() {
+		var i Campuse
+		if err := rows.Scan(
+			&i.CampusID,
+			&i.CampusCode,
+			&i.CampusName,
+			&i.AddressLine1,
+			&i.AddressLine2,
+			&i.City,
+			&i.State,
+			&i.Country,
+			&i.PostalCode,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCampusesPaginated = `-- name: ListCampusesPaginated :many
+SELECT campus_id, campus_code, campus_name, address_line_1, address_line_2, city, state, country, postal_code, created_at, updated_at, deleted_at
+FROM campuses
+ORDER BY campus_name
+LIMIT $1
+OFFSET $2
+`
+
+type ListCampusesPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListCampusesPaginated(ctx context.Context, arg ListCampusesPaginatedParams) ([]Campuse, error) {
+	rows, err := q.db.Query(ctx, listCampusesPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

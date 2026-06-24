@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countAcademicYears = `-- name: CountAcademicYears :one
+SELECT COUNT(*)
+FROM academic_years
+`
+
+func (q *Queries) CountAcademicYears(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countAcademicYears)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createAcademicYear = `-- name: CreateAcademicYear :exec
 INSERT INTO academic_years (
     academic_year_id,
@@ -55,6 +67,48 @@ ORDER BY start_date DESC
 
 func (q *Queries) ListAcademicYears(ctx context.Context) ([]AcademicYear, error) {
 	rows, err := q.db.Query(ctx, listAcademicYears)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AcademicYear{}
+	for rows.Next() {
+		var i AcademicYear
+		if err := rows.Scan(
+			&i.AcademicYearID,
+			&i.AcademicYearName,
+			&i.StartDate,
+			&i.EndDate,
+			&i.IsCurrent,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAcademicYearsPaginated = `-- name: ListAcademicYearsPaginated :many
+SELECT academic_year_id, academic_year_name, start_date, end_date, is_current, created_at, updated_at, deleted_at
+FROM academic_years
+ORDER BY start_date DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListAcademicYearsPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListAcademicYearsPaginated(ctx context.Context, arg ListAcademicYearsPaginatedParams) ([]AcademicYear, error) {
+	rows, err := q.db.Query(ctx, listAcademicYearsPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

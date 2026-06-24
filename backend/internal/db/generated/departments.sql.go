@@ -11,6 +11,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countDepartments = `-- name: CountDepartments :one
+SELECT COUNT(*)
+FROM departments
+`
+
+func (q *Queries) CountDepartments(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countDepartments)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createDepartment = `-- name: CreateDepartment :exec
 INSERT INTO departments (
     department_id,
@@ -55,6 +67,48 @@ ORDER BY department_name
 
 func (q *Queries) ListDepartments(ctx context.Context) ([]Department, error) {
 	rows, err := q.db.Query(ctx, listDepartments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Department{}
+	for rows.Next() {
+		var i Department
+		if err := rows.Scan(
+			&i.DepartmentID,
+			&i.SchoolID,
+			&i.DepartmentCode,
+			&i.DepartmentName,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDepartmentsPaginated = `-- name: ListDepartmentsPaginated :many
+SELECT department_id, school_id, department_code, department_name, description, created_at, updated_at, deleted_at
+FROM departments
+ORDER BY department_name
+LIMIT $1
+OFFSET $2
+`
+
+type ListDepartmentsPaginatedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListDepartmentsPaginated(ctx context.Context, arg ListDepartmentsPaginatedParams) ([]Department, error) {
+	rows, err := q.db.Query(ctx, listDepartmentsPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
