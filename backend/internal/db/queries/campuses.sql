@@ -26,3 +26,13 @@ VALUES (
     $8,
     $9
 );
+-- name: ListCampusesPaginated :many
+SELECT *
+FROM campuses
+ORDER BY campus_name
+LIMIT $1
+OFFSET $2;
+
+-- name: CountCampuses :one
+SELECT COUNT(*)
+FROM campuses;
