@@ -42,3 +42,27 @@ func (r *Repository) Create(
 		params,
 	)
 }
+
+func (r *Repository) ListPaginated(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]generated.FacultyProfile, error) {
+
+	return r.queries.ListFacultyPaginated(
+		ctx,
+		generated.ListFacultyPaginatedParams{
+			Limit:  limit,
+			Offset: offset,
+		},
+	)
+}
+
+func (r *Repository) Count(
+	ctx context.Context,
+) (int64, error) {
+
+	return r.queries.CountFaculty(
+		ctx,
+	)
+}
