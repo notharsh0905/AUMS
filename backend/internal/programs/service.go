@@ -28,6 +28,27 @@ func (s *Service) List(
 
 	return s.repository.List(ctx)
 }
+func (s *Service) ListPaginated(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]generated.Program, error) {
+
+	return s.repository.ListPaginated(
+		ctx,
+		limit,
+		offset,
+	)
+}
+
+func (s *Service) Count(
+	ctx context.Context,
+) (int64, error) {
+
+	return s.repository.Count(
+		ctx,
+	)
+}
 
 func (s *Service) Create(
 	ctx context.Context,
