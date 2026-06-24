@@ -32,6 +32,30 @@ func (r *Repository) List(
 	)
 }
 
+func (r *Repository) ListPaginated(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]generated.Course, error) {
+
+	return r.queries.ListCoursesPaginated(
+		ctx,
+		generated.ListCoursesPaginatedParams{
+			Limit:  limit,
+			Offset: offset,
+		},
+	)
+}
+
+func (r *Repository) Count(
+	ctx context.Context,
+) (int64, error) {
+
+	return r.queries.CountCourses(
+		ctx,
+	)
+}
+
 func (r *Repository) Create(
 	ctx context.Context,
 	params generated.CreateCourseParams,
