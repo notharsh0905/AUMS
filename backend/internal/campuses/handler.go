@@ -1,6 +1,7 @@
 package campuses
 
 import (
+	"aums/backend/pkg/response"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,25 +24,53 @@ func (h *Handler) ListCampuses(
 	c *gin.Context,
 ) {
 
-	campuses, err := h.service.List(
+	page := response.GetPage(c)
+	limit := response.GetLimit(c)
+
+	offset := (page - 1) * limit
+
+	campuses, err := h.service.ListPaginated(
 		c.Request.Context(),
+		int32(limit),
+		int32(offset),
 	)
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	total, err := h.service.Count(
+		c.Request.Context(),
+	)
+
+	if err != nil {
+
+		response.Error(
+			c,
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+
+		return
+	}
+
+	response.SuccessWithMeta(
+		c,
 		http.StatusOK,
+		"campuses fetched successfully",
 		campuses,
+		response.PaginationMeta{
+			Page:  page,
+			Limit: limit,
+			Total: int(total),
+		},
 	)
 }
 
