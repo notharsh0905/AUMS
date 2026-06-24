@@ -14,6 +14,10 @@ import (
 	"aums/backend/internal/courseofferings"
 	"aums/backend/internal/courses"
 	"aums/backend/internal/departments"
+	"aums/backend/internal/examattempts"
+	"aums/backend/internal/examregistrations"
+	"aums/backend/internal/exams"
+	"aums/backend/internal/examschedules"
 	"aums/backend/internal/faculty"
 	"aums/backend/internal/facultycourseallocations"
 	"aums/backend/internal/middleware"
@@ -338,6 +342,58 @@ func New(application *app.Application) *gin.Engine {
 	assignmentSubmissionHandler :=
 		assignmentsubmissions.NewHandler(
 			assignmentSubmissionService,
+		)
+
+	examRepository :=
+		exams.NewRepository(application.DB)
+
+	examScheduleRepository :=
+		examschedules.NewRepository(application.DB)
+
+	examRegistrationRepository :=
+		examregistrations.NewRepository(application.DB)
+
+	examAttemptRepository :=
+		examattempts.NewRepository(application.DB)
+
+	examService :=
+		exams.NewService(
+			examRepository,
+		)
+
+	examScheduleService :=
+		examschedules.NewService(
+			examScheduleRepository,
+		)
+
+	examRegistrationService :=
+		examregistrations.NewService(
+			examRegistrationRepository,
+		)
+
+	examAttemptService :=
+		examattempts.NewService(
+			examAttemptRepository,
+		)
+
+	examHandler :=
+		exams.NewHandler(
+			examService,
+		)
+
+	examScheduleHandler :=
+		examschedules.NewHandler(
+			examScheduleService,
+		)
+
+	examRegistrationHandler :=
+		examregistrations.NewHandler(
+			examRegistrationService,
+		)
+
+	examAttemptHandler :=
+		examattempts.NewHandler(
+			examAttemptService,
 		)
 	// ==========================================
 	// USERS MODULE
@@ -917,7 +973,25 @@ func New(application *app.Application) *gin.Engine {
 	// ==========================================
 	// EXAMS MODULE
 	// ==========================================
+	exams.RegisterRoutes(
+		api.Group("/exams"),
+		examHandler,
+	)
 
+	examschedules.RegisterRoutes(
+		api.Group("/exam-schedules"),
+		examScheduleHandler,
+	)
+
+	examregistrations.RegisterRoutes(
+		api.Group("/exam-registrations"),
+		examRegistrationHandler,
+	)
+
+	examattempts.RegisterRoutes(
+		api.Group("/exam-attempts"),
+		examAttemptHandler,
+	)
 	// ==========================================
 	// RESULTS MODULE
 	// ==========================================
