@@ -18,3 +18,13 @@ VALUES (
     $4,
     $5
 );
+-- name: ListAcademicYearsPaginated :many
+SELECT *
+FROM academic_years
+ORDER BY start_date DESC
+LIMIT $1
+OFFSET $2;
+
+-- name: CountAcademicYears :one
+SELECT COUNT(*)
+FROM academic_years;
