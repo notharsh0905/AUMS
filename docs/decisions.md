@@ -1182,7 +1182,7 @@ Accepted
 
 The following topics remain undecided:
 
-* Examination Architecture
+
 * Result Processing Engine
 * E-Office Architecture
 * Notification Architecture
