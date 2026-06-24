@@ -21,18 +21,10 @@ func NewHandler(
 }
 
 // ListStudents godoc
-//
 // @Summary List students
-// @Description Get paginated list of students
 // @Tags Students
 // @Produce json
-// @Security BearerAuth
-// @Param page query int false "Page Number"
-// @Param limit query int false "Page Size"
 // @Success 200 {object} response.SuccessResponse
-// @Failure 401 {object} response.ErrorResponse
-// @Failure 403 {object} response.ErrorResponse
-// @Failure 500 {object} response.ErrorResponse
 // @Router /students [get]
 
 func (h *Handler) ListStudents(
