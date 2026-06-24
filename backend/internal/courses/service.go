@@ -76,3 +76,24 @@ func (s *Service) Create(
 		},
 	)
 }
+func (s *Service) ListPaginated(
+	ctx context.Context,
+	limit int32,
+	offset int32,
+) ([]generated.Course, error) {
+
+	return s.repository.ListPaginated(
+		ctx,
+		limit,
+		offset,
+	)
+}
+
+func (s *Service) Count(
+	ctx context.Context,
+) (int64, error) {
+
+	return s.repository.Count(
+		ctx,
+	)
+}
