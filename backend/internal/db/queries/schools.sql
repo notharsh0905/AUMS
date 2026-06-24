@@ -16,3 +16,14 @@ VALUES (
     $3,
     $4
 );
+
+-- name: ListSchoolsPaginated :many
+SELECT *
+FROM schools
+ORDER BY school_name
+LIMIT $1
+OFFSET $2;
+
+-- name: CountSchools :one
+SELECT COUNT(*)
+FROM schools;
