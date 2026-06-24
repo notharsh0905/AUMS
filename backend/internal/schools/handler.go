@@ -81,11 +81,10 @@ func (h *Handler) CreateSchool(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
@@ -98,20 +97,19 @@ func (h *Handler) CreateSchool(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusCreated,
-		gin.H{
-			"message": "school created successfully",
-		},
+		"school created successfully",
+		nil,
 	)
 }
