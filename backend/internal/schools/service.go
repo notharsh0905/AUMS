@@ -45,7 +45,6 @@ func (s *Service) Create(
 		ctx,
 		generated.CreateSchoolParams{
 			SchoolID:   schoolID,
-			CampusID:   campusID,
 			SchoolCode: req.SchoolCode,
 			SchoolName: req.SchoolName,
 

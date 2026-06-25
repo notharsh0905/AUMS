@@ -28,27 +28,10 @@ func (h *Handler) ListAcademicYears(
 	page := response.GetPage(c)
 	limit := response.GetLimit(c)
 
-	offset := (page - 1) * limit
-
-	years, err := h.service.ListPaginated(
+	years, total, err := h.service.ListPaginated(
 		c.Request.Context(),
-		int32(limit),
-		int32(offset),
-	)
-
-	if err != nil {
-
-		response.Error(
-			c,
-			http.StatusInternalServerError,
-			err.Error(),
-		)
-
-		return
-	}
-
-	total, err := h.service.Count(
-		c.Request.Context(),
+		page,
+		limit,
 	)
 
 	if err != nil {
@@ -79,6 +62,17 @@ func (h *Handler) CreateAcademicYear(
 ) {
 
 	var req CreateAcademicYearRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+
+		response.Error(
+			c,
+			http.StatusBadRequest,
+			err.Error(),
+		)
+
+		return
+	}
 
 	if err := validator.Validate.Struct(req); err != nil {
 

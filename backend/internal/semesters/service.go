@@ -23,15 +23,6 @@ func NewService(
 	}
 }
 
-func (s *Service) List(
-	ctx context.Context,
-) ([]generated.Semester, error) {
-
-	return s.repository.List(
-		ctx,
-	)
-}
-
 func (s *Service) Create(
 	ctx context.Context,
 	req CreateSemesterRequest,
@@ -45,7 +36,6 @@ func (s *Service) Create(
 	academicYearID, err := aumsuuid.Parse(
 		req.AcademicYearID,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -54,7 +44,6 @@ func (s *Service) Create(
 		"2006-01-02",
 		req.StartDate,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -63,7 +52,6 @@ func (s *Service) Create(
 		"2006-01-02",
 		req.EndDate,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -71,10 +59,13 @@ func (s *Service) Create(
 	return s.repository.Create(
 		ctx,
 		generated.CreateSemesterParams{
-			SemesterID:     semesterID,
+			SemesterID: semesterID,
+
 			AcademicYearID: academicYearID,
+
 			SemesterNumber: req.SemesterNumber,
-			SemesterName:   req.SemesterName,
+
+			SemesterName: req.SemesterName,
 
 			StartDate: pgtype.Date{
 				Time:  startDate,
@@ -85,27 +76,36 @@ func (s *Service) Create(
 				Time:  endDate,
 				Valid: true,
 			},
-
-			IsActive: req.IsActive,
+			IsActive: true,
 		},
 	)
 }
+
 func (s *Service) ListPaginated(
 	ctx context.Context,
-	limit int32,
-	offset int32,
-) ([]generated.Semester, error) {
+	page int,
+	limit int,
+) ([]generated.Semester, int64, error) {
 
-	return s.repository.ListPaginated(
+	offset := (page - 1) * limit
+
+	data, err := s.repository.ListPaginated(
 		ctx,
-		limit,
-		offset,
+		int32(limit),
+		int32(offset),
 	)
-}
 
-func (s *Service) Count(
-	ctx context.Context,
-) (int64, error) {
+	if err != nil {
+		return nil, 0, err
+	}
 
-	return s.repository.Count(ctx)
+	total, err := s.repository.Count(
+		ctx,
+	)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return data, total, nil
 }
