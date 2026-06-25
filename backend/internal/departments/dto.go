@@ -1,10 +1,11 @@
 package departments
 
 type CreateDepartmentRequest struct {
-	SchoolID string `json:"school_id" binding:"required"`
+	SchoolID string `json:"school_id" validate:"required,uuid"`
 
-	DepartmentCode string `json:"department_code" binding:"required"`
-	DepartmentName string `json:"department_name" binding:"required"`
+	DepartmentCode string `json:"department_code" validate:"required"`
 
-	Description string `json:"description"`
+	DepartmentName string `json:"department_name" validate:"required"`
+
+	Description string `json:"description,omitempty"`
 }
