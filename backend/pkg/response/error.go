@@ -22,3 +22,18 @@ func Error(
 		},
 	)
 }
+
+func ValidationError(
+	c *gin.Context,
+	errors map[string]string,
+) {
+
+	c.JSON(
+		400,
+		ErrorResponse{
+			Success: false,
+			Message: "validation failed",
+			Errors:  errors,
+		},
+	)
+}
