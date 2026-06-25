@@ -2,6 +2,7 @@ package schools
 
 import (
 	"aums/backend/pkg/response"
+	"aums/backend/pkg/validator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -79,12 +80,11 @@ func (h *Handler) CreateSchool(
 
 	var req CreateSchoolRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := validator.Validate.Struct(req); err != nil {
 
-		response.Error(
+		response.ValidationError(
 			c,
-			http.StatusBadRequest,
-			err.Error(),
+			validator.FormatErrors(err),
 		)
 
 		return
