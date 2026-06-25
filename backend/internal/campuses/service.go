@@ -43,19 +43,17 @@ func (s *Service) Create(
 	return s.repository.Create(
 		ctx,
 		generated.CreateCampusParams{
-			CampusID: campusID,
-
+			CampusID:   campusID,
 			CampusCode: req.CampusCode,
 			CampusName: req.CampusName,
 
 			AddressLine1: pgtype.Text{
-				String: req.AddressLine1,
-				Valid:  req.AddressLine1 != "",
+				String: req.Address,
+				Valid:  req.Address != "",
 			},
 
 			AddressLine2: pgtype.Text{
-				String: req.AddressLine2,
-				Valid:  req.AddressLine2 != "",
+				Valid: false,
 			},
 
 			City: pgtype.Text{
