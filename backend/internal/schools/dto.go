@@ -1,8 +1,11 @@
 package schools
 
 type CreateSchoolRequest struct {
-	SchoolCode string `json:"school_code" binding:"required"`
-	SchoolName string `json:"school_name" binding:"required"`
+	CampusID string `json:"campus_id" validate:"required,uuid"`
 
-	Description string `json:"description"`
+	SchoolCode string `json:"school_code" validate:"required"`
+
+	SchoolName string `json:"school_name" validate:"required"`
+
+	Description string `json:"description,omitempty"`
 }
