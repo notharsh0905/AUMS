@@ -3,8 +3,9 @@ package response
 import "github.com/gin-gonic/gin"
 
 type ErrorResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success bool              `json:"success"`
+	Message string            `json:"message"`
+	Errors  map[string]string `json:"errors,omitempty"`
 }
 
 func Error(
