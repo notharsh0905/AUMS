@@ -2,6 +2,7 @@ package campuses
 
 import (
 	"aums/backend/pkg/response"
+	"aums/backend/pkg/validator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -81,6 +82,15 @@ func (h *Handler) CreateCampus(
 	var req CreateCampusRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		if err := validator.Validate.Struct(req); err != nil {
+
+			response.ValidationError(
+				c,
+				validator.FormatErrors(err),
+			)
+
+			return
+		}
 
 		response.Error(
 			c,
