@@ -1,14 +1,15 @@
 package courses
 
 type CreateCourseRequest struct {
-	CourseCode string `json:"course_code" binding:"required"`
-	CourseName string `json:"course_name" binding:"required"`
+	CourseCode string `json:"course_code" validate:"required"`
 
-	CourseType string `json:"course_type" binding:"required"`
+	CourseName string `json:"course_name" validate:"required"`
 
-	Credits string `json:"credits" binding:"required"`
+	CourseType string `json:"course_type" validate:"required"`
 
-	ContactHours int32 `json:"contact_hours"`
+	Credits string `json:"credits" validate:"required"`
 
-	Description string `json:"description"`
+	ContactHours int32 `json:"contact_hours" validate:"required,gte=1"`
+
+	Description string `json:"description,omitempty"`
 }
