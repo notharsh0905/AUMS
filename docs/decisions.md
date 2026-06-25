@@ -1182,7 +1182,6 @@ Accepted
 
 The following topics remain undecided:
 
-
 * Result Processing Engine
 * E-Office Architecture
 * Notification Architecture
