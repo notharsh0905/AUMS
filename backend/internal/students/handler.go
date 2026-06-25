@@ -99,10 +99,9 @@ func (h *Handler) CreateStudent(
 
 	if err := validator.Validate.Struct(req); err != nil {
 
-		response.Error(
+		response.ValidationError(
 			c,
-			http.StatusBadRequest,
-			err.Error(),
+			validator.FormatErrors(err),
 		)
 
 		return
