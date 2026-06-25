@@ -1,10 +1,11 @@
 package academicyears
 
 type CreateAcademicYearRequest struct {
-	AcademicYearName string `json:"academic_year_name" binding:"required"`
+	YearName string `json:"year_name" validate:"required"`
 
-	StartDate string `json:"start_date" binding:"required"`
-	EndDate   string `json:"end_date" binding:"required"`
+	StartDate string `json:"start_date" validate:"required"`
+
+	EndDate string `json:"end_date" validate:"required"`
 
 	IsCurrent bool `json:"is_current"`
 }
