@@ -1,23 +1,23 @@
 package faculty
 
 type CreateFacultyRequest struct {
-	UserID string `json:"user_id" binding:"required"`
+	UserID string `json:"user_id" validate:"required,uuid"`
 
-	EmployeeCode string `json:"employee_code" binding:"required"`
+	EmployeeCode string `json:"employee_code" validate:"required"`
 
-	DepartmentID string `json:"department_id" binding:"required"`
+	DepartmentID string `json:"department_id" validate:"required,uuid"`
 
-	Designation string `json:"designation" binding:"required"`
+	Designation string `json:"designation" validate:"required"`
 
-	EmploymentType string `json:"employment_type" binding:"required"`
+	EmploymentType string `json:"employment_type" validate:"required"`
 
-	JoiningDate string `json:"joining_date" binding:"required"`
+	JoiningDate string `json:"joining_date" validate:"required"`
 
-	Status string `json:"status"`
+	Status string `json:"status" validate:"required"`
 
-	YearsOfExperience string `json:"years_of_experience"`
+	YearsOfExperience string `json:"years_of_experience,omitempty"`
 
-	OfficeLocation string `json:"office_location"`
+	OfficeLocation string `json:"office_location,omitempty"`
 
-	Bio string `json:"bio"`
+	Bio string `json:"bio,omitempty"`
 }
