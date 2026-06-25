@@ -56,6 +56,7 @@ func (s *Service) Create(
 			SchoolID:       schoolID,
 			DepartmentCode: req.DepartmentCode,
 			DepartmentName: req.DepartmentName,
+
 			Description: pgtype.Text{
 				String: req.Description,
 				Valid:  req.Description != "",
