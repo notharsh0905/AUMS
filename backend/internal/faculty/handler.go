@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"aums/backend/pkg/response"
+	"aums/backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
 )
@@ -83,6 +84,15 @@ func (h *Handler) Create(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
+		if err := validator.Validate.Struct(req); err != nil {
+
+			response.ValidationError(
+				c,
+				validator.FormatErrors(err),
+			)
+
+			return
+		}
 		response.Error(
 			c,
 			http.StatusBadRequest,
