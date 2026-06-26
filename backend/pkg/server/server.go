@@ -40,6 +40,9 @@ import (
 	"aums/backend/internal/timetableentries"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
+
+	pkgmiddleware "aums/backend/pkg/middleware"
+
 	"aums/backend/pkg/app"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -51,6 +54,11 @@ import (
 func New(application *app.Application) *gin.Engine {
 
 	router := gin.Default()
+
+	router.Use(
+		pkgmiddleware.RequestID(),
+		pkgmiddleware.RequestLogger(),
+	)
 
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
