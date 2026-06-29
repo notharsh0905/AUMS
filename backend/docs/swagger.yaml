@@ -1,13 +1,525 @@
 basePath: /api/v1
 definitions:
-  aums_backend_pkg_response.ErrorResponse:
+  academicyears.AcademicYearResponse:
     properties:
+      academic_year_id:
+        type: string
+      academic_year_name:
+        type: string
+      end_date:
+        type: string
+      is_current:
+        type: boolean
+      start_date:
+        type: string
+    type: object
+  academicyears.CreateAcademicYearRequest:
+    properties:
+      end_date:
+        type: string
+      is_current:
+        type: boolean
+      start_date:
+        type: string
+      year_name:
+        type: string
+    required:
+    - end_date
+    - start_date
+    - year_name
+    type: object
+  assignments.CreateAssignmentRequest:
+    properties:
+      assignment_status:
+        type: string
+      course_offering_id:
+        type: string
+      description:
+        type: string
+      due_at:
+        type: string
+      faculty_profile_id:
+        type: string
+      publish_at:
+        type: string
+      title:
+        type: string
+      total_marks:
+        type: number
+    required:
+    - course_offering_id
+    - due_at
+    - faculty_profile_id
+    - publish_at
+    - title
+    - total_marks
+    type: object
+  assignmentsubmissions.CreateAssignmentSubmissionRequest:
+    properties:
+      assignment_id:
+        type: string
+      enrollment_id:
+        type: string
+      remarks:
+        type: string
+      submission_status:
+        type: string
+      submitted_at:
+        type: string
+    required:
+    - assignment_id
+    - enrollment_id
+    - submission_status
+    - submitted_at
+    type: object
+  attendance.CreateAttendanceRecordRequest:
+    properties:
+      attendance_status:
+        type: string
+      class_session_id:
+        type: string
+      enrollment_id:
+        type: string
+      marked_by:
+        type: string
+      remarks:
+        type: string
+    required:
+    - attendance_status
+    - class_session_id
+    - enrollment_id
+    type: object
+  auth.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  auth.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      refresh_token:
+        type: string
+      token_type:
+        type: string
+    type: object
+  auth.LogoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.RefreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  auth.RefreshResponse:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
+  campuses.CampusResponse:
+    properties:
+      address_line_1:
+        type: string
+      address_line_2:
+        type: string
+      campus_code:
+        type: string
+      campus_id:
+        type: string
+      campus_name:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      postal_code:
+        type: string
+      state:
+        type: string
+    type: object
+  campuses.CreateCampusRequest:
+    properties:
+      address:
+        type: string
+      campus_code:
+        type: string
+      campus_name:
+        type: string
+      city:
+        type: string
+      country:
+        type: string
+      postal_code:
+        type: string
+      state:
+        type: string
+    required:
+    - campus_code
+    - campus_name
+    type: object
+  classsessions.CreateClassSessionRequest:
+    properties:
+      conducted_by:
+        type: string
+      end_time:
+        type: string
+      remarks:
+        type: string
+      session_date:
+        type: string
+      session_status:
+        type: string
+      start_time:
+        type: string
+      timetable_entry_id:
+        type: string
+    required:
+    - end_time
+    - session_date
+    - start_time
+    - timetable_entry_id
+    type: object
+  courseofferings.CreateCourseOfferingRequest:
+    properties:
+      academic_year_id:
+        type: string
+      course_id:
+        type: string
+      max_capacity:
+        type: integer
+      section:
+        type: string
+      semester_id:
+        type: string
+      status:
+        type: string
+    required:
+    - academic_year_id
+    - course_id
+    - semester_id
+    type: object
+  courseresults.CreateCourseResultRequest:
+    properties:
+      course_offering_id:
+        type: string
+      enrollment_id:
+        type: string
+      grade_scale_id:
+        type: string
+      marks_obtained:
+        type: number
+      percentage:
+        type: number
+      published_at:
+        type: string
+      result_status:
+        type: string
+      total_marks:
+        type: number
+    required:
+    - course_offering_id
+    - enrollment_id
+    - grade_scale_id
+    - marks_obtained
+    - percentage
+    - published_at
+    - total_marks
+    type: object
+  courses.CreateCourseRequest:
+    properties:
+      contact_hours:
+        minimum: 1
+        type: integer
+      course_code:
+        type: string
+      course_name:
+        type: string
+      course_type:
+        type: string
+      credits:
+        type: string
+      description:
+        type: string
+    required:
+    - contact_hours
+    - course_code
+    - course_name
+    - course_type
+    - credits
+    type: object
+  departments.CreateDepartmentRequest:
+    properties:
+      department_code:
+        type: string
+      department_name:
+        type: string
+      description:
+        type: string
+      school_id:
+        type: string
+    required:
+    - department_code
+    - department_name
+    - school_id
+    type: object
+  departments.DepartmentResponse:
+    properties:
+      department_code:
+        type: string
+      department_id:
+        type: string
+      department_name:
+        type: string
+      description:
+        type: string
+      school_id:
+        type: string
+    type: object
+  examattempts.CreateExamAttemptRequest:
+    properties:
+      attempt_number:
+        minimum: 1
+        type: integer
+      evaluated_at:
+        type: string
+      evaluator_id:
+        type: string
+      exam_registration_id:
+        type: string
+      marks_obtained:
+        type: number
+      remarks:
+        type: string
+    required:
+    - attempt_number
+    - evaluated_at
+    - evaluator_id
+    - exam_registration_id
+    - marks_obtained
+    type: object
+  examregistrations.CreateExamRegistrationRequest:
+    properties:
+      enrollment_id:
+        type: string
+      exam_id:
+        type: string
+      registration_status:
+        type: string
+    required:
+    - enrollment_id
+    - exam_id
+    type: object
+  exams.CreateExamRequest:
+    properties:
+      course_offering_id:
+        type: string
+      description:
+        type: string
+      exam_name:
+        type: string
+      exam_status:
+        type: string
+      exam_type:
+        type: string
+      passing_marks:
+        type: number
+      total_marks:
+        type: number
+    required:
+    - course_offering_id
+    - exam_name
+    - exam_type
+    - passing_marks
+    - total_marks
+    type: object
+  examschedules.CreateExamScheduleRequest:
+    properties:
+      end_time:
+        type: string
+      exam_date:
+        type: string
+      exam_id:
+        type: string
+      room_id:
+        type: string
+      start_time:
+        type: string
+    required:
+    - end_time
+    - exam_date
+    - exam_id
+    - room_id
+    - start_time
+    type: object
+  faculty.CreateFacultyRequest:
+    properties:
+      bio:
+        type: string
+      department_id:
+        type: string
+      designation:
+        type: string
+      employee_code:
+        type: string
+      employment_type:
+        type: string
+      joining_date:
+        type: string
+      office_location:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: string
+      years_of_experience:
+        type: string
+    required:
+    - department_id
+    - designation
+    - employee_code
+    - employment_type
+    - joining_date
+    - status
+    - user_id
+    type: object
+  facultycourseallocations.CreateFacultyCourseAllocationRequest:
+    properties:
+      course_offering_id:
+        type: string
+      faculty_profile_id:
+        type: string
+    required:
+    - course_offering_id
+    - faculty_profile_id
+    type: object
+  permissions.PermissionResponse:
+    properties:
+      description:
+        type: string
+      permission_code:
+        type: string
+      permission_id:
+        type: string
+      permission_name:
+        type: string
+    type: object
+  programcurriculum.CreateProgramCurriculumRequest:
+    properties:
+      course_id:
+        type: string
+      is_mandatory:
+        type: boolean
+      program_id:
+        type: string
+      semester_number:
+        minimum: 1
+        type: integer
+    required:
+    - course_id
+    - program_id
+    - semester_number
+    type: object
+  programresults.CreateProgramResultRequest:
+    properties:
+      cgpa:
+        type: number
+      completion_date:
+        type: string
+      degree_completed:
+        type: boolean
+      earned_credits:
+        type: number
+      enrollment_id:
+        type: string
+      published_at:
+        type: string
+      result_status:
+        type: string
+      total_credits:
+        type: number
+    required:
+    - cgpa
+    - completion_date
+    - earned_credits
+    - enrollment_id
+    - published_at
+    - total_credits
+    type: object
+  programs.CreateProgramRequest:
+    properties:
+      degree_type:
+        type: string
+      department_id:
+        type: string
+      duration_unit:
+        type: string
+      duration_value:
+        minimum: 1
+        type: integer
+      program_code:
+        type: string
+      program_name:
+        type: string
+      total_semesters:
+        minimum: 1
+        type: integer
+    required:
+    - degree_type
+    - department_id
+    - duration_unit
+    - duration_value
+    - program_code
+    - program_name
+    - total_semesters
+    type: object
+  programs.ProgramResponse:
+    properties:
+      degree_type:
+        type: string
+      department_id:
+        type: string
+      duration_unit:
+        type: string
+      duration_value:
+        type: integer
+      program_code:
+        type: string
+      program_id:
+        type: string
+      program_name:
+        type: string
+      total_semesters:
+        type: integer
+    type: object
+  response.ErrorResponse:
+    properties:
+      errors:
+        additionalProperties:
+          type: string
+        type: object
       message:
         type: string
       success:
         type: boolean
     type: object
-  aums_backend_pkg_response.SuccessResponse:
+  response.SuccessResponse:
     properties:
       data: {}
       message:
@@ -15,7 +527,156 @@ definitions:
       success:
         type: boolean
     type: object
-  internal_students.CreateStudentRequest:
+  roles.RoleResponse:
+    properties:
+      description:
+        type: string
+      role_code:
+        type: string
+      role_id:
+        type: string
+      role_name:
+        type: string
+    type: object
+  schools.CreateSchoolRequest:
+    properties:
+      campus_id:
+        type: string
+      description:
+        type: string
+      school_code:
+        type: string
+      school_name:
+        type: string
+    required:
+    - campus_id
+    - school_code
+    - school_name
+    type: object
+  schools.SchoolResponse:
+    properties:
+      description:
+        type: string
+      school_code:
+        type: string
+      school_id:
+        type: string
+      school_name:
+        type: string
+    type: object
+  semesterresults.CreateSemesterResultRequest:
+    properties:
+      earned_credits:
+        type: number
+      enrollment_id:
+        type: string
+      published_at:
+        type: string
+      result_status:
+        type: string
+      semester_id:
+        type: string
+      sgpa:
+        type: number
+      total_credits:
+        type: number
+    required:
+    - earned_credits
+    - enrollment_id
+    - published_at
+    - semester_id
+    - sgpa
+    - total_credits
+    type: object
+  semesters.CreateSemesterRequest:
+    properties:
+      academic_year_id:
+        type: string
+      end_date:
+        type: string
+      semester_name:
+        type: string
+      semester_number:
+        minimum: 1
+        type: integer
+      start_date:
+        type: string
+    required:
+    - academic_year_id
+    - end_date
+    - semester_name
+    - semester_number
+    - start_date
+    type: object
+  semesters.SemesterResponse:
+    properties:
+      academic_year_id:
+        type: string
+      end_date:
+        type: string
+      semester_id:
+        type: string
+      semester_name:
+        type: string
+      semester_number:
+        type: integer
+      start_date:
+        type: string
+    type: object
+  studentcourseregistrations.CreateStudentCourseRegistrationRequest:
+    properties:
+      course_offering_id:
+        type: string
+      enrollment_id:
+        type: string
+      registration_status:
+        type: string
+    required:
+    - course_offering_id
+    - enrollment_id
+    type: object
+  studentenrollments.CreateStudentEnrollmentRequest:
+    properties:
+      enrollment_date:
+        type: string
+      enrollment_number:
+        type: string
+      graduation_date:
+        type: string
+      program_id:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      student_profile_id:
+        type: string
+    required:
+    - enrollment_date
+    - enrollment_number
+    - program_id
+    - student_profile_id
+    type: object
+  studentenrollments.StudentEnrollmentResponse:
+    properties:
+      enrollment_date:
+        type: string
+      enrollment_id:
+        type: string
+      enrollment_number:
+        type: string
+      graduation_date:
+        type: string
+      program_id:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      student_profile_id:
+        type: string
+    type: object
+  students.CreateStudentRequest:
     properties:
       admission_date:
         type: string
@@ -30,6 +691,10 @@ definitions:
       emergency_contact_phone:
         type: string
       gender:
+        enum:
+        - MALE
+        - FEMALE
+        - OTHER
         type: string
       nationality:
         type: string
@@ -40,12 +705,2046 @@ definitions:
     required:
     - user_id
     type: object
+  timetable.CreateTimetableRequest:
+    properties:
+      academic_year_id:
+        type: string
+      effective_from:
+        type: string
+      effective_to:
+        type: string
+      is_active:
+        type: boolean
+      semester_id:
+        type: string
+      timetable_name:
+        type: string
+    required:
+    - academic_year_id
+    - effective_from
+    - semester_id
+    - timetable_name
+    type: object
+  timetableentries.CreateTimetableEntryRequest:
+    properties:
+      course_offering_id:
+        type: string
+      entry_type:
+        type: string
+      faculty_profile_id:
+        type: string
+      room_id:
+        type: string
+      time_slot_id:
+        type: string
+      timetable_id:
+        type: string
+      working_day_id:
+        type: string
+    required:
+    - course_offering_id
+    - entry_type
+    - faculty_profile_id
+    - room_id
+    - time_slot_id
+    - timetable_id
+    - working_day_id
+    type: object
+  users.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      middle_name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+      phone_number:
+        type: string
+      username:
+        maxLength: 100
+        minLength: 3
+        type: string
+    required:
+    - email
+    - first_name
+    - password
+    - username
+    type: object
+  users.UserResponse:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      last_name:
+        type: string
+      middle_name:
+        type: string
+      phone_number:
+        type: string
+      status:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
   description: AI Powered Autonomous Management System API
   title: AUMS API
   version: "1.0"
 paths:
+  /academic-years:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of academic years
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/academicyears.AcademicYearResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Academic Years
+      tags:
+      - Academic Years
+    post:
+      consumes:
+      - application/json
+      description: Create a new academic year
+      parameters:
+      - description: Create Academic Year Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/academicyears.CreateAcademicYearRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Academic Year
+      tags:
+      - Academic Years
+  /assignment-submissions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of assignment submissions
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Assignment Submissions
+      tags:
+      - Assignment Submissions
+    post:
+      consumes:
+      - application/json
+      description: Submit an assignment for grading
+      parameters:
+      - description: Create Submission Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/assignmentsubmissions.CreateAssignmentSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Assignment Submission
+      tags:
+      - Assignment Submissions
+  /assignments:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of assignments
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Assignments
+      tags:
+      - Assignments
+    post:
+      consumes:
+      - application/json
+      description: Create a new assignment record
+      parameters:
+      - description: Create Assignment Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/assignments.CreateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Assignment
+      tags:
+      - Assignments
+  /attendance:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of attendance records
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Attendance Records
+      tags:
+      - Attendance
+    post:
+      consumes:
+      - application/json
+      description: Mark attendance for a student session
+      parameters:
+      - description: Create Attendance Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/attendance.CreateAttendanceRecordRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Attendance Record
+      tags:
+      - Attendance
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user credentials and return access and refresh tokens
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.LoginResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: User Login
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate the user's refresh token and log them out
+      parameters:
+      - description: Logout Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: User Logout
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate a new access token using a valid refresh token
+      parameters:
+      - description: Refresh Token Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/auth.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/auth.RefreshResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Refresh Access Token
+      tags:
+      - Auth
+  /campuses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of campuses
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/campuses.CampusResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Campuses
+      tags:
+      - Campuses
+    post:
+      consumes:
+      - application/json
+      description: Create a new campus profile
+      parameters:
+      - description: Create Campus Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/campuses.CreateCampusRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Campus
+      tags:
+      - Campuses
+  /class-sessions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of class sessions
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Class Sessions
+      tags:
+      - Class Sessions
+    post:
+      consumes:
+      - application/json
+      description: Create a new class session record
+      parameters:
+      - description: Create Class Session Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/classsessions.CreateClassSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Class Session
+      tags:
+      - Class Sessions
+  /course-offerings:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of course offerings
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Course Offerings
+      tags:
+      - Course Offerings
+    post:
+      consumes:
+      - application/json
+      description: Create a new course offering record
+      parameters:
+      - description: Create Offering Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/courseofferings.CreateCourseOfferingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Course Offering
+      tags:
+      - Course Offerings
+  /course-results:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of course results
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Course Results
+      tags:
+      - Course Results
+    post:
+      consumes:
+      - application/json
+      description: Record a new course result details
+      parameters:
+      - description: Create Course Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/courseresults.CreateCourseResultRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Course Result
+      tags:
+      - Course Results
+  /courses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of courses
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Courses
+      tags:
+      - Courses
+    post:
+      consumes:
+      - application/json
+      description: Create a new course profile
+      parameters:
+      - description: Create Course Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/courses.CreateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Course
+      tags:
+      - Courses
+  /departments:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of departments
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/departments.DepartmentResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Departments
+      tags:
+      - Departments
+    post:
+      consumes:
+      - application/json
+      description: Create a new department profile
+      parameters:
+      - description: Create Department Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/departments.CreateDepartmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Department
+      tags:
+      - Departments
+  /exam-attempts:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of exam attempts
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Exam Attempts
+      tags:
+      - Exam Attempts
+    post:
+      consumes:
+      - application/json
+      description: Record marks and presence for a student's exam attempt
+      parameters:
+      - description: Create Attempt Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examattempts.CreateExamAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Exam Attempt
+      tags:
+      - Exam Attempts
+  /exam-registrations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of exam registrations
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Exam Registrations
+      tags:
+      - Exam Registrations
+    post:
+      consumes:
+      - application/json
+      description: Register a student for a scheduled exam
+      parameters:
+      - description: Create Registration Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examregistrations.CreateExamRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Exam Registration
+      tags:
+      - Exam Registrations
+  /exam-schedules:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of exam schedules
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Exam Schedules
+      tags:
+      - Exam Schedules
+    post:
+      consumes:
+      - application/json
+      description: Create a new exam schedule record
+      parameters:
+      - description: Create Schedule Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examschedules.CreateExamScheduleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Exam Schedule
+      tags:
+      - Exam Schedules
+  /exams:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of exams
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Exams
+      tags:
+      - Exams
+    post:
+      consumes:
+      - application/json
+      description: Create a new exam record
+      parameters:
+      - description: Create Exam Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/exams.CreateExamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Exam
+      tags:
+      - Exams
+  /faculty:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of faculty members
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Faculty
+      tags:
+      - Faculty
+    post:
+      consumes:
+      - application/json
+      description: Create a new faculty member profile
+      parameters:
+      - description: Create Faculty Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/faculty.CreateFacultyRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Faculty
+      tags:
+      - Faculty
+  /faculty-course-allocations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of faculty course allocations
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Faculty Course Allocations
+      tags:
+      - Faculty Course Allocations
+    post:
+      consumes:
+      - application/json
+      description: Allocate a course offering to a faculty member
+      parameters:
+      - description: Create Allocation Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/facultycourseallocations.CreateFacultyCourseAllocationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Faculty Course Allocation
+      tags:
+      - Faculty Course Allocations
+  /permissions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of user permissions
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/permissions.PermissionResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Permissions
+      tags:
+      - Permissions
+  /program-curriculums:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of program curriculums
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Program Curriculums
+      tags:
+      - Program Curriculums
+    post:
+      consumes:
+      - application/json
+      description: Create a new program curriculum record
+      parameters:
+      - description: Create Curriculum Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/programcurriculum.CreateProgramCurriculumRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Program Curriculum
+      tags:
+      - Program Curriculums
+  /program-results:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of program results
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Program Results
+      tags:
+      - Program Results
+    post:
+      consumes:
+      - application/json
+      description: Record a new program result details
+      parameters:
+      - description: Create Program Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/programresults.CreateProgramResultRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Program Result
+      tags:
+      - Program Results
+  /programs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of programs
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/programs.ProgramResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Programs
+      tags:
+      - Programs
+    post:
+      consumes:
+      - application/json
+      description: Create a new program profile
+      parameters:
+      - description: Create Program Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/programs.CreateProgramRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Program
+      tags:
+      - Programs
+  /roles:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of user roles
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/roles.RoleResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Roles
+      tags:
+      - Roles
+  /schools:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of schools
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/schools.SchoolResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Schools
+      tags:
+      - Schools
+    post:
+      consumes:
+      - application/json
+      description: Create a new school profile
+      parameters:
+      - description: Create School Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schools.CreateSchoolRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create School
+      tags:
+      - Schools
+  /semester-results:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of semester results
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Semester Results
+      tags:
+      - Semester Results
+    post:
+      consumes:
+      - application/json
+      description: Record a new semester result details
+      parameters:
+      - description: Create Semester Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/semesterresults.CreateSemesterResultRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Semester Result
+      tags:
+      - Semester Results
+  /semesters:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of semesters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/semesters.SemesterResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Semesters
+      tags:
+      - Semesters
+    post:
+      consumes:
+      - application/json
+      description: Create a new semester
+      parameters:
+      - description: Create Semester Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/semesters.CreateSemesterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Semester
+      tags:
+      - Semesters
+  /student-course-registrations:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of student course registrations
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Student Course Registrations
+      tags:
+      - Student Course Registrations
+    post:
+      consumes:
+      - application/json
+      description: Register a student for a course offering
+      parameters:
+      - description: Create Registration Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/studentcourseregistrations.CreateStudentCourseRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Student Course Registration
+      tags:
+      - Student Course Registrations
+  /student-enrollments:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of student enrollments
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/studentenrollments.StudentEnrollmentResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Student Enrollments
+      tags:
+      - Student Enrollments
+    post:
+      consumes:
+      - application/json
+      description: Create a new student enrollment record
+      parameters:
+      - description: Create Enrollment Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/studentenrollments.CreateStudentEnrollmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Student Enrollment
+      tags:
+      - Student Enrollments
   /students:
     post:
       consumes:
@@ -57,35 +2756,264 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_students.CreateStudentRequest'
+          $ref: '#/definitions/students.CreateStudentRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/aums_backend_pkg_response.SuccessResponse'
+            $ref: '#/definitions/response.SuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
+            $ref: '#/definitions/response.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
+            $ref: '#/definitions/response.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
+            $ref: '#/definitions/response.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/aums_backend_pkg_response.ErrorResponse'
+            $ref: '#/definitions/response.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create student
       tags:
       - Students
+  /timetable-entries:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of timetable entries
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Timetable Entries
+      tags:
+      - Timetable Entries
+    post:
+      consumes:
+      - application/json
+      description: Create a new timetable entry record
+      parameters:
+      - description: Create Timetable Entry Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/timetableentries.CreateTimetableEntryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Timetable Entry
+      tags:
+      - Timetable Entries
+  /timetables:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of timetables
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Timetables
+      tags:
+      - Timetables
+    post:
+      consumes:
+      - application/json
+      description: Create a new timetable record
+      parameters:
+      - description: Create Timetable Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/timetable.CreateTimetableRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Timetable
+      tags:
+      - Timetables
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of users
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/users.UserResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create a new user profile
+      parameters:
+      - description: Create User Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/users.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/users.UserResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create User
+      tags:
+      - Users
 securityDefinitions:
   BearerAuth:
     in: header

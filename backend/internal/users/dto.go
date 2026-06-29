@@ -1,5 +1,6 @@
 package users
 
+// CreateUserRequest represents the request payload for creating a new user.
 type CreateUserRequest struct {
 	Username string `json:"username" validate:"required,min=3,max=100"`
 
@@ -16,6 +17,7 @@ type CreateUserRequest struct {
 	LastName string `json:"last_name"`
 }
 
+// UserResponse represents the response details of a user.
 type UserResponse struct {
 	UserID string `json:"user_id"`
 

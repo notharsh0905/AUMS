@@ -1,5 +1,6 @@
 package faculty
 
+// CreateFacultyRequest represents the request payload for creating a new faculty member.
 type CreateFacultyRequest struct {
 	UserID string `json:"user_id" validate:"required,uuid"`
 

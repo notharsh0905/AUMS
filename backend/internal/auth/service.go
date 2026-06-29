@@ -166,9 +166,6 @@ func (s *Service) Login(
 		return nil, err
 	}
 
-	println("IP:", req.IPAddress)
-	println("USER AGENT:", req.UserAgent)
-
 	_ = s.auditService.LogSuccessfulLogin(
 		ctx,
 		generated.CreateLoginAuditLogParams{
@@ -209,8 +206,7 @@ func (s *Service) Refresh(
 	ctx context.Context,
 	req RefreshRequest,
 ) (*RefreshResponse, error) {
-	println("REFRESH TOKEN:")
-	println(req.RefreshToken)
+
 	claims, err := aumsjwt.ValidateToken(
 		req.RefreshToken,
 		s.config.JWT.Secret,

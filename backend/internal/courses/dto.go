@@ -1,5 +1,6 @@
 package courses
 
+// CreateCourseRequest represents the request payload for creating a new course.
 type CreateCourseRequest struct {
 	CourseCode string `json:"course_code" validate:"required"`
 

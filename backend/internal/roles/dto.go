@@ -1,5 +1,6 @@
 package roles
 
+// RoleResponse represents the response details of a role.
 type RoleResponse struct {
 	RoleID string `json:"role_id"`
 

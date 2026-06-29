@@ -22,6 +22,20 @@ func NewHandler(
 	}
 }
 
+// List godoc
+// @Summary      List Faculty
+// @Description  Retrieve a paginated list of faculty members
+// @Tags         Faculty
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page   query      int  false  "Page number"   default(1)
+// @Param        limit  query      int  false  "Page size"     default(20)
+// @Success      200    {object}   response.SuccessResponse
+// @Failure      400    {object}   response.ErrorResponse
+// @Failure      401    {object}   response.ErrorResponse
+// @Failure      500    {object}   response.ErrorResponse
+// @Router       /faculty [get]
 func (h *Handler) List(
 	c *gin.Context,
 ) {
@@ -76,6 +90,18 @@ func (h *Handler) List(
 	)
 }
 
+// Create godoc
+// @Summary      Create Faculty
+// @Description  Create a new faculty member profile
+// @Tags         Faculty
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body      CreateFacultyRequest  true  "Create Faculty Payload"
+// @Success      201     {object}  response.SuccessResponse
+// @Failure      400     {object}  response.ErrorResponse
+// @Failure      401     {object}  response.ErrorResponse
+// @Router       /faculty [post]
 func (h *Handler) Create(
 	c *gin.Context,
 ) {
@@ -84,19 +110,19 @@ func (h *Handler) Create(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		if err := validator.Validate.Struct(req); err != nil {
-
-			response.ValidationError(
-				c,
-				validator.FormatErrors(err),
-			)
-
-			return
-		}
-		response.Error(
+		response.ValidationError(
 			c,
-			http.StatusBadRequest,
-			err.Error(),
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(req); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
 		)
 
 		return

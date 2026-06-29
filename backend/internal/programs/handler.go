@@ -1,11 +1,13 @@
 package programs
 
 import (
-	"aums/backend/pkg/response"
-	"aums/backend/pkg/validator"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"aums/backend/internal/db/generated"
+	"aums/backend/pkg/response"
+	"aums/backend/pkg/validator"
 )
 
 type Handler struct {
@@ -21,6 +23,20 @@ func NewHandler(
 	}
 }
 
+// ListPrograms godoc
+// @Summary      List Programs
+// @Description  Retrieve a paginated list of programs
+// @Tags         Programs
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page   query      int  false  "Page number"   default(1)
+// @Param        limit  query      int  false  "Page size"     default(20)
+// @Success      200    {object}   response.SuccessResponse{data=[]ProgramResponse}
+// @Failure      400    {object}   response.ErrorResponse
+// @Failure      401    {object}   response.ErrorResponse
+// @Failure      500    {object}   response.ErrorResponse
+// @Router       /programs [get]
 func (h *Handler) ListPrograms(
 	c *gin.Context,
 ) {
@@ -66,7 +82,7 @@ func (h *Handler) ListPrograms(
 		c,
 		http.StatusOK,
 		"programs fetched successfully",
-		programs,
+		ToResponses(programs),
 		response.PaginationMeta{
 			Page:  page,
 			Limit: limit,
@@ -75,6 +91,18 @@ func (h *Handler) ListPrograms(
 	)
 }
 
+// CreateProgram godoc
+// @Summary      Create Program
+// @Description  Create a new program profile
+// @Tags         Programs
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body      CreateProgramRequest  true  "Create Program Payload"
+// @Success      201     {object}  response.SuccessResponse
+// @Failure      400     {object}  response.ErrorResponse
+// @Failure      401     {object}  response.ErrorResponse
+// @Router       /programs [post]
 func (h *Handler) CreateProgram(
 	c *gin.Context,
 ) {
@@ -83,20 +111,19 @@ func (h *Handler) CreateProgram(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		if err := validator.Validate.Struct(req); err != nil {
-
-			response.ValidationError(
-				c,
-				validator.FormatErrors(err),
-			)
-
-			return
-		}
-
-		response.Error(
+		response.ValidationError(
 			c,
-			http.StatusBadRequest,
-			err.Error(),
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(req); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
 		)
 
 		return
@@ -124,4 +151,25 @@ func (h *Handler) CreateProgram(
 		"program created successfully",
 		nil,
 	)
+}
+
+func ToResponse(prog generated.Program) ProgramResponse {
+	return ProgramResponse{
+		ProgramID:      prog.ProgramID.String(),
+		DepartmentID:   prog.DepartmentID.String(),
+		ProgramCode:    prog.ProgramCode,
+		ProgramName:    prog.ProgramName,
+		DegreeType:     string(prog.DegreeType),
+		DurationValue:  prog.DurationValue,
+		DurationUnit:   prog.DurationUnit,
+		TotalSemesters: prog.TotalSemesters.Int32,
+	}
+}
+
+func ToResponses(progs []generated.Program) []ProgramResponse {
+	res := make([]ProgramResponse, 0, len(progs))
+	for _, p := range progs {
+		res = append(res, ToResponse(p))
+	}
+	return res
 }

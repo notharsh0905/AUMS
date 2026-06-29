@@ -1,11 +1,12 @@
 package courseofferings
 
+// CreateCourseOfferingRequest represents the request payload for creating a new course offering.
 type CreateCourseOfferingRequest struct {
-	CourseID string `json:"course_id" binding:"required"`
+	CourseID string `json:"course_id" validate:"required,uuid"`
 
-	AcademicYearID string `json:"academic_year_id" binding:"required"`
+	AcademicYearID string `json:"academic_year_id" validate:"required,uuid"`
 
-	SemesterID string `json:"semester_id" binding:"required"`
+	SemesterID string `json:"semester_id" validate:"required,uuid"`
 
 	Section string `json:"section"`
 

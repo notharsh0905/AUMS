@@ -1,9 +1,10 @@
 package courses
 
 import (
+	"net/http"
+
 	"aums/backend/pkg/response"
 	"aums/backend/pkg/validator"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,6 +22,20 @@ func NewHandler(
 	}
 }
 
+// List godoc
+// @Summary      List Courses
+// @Description  Retrieve a paginated list of courses
+// @Tags         Courses
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page   query      int  false  "Page number"   default(1)
+// @Param        limit  query      int  false  "Page size"     default(20)
+// @Success      200    {object}   response.SuccessResponse
+// @Failure      400    {object}   response.ErrorResponse
+// @Failure      401    {object}   response.ErrorResponse
+// @Failure      500    {object}   response.ErrorResponse
+// @Router       /courses [get]
 func (h *Handler) List(
 	c *gin.Context,
 ) {
@@ -75,6 +90,18 @@ func (h *Handler) List(
 	)
 }
 
+// Create godoc
+// @Summary      Create Course
+// @Description  Create a new course profile
+// @Tags         Courses
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body      CreateCourseRequest  true  "Create Course Payload"
+// @Success      201     {object}  response.SuccessResponse
+// @Failure      400     {object}  response.ErrorResponse
+// @Failure      401     {object}  response.ErrorResponse
+// @Router       /courses [post]
 func (h *Handler) Create(
 	c *gin.Context,
 ) {
@@ -83,20 +110,19 @@ func (h *Handler) Create(
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 
-		if err := validator.Validate.Struct(req); err != nil {
-
-			response.ValidationError(
-				c,
-				validator.FormatErrors(err),
-			)
-
-			return
-		}
-
-		response.Error(
+		response.ValidationError(
 			c,
-			http.StatusBadRequest,
-			err.Error(),
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(req); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
 		)
 
 		return
