@@ -5,6 +5,18 @@ AI Powered Autonomous Management System (AUMS) Enterprise University ERP Portal.
 ## Technical Stack
 
 - **Core**: Next.js (App Router, latest stable), React 19, TypeScript
+- **State Management**: Zustand
+- **API Communication**: Axios
+- **Form Management**: React Hook Form + @hookform/resolvers + Zod Validation
+- **UI Utilities**: class-variance-authority, clsx, tailwind-merge
+- **Icon Set**: Lucide React
+- **Notifications**: Sonner
+- **Themes**: Next-themes
+- **Animations**: Framer Motion
+- **Date Handling**: Date-fns
+- **File Upload**: React Dropzone
+- **Tables**: TanStack Table (@tanstack/react-table)
+- **Charts**: Recharts
 - **Styling**: Tailwind CSS v4
 - **Formatting & Linting**: ESLint, Prettier
 
@@ -13,7 +25,7 @@ AI Powered Autonomous Management System (AUMS) Enterprise University ERP Portal.
 This project enforces a **feature-first** organization model as detailed in the approved Frontend Master Plan:
 
 - `app/` - Routing layer (Page Layouts, loading fallback templates, error boundaries).
-- `components/` - Global, reusable, atomic stateless UI elements.
+- `components/` - Global, reusable, atomic stateless UI elements (ui, shared, layouts).
 - `features/` - Domain-specific capsules (e.g. `auth`, `users`, `courses`). Each feature encapsulates its own assets, services, and local hooks.
 - `hooks/` - Global custom hooks.
 - `providers/` - Context providers (State Management, UI Themes, toasts).
