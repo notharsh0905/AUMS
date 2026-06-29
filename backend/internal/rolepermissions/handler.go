@@ -1,10 +1,13 @@
 package rolepermissions
 
 import (
-	uuidpkg "aums/backend/pkg/uuid"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"aums/backend/pkg/response"
+	uuidpkg "aums/backend/pkg/uuid"
+	"aums/backend/pkg/validator"
 )
 
 type Handler struct {
@@ -20,6 +23,19 @@ func NewHandler(
 	}
 }
 
+// GetRolePermissions godoc
+// @Summary      Get Role Permissions
+// @Description  Retrieve permissions assigned to a specific role
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Role ID"
+// @Success      200  {object}  response.SuccessResponse
+// @Failure      400  {object}  response.ErrorResponse
+// @Failure      401  {object}  response.ErrorResponse
+// @Failure      500  {object}  response.ErrorResponse
+// @Router       /roles/{id}/permissions [get]
 func (h *Handler) GetRolePermissions(
 	c *gin.Context,
 ) {
@@ -30,11 +46,10 @@ func (h *Handler) GetRolePermissions(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": "invalid role id",
-			},
+			"invalid role id",
 		)
 
 		return
@@ -47,22 +62,37 @@ func (h *Handler) GetRolePermissions(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
 	}
 
-	c.JSON(
+	response.Success(
+		c,
 		http.StatusOK,
+		"role permissions fetched successfully",
 		permissions,
 	)
 }
 
+// AssignPermissionToRole godoc
+// @Summary      Assign Permission to Role
+// @Description  Assign a permission to a role
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id       path      string                   true  "Role ID"
+// @Param        request  body      AssignPermissionRequest  true  "Assign Permission Payload"
+// @Success      204      {object}  response.SuccessResponse
+// @Failure      400      {object}  response.ErrorResponse
+// @Failure      401      {object}  response.ErrorResponse
+// @Failure      500      {object}  response.ErrorResponse
+// @Router       /roles/{id}/permissions [post]
 func (h *Handler) AssignPermissionToRole(
 	c *gin.Context,
 ) {
@@ -73,11 +103,10 @@ func (h *Handler) AssignPermissionToRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": "invalid role id",
-			},
+			"invalid role id",
 		)
 
 		return
@@ -87,11 +116,19 @@ func (h *Handler) AssignPermissionToRole(
 
 	if err := c.ShouldBindJSON(&request); err != nil {
 
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(request); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
 		)
 
 		return
@@ -103,11 +140,10 @@ func (h *Handler) AssignPermissionToRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": "invalid permission id",
-			},
+			"invalid permission id",
 		)
 
 		return
@@ -121,11 +157,10 @@ func (h *Handler) AssignPermissionToRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return
@@ -136,6 +171,20 @@ func (h *Handler) AssignPermissionToRole(
 	)
 }
 
+// RemovePermissionFromRole godoc
+// @Summary      Remove Permission from Role
+// @Description  Remove a permission from a role
+// @Tags         Roles
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id            path      string  true  "Role ID"
+// @Param        permissionId  path      string  true  "Permission ID"
+// @Success      204           {object}  response.SuccessResponse
+// @Failure      400           {object}  response.ErrorResponse
+// @Failure      401           {object}  response.ErrorResponse
+// @Failure      500           {object}  response.ErrorResponse
+// @Router       /roles/{id}/permissions/{permissionId} [delete]
 func (h *Handler) RemovePermissionFromRole(
 	c *gin.Context,
 ) {
@@ -146,11 +195,10 @@ func (h *Handler) RemovePermissionFromRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": "invalid role id",
-			},
+			"invalid role id",
 		)
 
 		return
@@ -162,11 +210,10 @@ func (h *Handler) RemovePermissionFromRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusBadRequest,
-			gin.H{
-				"error": "invalid permission id",
-			},
+			"invalid permission id",
 		)
 
 		return
@@ -180,11 +227,10 @@ func (h *Handler) RemovePermissionFromRole(
 
 	if err != nil {
 
-		c.JSON(
+		response.Error(
+			c,
 			http.StatusInternalServerError,
-			gin.H{
-				"error": err.Error(),
-			},
+			err.Error(),
 		)
 
 		return

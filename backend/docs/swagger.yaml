@@ -527,6 +527,13 @@ definitions:
       success:
         type: boolean
     type: object
+  rolepermissions.AssignPermissionRequest:
+    properties:
+      permission_id:
+        type: string
+    required:
+    - permission_id
+    type: object
   roles.RoleResponse:
     properties:
       description:
@@ -2367,6 +2374,121 @@ paths:
       security:
       - BearerAuth: []
       summary: List Roles
+      tags:
+      - Roles
+  /roles/{id}/permissions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve permissions assigned to a specific role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Role Permissions
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Assign a permission to a role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Assign Permission Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/rolepermissions.AssignPermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Assign Permission to Role
+      tags:
+      - Roles
+  /roles/{id}/permissions/{permissionId}:
+    delete:
+      consumes:
+      - application/json
+      description: Remove a permission from a role
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Permission ID
+        in: path
+        name: permissionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Remove Permission from Role
       tags:
       - Roles
   /schools:
