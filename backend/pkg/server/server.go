@@ -1,7 +1,9 @@
 package server
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	_ "aums/backend/docs"
 	"aums/backend/internal/academicyears"
@@ -55,6 +57,9 @@ func New(application *app.Application) *gin.Engine {
 
 	router := gin.Default()
 
+	// Secure configuration of trusted proxies for production
+	_ = router.SetTrustedProxies(nil)
+
 	router.Use(
 		pkgmiddleware.RequestID(),
 		pkgmiddleware.RequestLogger(),
@@ -66,6 +71,31 @@ func New(application *app.Application) *gin.Engine {
 			"service":     "AUMS",
 			"environment": application.Config.App.Environment,
 			"version":     "v1",
+		})
+	})
+
+	router.GET("/ready", func(c *gin.Context) {
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
+		defer cancel()
+
+		if err := application.DB.Ping(ctx); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":  "down",
+				"details": "database is not reachable",
+			})
+			return
+		}
+
+		if err := application.Redis.Ping(ctx).Err(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{
+				"status":  "down",
+				"details": "cache is not reachable",
+			})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ready",
 		})
 	})
 

@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"errors"
 	"os"
 
 	"github.com/spf13/viper"
@@ -55,6 +56,28 @@ type JWTConfig struct {
 	RefreshTokenDurationHours  int    `mapstructure:"refresh_token_duration_hours"`
 }
 
+func (c *Config) Validate() error {
+	if c.App.Name == "" {
+		return errors.New("app name is required")
+	}
+	if c.App.Port <= 0 {
+		return errors.New("app port must be positive")
+	}
+	if c.Database.Host == "" || c.Database.Name == "" || c.Database.User == "" {
+		return errors.New("database host, name, and user are required")
+	}
+	if c.Redis.Host == "" {
+		return errors.New("redis host is required")
+	}
+	if c.MinIO.Endpoint == "" {
+		return errors.New("minio endpoint is required")
+	}
+	if c.JWT.Secret == "" {
+		return errors.New("jwt secret is required")
+	}
+	return nil
+}
+
 func Load() (*Config, error) {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
@@ -72,6 +95,10 @@ func Load() (*Config, error) {
 	var cfg Config
 
 	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+
+	if err := cfg.Validate(); err != nil {
 		return nil, err
 	}
 
