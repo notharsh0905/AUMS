@@ -185,6 +185,13 @@ export const navigationConfig: NavigationGroup[] = [
         icon: FileText,
         href: '/transcripts',
         requiredPermissions: ['transcripts.read'],
+      },
+      {
+        id: 'course-results',
+        title: 'Course Results',
+        icon: FileText,
+        href: '/course-results',
+        requiredPermissions: ['course_results.read'],
       }
     ]
   },

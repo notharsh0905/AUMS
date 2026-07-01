@@ -180,3 +180,57 @@ We structured the exam attempts module in a domain-driven feature capsule matchi
 │  Admin                                    Page 1 of 1  [<] [>]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+# Module 5: Course Results
+
+We completed the implementation of the **Course Results Management Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and supports full CRUD capabilities (List, View, Create, Edit, and Delete course results entries) along with pagination, search, and dynamic status/student/course/semester filtering.
+
+## 1. Implemented Features
+
+### 🏢 Course Results Feature Capsule (`frontend/features/course-results`)
+We structured the course results module in a domain-driven feature capsule matching the established repository patterns:
+- **[types/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/types/index.ts)**: Declared types for both raw snake_case backend API responses (`RawCourseResult`, `CourseResultFilters`, etc.) and mapped camelCase types (`CourseResult`, `CourseResultListResponse`, etc.) that hold joined lookup fields.
+- **[schemas/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/schemas/index.ts)**: Created a Zod validation schema (`courseResultFormSchema`) to validate student enrollment, course offerings, internal marks, external marks, total max possible marks, and results statuses.
+- **[constants/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/constants/index.ts)**: Maintained query keys and publication status options (Draft, Published, Withheld, Revised).
+- **[services/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/services/index.ts)**: Implemented Axios client integrations communicating with real `/course-results` endpoints (`GET /course-results`, `GET /course-results/:id`, `POST /course-results`, `PUT /course-results/:id`, and `DELETE /course-results/:id`). The service automatically resolves student profiles, course offerings, credit configurations, and semester titles in parallel to enrich results with candidate details. It also maps final marks into grades and grade points dynamically.
+- **[hooks/use-course-results.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/hooks/use-course-results.ts)**: Manages load cycles, page indices, search metrics, select parameters, form drawers, and deletion confirmation dialogs.
+- **[components/course-result-form/course-result-form.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/components/course-result-form/course-result-form.tsx)**: Form component leveraging React Hook Form. Real-time dynamic calculator sums internal assessment marks and external exam marks, rendering an active status badge (PASS / FAIL) and calculating the final grade (A+, A, B, etc.) and grade point automatically based on standard thresholds.
+- **[components/course-result-details/course-result-details.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/components/course-result-details/course-result-details.tsx)**: Renders a structured read-only card of a student's final course result grades, including visual metrics of the internal/external marks breakdown, credits awarded, and pass/fail indicators.
+- **[components/course-result-list/course-result-list-view.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/course-results/components/course-result-list/course-result-list-view.tsx)**: Main course results log dashboard view containing paginated `DataTable`, search bar, filters (status, student, course offering, semester), drawers, and confirmation dialogues.
+
+### 🗺 Page Routing (`frontend/app/course-results/page.tsx`)
+- Configured a route page at `/course-results` implementing standard layout containers and Route guard checks.
+
+### 🧭 Navigation Integration (`frontend/config/navigation.ts`)
+- Added the **Course Results** sidebar item under the Academics section, secured by the `course_results.read` permission gate.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
+## 3. Walkthrough Layout Mockup
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  AUMS ERP   [Search Bar]                                  [Admin Profile]
+├────────────────────────────────────────────────────────────────────────┤
+│  Gen       Course Results Management                       + Add Result   │
+│  ├── Dash                                                              │
+│  Acad      [Search student, roll...]  Status: [Select] Semester: [Select]│
+│  ├── Stud  ┌─────────────────────────────────────────────────────────┐ │
+│  ├── Fac   │ Student Name │ Course Offered│ Marks  │ Grade  │ Outcome │ │
+│  ├── Course├──────────────┼───────────────┼────────┼────────┼─────────┤ │
+│  │  Res    │ Jane Doe     │ CS-101 - Intro│ 85/100 │ A (9.0)│  PASS   │ │
+│  │         │ (2026CS101)  │ to Computing  │        │        │         │ │
+│  └── Tran  └──────────────┴───────────────┴────────┴────────┴─────────┘ │
+│  Admin                                    Page 1 of 1  [<] [>]         │
+└────────────────────────────────────────────────────────────────────────┘
+```
