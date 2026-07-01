@@ -298,12 +298,14 @@ definitions:
         minimum: 1
         type: integer
       evaluated_at:
+        description: RFC3339 format
         type: string
       evaluator_id:
         type: string
       exam_registration_id:
         type: string
       marks_obtained:
+        minimum: 0
         type: number
       remarks:
         type: string
@@ -312,6 +314,44 @@ definitions:
     - evaluated_at
     - evaluator_id
     - exam_registration_id
+    - marks_obtained
+    type: object
+  examattempts.ExamAttemptResponse:
+    properties:
+      attempt_number:
+        type: integer
+      created_at:
+        type: string
+      evaluated_at:
+        type: string
+      evaluator_id:
+        type: string
+      exam_attempt_id:
+        type: string
+      exam_registration_id:
+        type: string
+      marks_obtained:
+        type: number
+      remarks:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  examattempts.UpdateExamAttemptRequest:
+    properties:
+      evaluated_at:
+        description: RFC3339 format
+        type: string
+      evaluator_id:
+        type: string
+      marks_obtained:
+        minimum: 0
+        type: number
+      remarks:
+        type: string
+    required:
+    - evaluated_at
+    - evaluator_id
     - marks_obtained
     type: object
   examregistrations.CreateExamRegistrationRequest:
@@ -1771,7 +1811,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a paginated list of exam attempts
+      description: Retrieve a paginated list of exam attempts with filtering
       parameters:
       - default: 1
         description: Page number
@@ -1783,13 +1823,36 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filter by Exam ID
+        in: query
+        name: exam_id
+        type: string
+      - description: Filter by Exam Registration ID
+        in: query
+        name: registration_id
+        type: string
+      - description: Filter by Enrollment ID
+        in: query
+        name: enrollment_id
+        type: string
+      - description: Filter by Exam Registration Status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/examattempts.ExamAttemptResponse'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -1806,7 +1869,7 @@ paths:
       - BearerAuth: []
       summary: List Exam Attempts
       tags:
-      - Exam Attempts
+      - ExamAttempts
     post:
       consumes:
       - application/json
@@ -1837,7 +1900,113 @@ paths:
       - BearerAuth: []
       summary: Create Exam Attempt
       tags:
-      - Exam Attempts
+      - ExamAttempts
+  /exam-attempts/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an exam attempt record
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Exam Attempt
+      tags:
+      - ExamAttempts
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a single exam attempt
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/examattempts.ExamAttemptResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Exam Attempt
+      tags:
+      - ExamAttempts
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing exam attempt
+      parameters:
+      - description: Exam Attempt ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Attempt Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examattempts.UpdateExamAttemptRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Exam Attempt
+      tags:
+      - ExamAttempts
   /exam-registrations:
     get:
       consumes:

@@ -1106,9 +1106,16 @@ func New(application *app.Application) *gin.Engine {
 		rolePermissionsService,
 	)
 
+	examAttemptsGroup := api.Group("/exam-attempts")
+	examAttemptsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
 	examattempts.RegisterRoutes(
-		api.Group("/exam-attempts"),
+		examAttemptsGroup,
 		examAttemptHandler,
+		rolePermissionsService,
 	)
 	// ==========================================
 	// RESULTS MODULE
