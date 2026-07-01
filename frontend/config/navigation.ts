@@ -159,6 +159,13 @@ export const navigationConfig: NavigationGroup[] = [
         requiredPermissions: ['examinations.read'],
       },
       {
+        id: 'exam-rooms',
+        title: 'Exam Rooms',
+        icon: FileText,
+        href: '/exam-rooms',
+        requiredPermissions: ['exam_rooms.read'],
+      },
+      {
         id: 'transcripts',
         title: 'Transcripts',
         icon: FileText,

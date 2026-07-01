@@ -1,8 +1,12 @@
-# AUMS Frontend V1 - Transcripts Module Walkthrough
+# AUMS Frontend V1 - Module Walkthroughs
 
-We have successfully designed, built, and verified the **Academic Transcripts Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and does not use any mock data.
+This document contains detailed implementation descriptions and walkthroughs for the completed frontend modules of the AUMS Enterprise ERP.
 
 ---
+
+# Module 1: Transcripts
+
+We designed, built, and verified the **Academic Transcripts Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and does not use any mock data.
 
 ## 1. Implemented Features
 
@@ -37,28 +41,55 @@ We structured the transcripts module in a domain-driven feature capsule matching
 
 ---
 
+# Module 2: Exam Rooms
+
+We completed the implementation of the **Exam Room Management Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and supports full CRUD capabilities (Create, Read, Update, Delete) along with paginated search and dynamic filter widgets.
+
+## 1. Implemented Features
+
+### 🏢 Exam Rooms Feature Capsule (`frontend/features/exam-rooms`)
+We structured the exam rooms module in a domain-driven feature capsule matching the established repository patterns:
+- **[types/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/types/index.ts)**: Declared types for both raw snake_case backend API responses (`RawExamRoom`, `ExamRoomFilters`, etc.) and mapped camelCase types (`ExamRoom`, `ExamRoomListResponse`, etc.).
+- **[schemas/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/schemas/index.ts)**: Created a Zod validation schema (`examRoomFormSchema`) for the create/edit forms. It performs validations like building/room checks, floor constraints (>= 0), capacity checks (>= 1), and valid UUID formatting for the institution. It leverages `z.union([z.string(), z.number()])` for seamless field validation.
+- **[constants/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/constants/index.ts)**: Maintained dropdown options for room types (Classroom, Lecture Hall, Lab, Auditorium) and statuses (Active, Inactive, Maintenance).
+- **[services/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/services/index.ts)**: Implemented Axios client integrations communicating with real `/exam-rooms` endpoints (`GET /exam-rooms`, `GET /exam-rooms/:id`, `POST /exam-rooms`, `PUT /exam-rooms/:id`, and `DELETE /exam-rooms/:id`), including mapping helper utilities.
+- **[hooks/use-exam-rooms.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/hooks/use-exam-rooms.ts)**: Managed loading states, pagination state, search queries, filter state, form drawer modal states, delete confirmation states, and mutation hooks for creating, editing, and deleting exam rooms.
+- **[components/exam-room-form/exam-room-form.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/components/exam-room-form/exam-room-form.tsx)**: Form component leveraging React Hook Form. Features text fields, select elements, and custom boolean switches (`FormSwitch`) for amenities (Projector, AC, and Wheelchair accessibility). Includes logic to automatically pre-populate the `institutionId` from existing exam rooms to minimize data entry.
+- **[components/exam-room-details/exam-room-details.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/components/exam-room-details/exam-room-details.tsx)**: Display panel rendering a read-only view of a room's location, configuration, status, and amenities with check/cross indicators.
+- **[components/exam-room-list/exam-room-list-view.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-rooms/components/exam-room-list/exam-room-list-view.tsx)**: Integrates the lists, filters (status, room type, building), paginated `DataTable`, drawer modals, and confirmation dialogs into a cohesive dashboard.
+
+### 🗺 Page Routing (`frontend/app/exam-rooms/page.tsx`)
+- Configured a page at `/exam-rooms`.
+- Uses layout containers (`PageContainer`, `PageHeader`, `ContentArea`) and applies `ProtectedRoute` guard verification.
+
+### 🧭 Navigation Integration (`frontend/config/navigation.ts`)
+- Added **Exam Rooms** under the Academics sidebar category, secured by the `exam_rooms.read` permission gate.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
 ## 3. Walkthrough Layout Mockup
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  AUMS ERP   [Search Bar]                                  [Admin Profile]
 ├────────────────────────────────────────────────────────────────────────┤
-│  Gen       Official Academic Transcript         [Print / Export PDF]   │
+│  Gen       Exam Room Management                                + Add Room│
 │  ├── Dash                                                              │
-│  Acad      ┌─────────────────────────────┐  ┌────────────────────────┐ │
-│  ├── Stud  │ Student: John Doe           │  │ Program: B.Tech        │ │
-│  ├── Fac   │ Roll: 2026CS101             │  │ Dept: Computer Science │ │
-│  ├── Crse  └─────────────────────────────┘  └────────────────────────┘ │
-│  └── Tran  ┌───────────┐ ┌───────────┐ ┌─────────────┐ ┌─────────────┐ │
-│            │ CGPA: 9.2 │ │ Earned: 78│ │ Standing:   │ │ Status:     │ │
-│  Admin     │   / 10    │ │   / 120   │ │ GOOD        │ │ IN PROGRESS │ │
-│            └───────────┘ └───────────┘ └─────────────┘ └─────────────┘ │
-│            [Semester Breakdown] [Detailed Course Grades]               │
-│            ┌─────────────────────────────────────────────────────────┐ │
-│            │ Course Code │ Course Name      │ Credits │ Grade │ Pass │ │
-│            ├─────────────┼──────────────────┼─────────┼───────┼──────┤ │
-│            │ CS-101      │ Programming in C │ 4.0     │ A+    │ PASS │ │
-│            │ CS-152      │ Discrete Math    │ 3.0     │ A     │ PASS │ │
-│            └─────────────┴──────────────────┴─────────┴───────┴──────┘ │
+│  Acad      [Search building, number...]  Status: [Select] Type: [Select]│
+│  ├── Stud  ┌─────────────────────────────────────────────────────────┐ │
+│  ├── Fac   │ Building     │ Room Number │ Capacity │ Type     │ Status   │ │
+│  ├── Exam  ├──────────────┼─────────────┼──────────┼──────────┼──────────┤ │
+│  ├── Room  │ Ramanujan    │ 101         │ 40 seats │ CLASSROOM│ ACTIVE   │ │
+│  └── Tran  │ Science Wing │ LH-02       │ 80 seats │ LECTURE  │ ACTIVE   │ │
+│            └──────────────┴─────────────┴──────────┴──────────┴──────────┘ │
+│  Admin                                    Page 1 of 2  [<] [>]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
