@@ -11,6 +11,39 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countSemesterResults = `-- name: CountSemesterResults :one
+SELECT COUNT(*)
+FROM semester_results sr
+JOIN student_enrollments se ON sr.enrollment_id = se.enrollment_id
+JOIN semesters s ON sr.semester_id = s.semester_id
+WHERE ($1::text = '' OR sr.semester_id = $1::uuid)
+  AND ($2::text = '' OR se.student_profile_id = $2::uuid)
+  AND ($3::text = '' OR se.program_id = $3::uuid)
+  AND ($4::text = '' OR s.academic_year_id = $4::uuid)
+  AND ($5::text = '' OR sr.result_status = $5::text::result_status)
+`
+
+type CountSemesterResultsParams struct {
+	Column1 string `json:"column_1"`
+	Column2 string `json:"column_2"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+}
+
+func (q *Queries) CountSemesterResults(ctx context.Context, arg CountSemesterResultsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countSemesterResults,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createSemesterResult = `-- name: CreateSemesterResult :exec
 INSERT INTO semester_results (
     semester_result_id,
@@ -20,10 +53,12 @@ INSERT INTO semester_results (
     earned_credits,
     sgpa,
     result_status,
-    published_at
+    published_at,
+    created_at,
+    updated_at
 )
 VALUES (
-    $1,$2,$3,$4,$5,$6,$7,$8
+    $1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW()
 )
 `
 
@@ -50,6 +85,92 @@ func (q *Queries) CreateSemesterResult(ctx context.Context, arg CreateSemesterRe
 		arg.PublishedAt,
 	)
 	return err
+}
+
+const deleteSemesterResult = `-- name: DeleteSemesterResult :exec
+DELETE FROM semester_results
+WHERE semester_result_id = $1
+`
+
+func (q *Queries) DeleteSemesterResult(ctx context.Context, semesterResultID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSemesterResult, semesterResultID)
+	return err
+}
+
+const getCourseResultsForSGPA = `-- name: GetCourseResultsForSGPA :many
+SELECT
+    co.course_offering_id,
+    c.credits,
+    gs.grade_point,
+    gs.is_passing
+FROM course_results cr
+JOIN course_offerings co ON cr.course_offering_id = co.course_offering_id
+JOIN courses c ON co.course_id = c.course_id
+LEFT JOIN grade_scales gs ON cr.grade_scale_id = gs.grade_scale_id
+WHERE cr.enrollment_id = $1
+  AND co.semester_id = $2
+  AND cr.result_status = 'PUBLISHED'
+`
+
+type GetCourseResultsForSGPAParams struct {
+	EnrollmentID pgtype.UUID `json:"enrollment_id"`
+	SemesterID   pgtype.UUID `json:"semester_id"`
+}
+
+type GetCourseResultsForSGPARow struct {
+	CourseOfferingID pgtype.UUID    `json:"course_offering_id"`
+	Credits          pgtype.Numeric `json:"credits"`
+	GradePoint       pgtype.Numeric `json:"grade_point"`
+	IsPassing        pgtype.Bool    `json:"is_passing"`
+}
+
+func (q *Queries) GetCourseResultsForSGPA(ctx context.Context, arg GetCourseResultsForSGPAParams) ([]GetCourseResultsForSGPARow, error) {
+	rows, err := q.db.Query(ctx, getCourseResultsForSGPA, arg.EnrollmentID, arg.SemesterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetCourseResultsForSGPARow{}
+	for rows.Next() {
+		var i GetCourseResultsForSGPARow
+		if err := rows.Scan(
+			&i.CourseOfferingID,
+			&i.Credits,
+			&i.GradePoint,
+			&i.IsPassing,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSemesterResult = `-- name: GetSemesterResult :one
+SELECT semester_result_id, enrollment_id, semester_id, total_credits, earned_credits, sgpa, result_status, published_at, created_at, updated_at
+FROM semester_results
+WHERE semester_result_id = $1
+`
+
+func (q *Queries) GetSemesterResult(ctx context.Context, semesterResultID pgtype.UUID) (SemesterResult, error) {
+	row := q.db.QueryRow(ctx, getSemesterResult, semesterResultID)
+	var i SemesterResult
+	err := row.Scan(
+		&i.SemesterResultID,
+		&i.EnrollmentID,
+		&i.SemesterID,
+		&i.TotalCredits,
+		&i.EarnedCredits,
+		&i.Sgpa,
+		&i.ResultStatus,
+		&i.PublishedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listSemesterResults = `-- name: ListSemesterResults :many
@@ -87,4 +208,101 @@ func (q *Queries) ListSemesterResults(ctx context.Context) ([]SemesterResult, er
 		return nil, err
 	}
 	return items, nil
+}
+
+const listSemesterResultsPaginated = `-- name: ListSemesterResultsPaginated :many
+SELECT sr.semester_result_id, sr.enrollment_id, sr.semester_id, sr.total_credits, sr.earned_credits, sr.sgpa, sr.result_status, sr.published_at, sr.created_at, sr.updated_at
+FROM semester_results sr
+JOIN student_enrollments se ON sr.enrollment_id = se.enrollment_id
+JOIN semesters s ON sr.semester_id = s.semester_id
+WHERE ($3::text = '' OR sr.semester_id = $3::uuid)
+  AND ($4::text = '' OR se.student_profile_id = $4::uuid)
+  AND ($5::text = '' OR se.program_id = $5::uuid)
+  AND ($6::text = '' OR s.academic_year_id = $6::uuid)
+  AND ($7::text = '' OR sr.result_status = $7::text::result_status)
+ORDER BY sr.created_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListSemesterResultsPaginatedParams struct {
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+	Column6 string `json:"column_6"`
+	Column7 string `json:"column_7"`
+}
+
+func (q *Queries) ListSemesterResultsPaginated(ctx context.Context, arg ListSemesterResultsPaginatedParams) ([]SemesterResult, error) {
+	rows, err := q.db.Query(ctx, listSemesterResultsPaginated,
+		arg.Limit,
+		arg.Offset,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+		arg.Column6,
+		arg.Column7,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SemesterResult{}
+	for rows.Next() {
+		var i SemesterResult
+		if err := rows.Scan(
+			&i.SemesterResultID,
+			&i.EnrollmentID,
+			&i.SemesterID,
+			&i.TotalCredits,
+			&i.EarnedCredits,
+			&i.Sgpa,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateSemesterResult = `-- name: UpdateSemesterResult :exec
+UPDATE semester_results
+SET
+    total_credits = $2,
+    earned_credits = $3,
+    sgpa = $4,
+    result_status = $5,
+    published_at = $6,
+    updated_at = NOW()
+WHERE semester_result_id = $1
+`
+
+type UpdateSemesterResultParams struct {
+	SemesterResultID pgtype.UUID        `json:"semester_result_id"`
+	TotalCredits     pgtype.Numeric     `json:"total_credits"`
+	EarnedCredits    pgtype.Numeric     `json:"earned_credits"`
+	Sgpa             pgtype.Numeric     `json:"sgpa"`
+	ResultStatus     ResultStatus       `json:"result_status"`
+	PublishedAt      pgtype.Timestamptz `json:"published_at"`
+}
+
+func (q *Queries) UpdateSemesterResult(ctx context.Context, arg UpdateSemesterResultParams) error {
+	_, err := q.db.Exec(ctx, updateSemesterResult,
+		arg.SemesterResultID,
+		arg.TotalCredits,
+		arg.EarnedCredits,
+		arg.Sgpa,
+		arg.ResultStatus,
+		arg.PublishedAt,
+	)
+	return err
 }

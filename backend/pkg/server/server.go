@@ -470,6 +470,12 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	semesterResultsGroup := api.Group("/semester-results")
+	semesterResultsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
 	programResultsGroup := api.Group("/program-results")
 
 	courseResultsRepo := courseresults.NewRepository(application.DB)
@@ -1135,6 +1141,7 @@ func New(application *app.Application) *gin.Engine {
 	semesterresults.RegisterRoutes(
 		semesterResultsGroup,
 		semesterResultsHandler,
+		rolePermissionsService,
 	)
 
 	programresults.RegisterRoutes(

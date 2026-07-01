@@ -805,6 +805,7 @@ definitions:
       enrollment_id:
         type: string
       published_at:
+        description: RFC3339 format
         type: string
       result_status:
         type: string
@@ -815,12 +816,48 @@ definitions:
       total_credits:
         type: number
     required:
-    - earned_credits
     - enrollment_id
-    - published_at
+    - result_status
     - semester_id
-    - sgpa
-    - total_credits
+    type: object
+  semesterresults.SemesterResultResponse:
+    properties:
+      created_at:
+        type: string
+      earned_credits:
+        type: number
+      enrollment_id:
+        type: string
+      published_at:
+        type: string
+      result_status:
+        type: string
+      semester_id:
+        type: string
+      semester_result_id:
+        type: string
+      sgpa:
+        type: number
+      total_credits:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  semesterresults.UpdateSemesterResultRequest:
+    properties:
+      earned_credits:
+        type: number
+      published_at:
+        description: RFC3339 format
+        type: string
+      result_status:
+        type: string
+      sgpa:
+        type: number
+      total_credits:
+        type: number
+    required:
+    - result_status
     type: object
   semesters.CreateSemesterRequest:
     properties:
@@ -3376,7 +3413,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a paginated list of semester results
+      description: Retrieve a paginated list of semester results with filtering
       parameters:
       - default: 1
         description: Page number
@@ -3388,13 +3425,40 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filter by Semester ID
+        in: query
+        name: semester_id
+        type: string
+      - description: Filter by Student ID (profile)
+        in: query
+        name: student_id
+        type: string
+      - description: Filter by Program ID
+        in: query
+        name: program_id
+        type: string
+      - description: Filter by Academic Year ID
+        in: query
+        name: academic_year_id
+        type: string
+      - description: Filter by result status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/semesterresults.SemesterResultResponse'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -3411,11 +3475,12 @@ paths:
       - BearerAuth: []
       summary: List Semester Results
       tags:
-      - Semester Results
+      - SemesterResults
     post:
       consumes:
       - application/json
-      description: Record a new semester result details
+      description: Record a new semester result details (calculates SGPA automatically
+        if credits/sgpa are empty)
       parameters:
       - description: Create Semester Result Payload
         in: body
@@ -3442,7 +3507,113 @@ paths:
       - BearerAuth: []
       summary: Create Semester Result
       tags:
-      - Semester Results
+      - SemesterResults
+  /semester-results/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a semester result record
+      parameters:
+      - description: Semester Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Semester Result
+      tags:
+      - SemesterResults
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a single semester result
+      parameters:
+      - description: Semester Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/semesterresults.SemesterResultResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Semester Result
+      tags:
+      - SemesterResults
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing semester result
+      parameters:
+      - description: Semester Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Semester Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/semesterresults.UpdateSemesterResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Semester Result
+      tags:
+      - SemesterResults
   /semesters:
     get:
       consumes:
