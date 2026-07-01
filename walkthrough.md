@@ -22,7 +22,7 @@ We structured the transcripts module in a domain-driven feature capsule matching
   - **Printer-Friendly Styles**: Styled the print layout via Tailwind `print:` classes to generate clean, verified PDF transcripts upon printing (`window.print()`).
 
 ### 🗺 Page Routing (`frontend/app/transcripts/page.tsx`)
-- Configured a dynamic page at `/transcripts`.
+- Configured a page at `/transcripts`.
 - **Role-Based Routing**:
   - **Students**: Automatically looks up the current user's profile matching their email in the student directory, resolving their `student_profile_id` and taking them directly to their transcript dashboard.
   - **Admins / Super Admins**: Renders a student directory search bar. Admins can search by student name, roll number, or program, select the student, and pull up their verified transcript view.
@@ -75,21 +75,54 @@ We structured the exam rooms module in a domain-driven feature capsule matching 
 
 ---
 
+# Module 3: Hall Tickets (Exam Registrations)
+
+We completed the implementation of the **Hall Tickets (Exam Registrations) Management Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and supports registration creation, status modification (Registered, Absent, Disqualified), deletion/cancellation of registrations, paginated lists, and lookups.
+
+## 1. Implemented Features
+
+### 🏢 Exam Registrations Feature Capsule (`frontend/features/exam-registrations`)
+We structured the exam registrations module in a domain-driven feature capsule matching the established repository patterns:
+- **[types/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/types/index.ts)**: Declared types for both raw snake_case backend API responses (`RawExamRegistration`, `ExamRegistrationFilters`, etc.) and mapped camelCase types (`ExamRegistration`, `ExamRegistrationListResponse`, etc.) that hold joined lookup fields.
+- **[schemas/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/schemas/index.ts)**: Created a Zod validation schema (`examRegistrationFormSchema`) to validate exam IDs, student enrollment IDs, and registration status fields on submit.
+- **[constants/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/constants/index.ts)**: Maintained dropdown options for registration status choices (Registered, Absent, Disqualified).
+- **[services/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/services/index.ts)**: Implemented Axios client integrations communicating with real `/exam-registrations` endpoints (`GET /exam-registrations`, `GET /exam-registrations/:id`, `POST /exam-registrations`, `PUT /exam-registrations/:id`, and `DELETE /exam-registrations/:id`). The service automatically resolves student profiles and exam listings in parallel to enrich registrations with candidate names, roll numbers, and examination course schedules.
+- **[hooks/use-exam-registrations.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/hooks/use-exam-registrations.ts)**: Manages load cycles, filter states, drawer triggers, cancellation confirmation modals, and handles async lookup fetching to populate selection widgets.
+- **[components/registration-form/registration-form.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/components/registration-form/registration-form.tsx)**: Form component leveraging React Hook Form. Allows registering a new candidate to an exam by choosing from the loaded list of exams and student enrollments. In edit mode, presents static candidate details and permits updating the registration status.
+- **[components/registration-details/registration-details.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/components/registration-details/registration-details.tsx)**: Renders a high-fidelity digital card designed like an official **Exam Hall Ticket**. Displays candidate details, scheduling data, registration ID, and candidate guidelines with print capability.
+- **[components/registration-list/registration-list-view.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-registrations/components/registration-list/registration-list-view.tsx)**: Main dashboard view integrating paginated lists, filters (Status, Exam, Student), drawer sheets, and cancellation confirmation dialogues.
+
+### 🗺 Page Routing (`frontend/app/exam-registrations/page.tsx`)
+- Configured a route page at `/exam-registrations` implementing standard layout containers and Route guard checks.
+
+### 🧭 Navigation Integration (`frontend/config/navigation.ts`)
+- Added the **Hall Tickets** sidebar item under the Academics section, secured by the `exam_registrations.read` permission gate.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
 ## 3. Walkthrough Layout Mockup
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
 │  AUMS ERP   [Search Bar]                                  [Admin Profile]
 ├────────────────────────────────────────────────────────────────────────┤
-│  Gen       Exam Room Management                                + Add Room│
+│  Gen       Exam Registrations & Hall Tickets           + Register Student│
 │  ├── Dash                                                              │
-│  Acad      [Search building, number...]  Status: [Select] Type: [Select]│
+│  Acad      [Search student, roll...]  Status: [Select] Exam: [Select]  │
 │  ├── Stud  ┌─────────────────────────────────────────────────────────┐ │
-│  ├── Fac   │ Building     │ Room Number │ Capacity │ Type     │ Status   │ │
-│  ├── Exam  ├──────────────┼─────────────┼──────────┼──────────┼──────────┤ │
-│  ├── Room  │ Ramanujan    │ 101         │ 40 seats │ CLASSROOM│ ACTIVE   │ │
-│  └── Tran  │ Science Wing │ LH-02       │ 80 seats │ LECTURE  │ ACTIVE   │ │
-│            └──────────────┴─────────────┴──────────┴──────────┴──────────┘ │
-│  Admin                                    Page 1 of 2  [<] [>]         │
+│  ├── Fac   │ Student Name │ Course    │ Examination │ Status   │ Date    │ │
+│  ├── Hall  ├──────────────┼───────────┼─────────────┼──────────┼─────────┤ │
+│  │  Tckts  │ Jane Doe     │ CS-101    │ Semester    │REGISTERED│7/12/2026│ │
+│  │         │ (2026CS101)  │ (Intro C) │ End Term    │          │         │ │
+│  └── Tran  └──────────────┴───────────┴─────────────┴──────────┴─────────┘ │
+│  Admin                                    Page 1 of 1  [<] [>]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
