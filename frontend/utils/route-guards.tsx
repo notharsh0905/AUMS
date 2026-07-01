@@ -65,3 +65,27 @@ export function RoleRoute({ children, roles }: GuardProps & { roles: string[] })
 
   return <>{children}</>;
 }
+
+export function PermissionRoute({ children, permissions }: GuardProps & { permissions: string[] }) {
+  const { isAuthenticated, isLoading, hasPermission } = useAuth();
+  const router = useRouter();
+
+  const isAuthorized = permissions.every((permission) => hasPermission(permission));
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push(ROUTES.AUTH.LOGIN);
+      } else if (!isAuthorized) {
+        router.push(ROUTES.DASHBOARD.HOME);
+      }
+    }
+  }, [isAuthenticated, isLoading, isAuthorized, router]);
+
+  if (isLoading || !isAuthenticated || !isAuthorized) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
+

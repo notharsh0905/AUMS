@@ -22,6 +22,7 @@ export interface QuickActionData {
   id: string;
   label: string;
   icon: string;
+  href?: string;
   requiredRoles?: string[];
   requiredPermissions?: string[];
 }

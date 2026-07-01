@@ -508,3 +508,68 @@ We created a custom coordinator hook at **[use-admin-dashboard.ts](file:///Users
 │            └──────────────────────────────┘ └─────────────────────────┘ │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+# Module 11: Navigation & RBAC Verification
+
+We successfully completed the **Navigation & RBAC Verification** audit in the AUMS Frontend client on the `feature/frontend-v1` branch. The module secures every page, route, navigation link, action button, and dashboard console click.
+
+## 1. Implemented Features
+
+### 🛡 Route-Level Protections (`route-guards.tsx`)
+- Integrated a new **`PermissionRoute`** wrapper component.
+- Swapped loose wrappers on admin endpoints `/admin/users`, `/admin/roles`, and `/admin/permissions` with role-locked guards restricted to `SUPER_ADMIN`.
+
+### 🔘 Action Button Permission Checks (`student-list-view.tsx`)
+- Restructured `student-list-view` to call `useAuth()` and only mount edit/delete table cell triggers if the user has `'students.update'` and `'students.delete'` permissions.
+- Secured the student register trigger so the button is completely hidden if `'students.create'` permission check fails.
+
+### 🔗 Dashboards Quick Actions Routing (`quick-actions.tsx`)
+- Mapped optional routing links `href` to QuickAction console elements. Wrapping is handled dynamically using Next.js client-side `Link`.
+
+### 🌐 Axios API Interceptors Verification (`client.ts`)
+- Verified request token interpolation and response interceptors. The replica handles status code classifications (like `401`, `403`, `404`, `500`) globally, logging users out automatically on session expirations.
+
+---
+
+## 2. Verification & Correctness
+
+- **Release Checklist**: Created release checklist at **[frontend-release-checklist.md](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/docs/frontend-release-checklist.md)**.
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
+# Module 12: End-to-End Workflow Testing & Release Readiness
+
+We successfully completed the **End-to-End Workflow Testing & Release Readiness** validation in the AUMS Frontend client on the `feature/frontend-v1` branch. The audit confirms full role-based workflow compatibility across students, instructors, and university administrators.
+
+## 1. Verified Workflows
+
+### 🎓 Student User Journey
+1. **Login & Dashboard**: Graceful authentication. Redirects to personalized Student Portal displaying Profile details, CGPA/SGPA summary metrics, attendance percentage, and class schedule widgets.
+2. **Attendance & Assignments**: Direct navigation to registered attendance records and homework assignments list tracking submission statuses.
+3. **Exam Registration & Hall Tickets**: Students can verify exam registrations and view/print issued hall tickets.
+4. **Academic results & transcripts**: Review published course-results feed, semester-level SGPA lists, program CGPA indices, and generate official academic transcript document sheets.
+
+### 🏫 Faculty User Journey
+1. **Login & Dashboard**: Mounts the Faculty Portal displaying assigned course offerings, active weekly slots, and review queues.
+2. **Timetables & Attendance**: View active weekly lecture timetable slots and launch student attendance marking panels.
+3. **Assignments & Evaluations**: Inspect submission logs, grade student assignments, enter examination marks, and draft results.
+
+### 🔑 Administrator User Journey
+1. **Control Center Dashboard**: Displays global statistics, active academic session details, and Recharts enrollment trends.
+2. **Resource Management**: Fully manages students list, faculty directories, departments, programs, courses, and timetables.
+3. **Assessment Operations**: Sets up examinations schedules, prints hall tickets, manages marks entry queues, and finalizes results publications.
+
+---
+
+## 2. Release Compliance Status
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+- **Recommendation**: **Ready for Release (YES)**.
+

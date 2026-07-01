@@ -82,24 +82,28 @@ export const QUICK_ACTIONS: QuickActionData[] = [
     id: 'add-student',
     label: 'Add Student',
     icon: 'user-plus',
+    href: '/students',
     requiredPermissions: ['students.create'],
   },
   {
     id: 'add-faculty',
     label: 'Add Faculty',
     icon: 'user-cog',
+    href: '/faculty',
     requiredPermissions: ['faculty.create'],
   },
   {
     id: 'create-course',
     label: 'Create Course',
     icon: 'folder-plus',
+    href: '/courses',
     requiredPermissions: ['courses.create'],
   },
   {
     id: 'schedule-exam',
     label: 'Schedule Exam',
     icon: 'award',
+    href: '/examinations',
     requiredRoles: ['SUPER_ADMIN', 'FACULTY'],
   },
 ];

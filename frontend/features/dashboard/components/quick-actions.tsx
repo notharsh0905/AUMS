@@ -5,6 +5,7 @@ import { UserPlus, UserCog, FolderPlus, Award } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RequireRole, RequirePermission } from '@/components/shared/rbac';
+import Link from 'next/link';
 import { QuickActionData } from '../types';
 
 const actionIcons: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -22,9 +23,8 @@ export function QuickActions({ actions }: QuickActionsProps) {
   const renderButton = (action: QuickActionData) => {
     const IconComponent = actionIcons[action.icon] || UserPlus;
 
-    return (
+    const btn = (
       <Button
-        key={action.id}
         variant="outline"
         className="flex items-center gap-2.5 justify-start h-11 px-4 text-sm font-medium border-zinc-200 hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900 w-full"
       >
@@ -32,6 +32,16 @@ export function QuickActions({ actions }: QuickActionsProps) {
         <span>{action.label}</span>
       </Button>
     );
+
+    if (action.href) {
+      return (
+        <Link key={action.id} href={action.href} className="w-full block">
+          {btn}
+        </Link>
+      );
+    }
+
+    return <React.Fragment key={action.id}>{btn}</React.Fragment>;
   };
 
   return (
