@@ -11,6 +11,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countProgramResults = `-- name: CountProgramResults :one
+SELECT COUNT(*)
+FROM program_results pr
+JOIN student_enrollments se ON pr.enrollment_id = se.enrollment_id
+WHERE ($1::text = '' OR se.student_profile_id = $1::uuid)
+  AND ($2::text = '' OR se.program_id = $2::uuid)
+  AND ($3::text = '' OR se.enrollment_number LIKE '%' || $3::text || '%' OR EXTRACT(YEAR FROM se.enrollment_date)::text = $3::text)
+  AND ($4::text = '' OR pr.result_status = $4::text::result_status)
+`
+
+type CountProgramResultsParams struct {
+	Column1 string `json:"column_1"`
+	Column2 string `json:"column_2"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+}
+
+func (q *Queries) CountProgramResults(ctx context.Context, arg CountProgramResultsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countProgramResults,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createProgramResult = `-- name: CreateProgramResult :exec
 INSERT INTO program_results (
     program_result_id,
@@ -21,10 +50,12 @@ INSERT INTO program_results (
     degree_completed,
     completion_date,
     result_status,
-    published_at
+    published_at,
+    created_at,
+    updated_at
 )
 VALUES (
-    $1,$2,$3,$4,$5,$6,$7,$8,$9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()
 )
 `
 
@@ -53,6 +84,77 @@ func (q *Queries) CreateProgramResult(ctx context.Context, arg CreateProgramResu
 		arg.PublishedAt,
 	)
 	return err
+}
+
+const deleteProgramResult = `-- name: DeleteProgramResult :exec
+DELETE FROM program_results
+WHERE program_result_id = $1
+`
+
+func (q *Queries) DeleteProgramResult(ctx context.Context, programResultID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteProgramResult, programResultID)
+	return err
+}
+
+const getProgramResult = `-- name: GetProgramResult :one
+SELECT program_result_id, enrollment_id, cgpa, total_credits, earned_credits, degree_completed, completion_date, result_status, published_at, created_at, updated_at
+FROM program_results
+WHERE program_result_id = $1
+`
+
+func (q *Queries) GetProgramResult(ctx context.Context, programResultID pgtype.UUID) (ProgramResult, error) {
+	row := q.db.QueryRow(ctx, getProgramResult, programResultID)
+	var i ProgramResult
+	err := row.Scan(
+		&i.ProgramResultID,
+		&i.EnrollmentID,
+		&i.Cgpa,
+		&i.TotalCredits,
+		&i.EarnedCredits,
+		&i.DegreeCompleted,
+		&i.CompletionDate,
+		&i.ResultStatus,
+		&i.PublishedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getSemesterResultsForCGPA = `-- name: GetSemesterResultsForCGPA :many
+SELECT
+    earned_credits,
+    total_credits,
+    sgpa
+FROM semester_results
+WHERE enrollment_id = $1
+  AND result_status = 'PUBLISHED'
+`
+
+type GetSemesterResultsForCGPARow struct {
+	EarnedCredits pgtype.Numeric `json:"earned_credits"`
+	TotalCredits  pgtype.Numeric `json:"total_credits"`
+	Sgpa          pgtype.Numeric `json:"sgpa"`
+}
+
+func (q *Queries) GetSemesterResultsForCGPA(ctx context.Context, enrollmentID pgtype.UUID) ([]GetSemesterResultsForCGPARow, error) {
+	rows, err := q.db.Query(ctx, getSemesterResultsForCGPA, enrollmentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []GetSemesterResultsForCGPARow{}
+	for rows.Next() {
+		var i GetSemesterResultsForCGPARow
+		if err := rows.Scan(&i.EarnedCredits, &i.TotalCredits, &i.Sgpa); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listProgramResults = `-- name: ListProgramResults :many
@@ -91,4 +193,104 @@ func (q *Queries) ListProgramResults(ctx context.Context) ([]ProgramResult, erro
 		return nil, err
 	}
 	return items, nil
+}
+
+const listProgramResultsPaginated = `-- name: ListProgramResultsPaginated :many
+SELECT pr.program_result_id, pr.enrollment_id, pr.cgpa, pr.total_credits, pr.earned_credits, pr.degree_completed, pr.completion_date, pr.result_status, pr.published_at, pr.created_at, pr.updated_at
+FROM program_results pr
+JOIN student_enrollments se ON pr.enrollment_id = se.enrollment_id
+WHERE ($3::text = '' OR se.student_profile_id = $3::uuid)
+  AND ($4::text = '' OR se.program_id = $4::uuid)
+  AND ($5::text = '' OR se.enrollment_number LIKE '%' || $5::text || '%' OR EXTRACT(YEAR FROM se.enrollment_date)::text = $5::text)
+  AND ($6::text = '' OR pr.result_status = $6::text::result_status)
+ORDER BY pr.created_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListProgramResultsPaginatedParams struct {
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+	Column6 string `json:"column_6"`
+}
+
+func (q *Queries) ListProgramResultsPaginated(ctx context.Context, arg ListProgramResultsPaginatedParams) ([]ProgramResult, error) {
+	rows, err := q.db.Query(ctx, listProgramResultsPaginated,
+		arg.Limit,
+		arg.Offset,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+		arg.Column6,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ProgramResult{}
+	for rows.Next() {
+		var i ProgramResult
+		if err := rows.Scan(
+			&i.ProgramResultID,
+			&i.EnrollmentID,
+			&i.Cgpa,
+			&i.TotalCredits,
+			&i.EarnedCredits,
+			&i.DegreeCompleted,
+			&i.CompletionDate,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateProgramResult = `-- name: UpdateProgramResult :exec
+UPDATE program_results
+SET
+    cgpa = $2,
+    total_credits = $3,
+    earned_credits = $4,
+    degree_completed = $5,
+    completion_date = $6,
+    result_status = $7,
+    published_at = $8,
+    updated_at = NOW()
+WHERE program_result_id = $1
+`
+
+type UpdateProgramResultParams struct {
+	ProgramResultID pgtype.UUID        `json:"program_result_id"`
+	Cgpa            pgtype.Numeric     `json:"cgpa"`
+	TotalCredits    pgtype.Numeric     `json:"total_credits"`
+	EarnedCredits   pgtype.Numeric     `json:"earned_credits"`
+	DegreeCompleted bool               `json:"degree_completed"`
+	CompletionDate  pgtype.Date        `json:"completion_date"`
+	ResultStatus    ResultStatus       `json:"result_status"`
+	PublishedAt     pgtype.Timestamptz `json:"published_at"`
+}
+
+func (q *Queries) UpdateProgramResult(ctx context.Context, arg UpdateProgramResultParams) error {
+	_, err := q.db.Exec(ctx, updateProgramResult,
+		arg.ProgramResultID,
+		arg.Cgpa,
+		arg.TotalCredits,
+		arg.EarnedCredits,
+		arg.DegreeCompleted,
+		arg.CompletionDate,
+		arg.ResultStatus,
+		arg.PublishedAt,
+	)
+	return err
 }
