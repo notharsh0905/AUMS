@@ -126,3 +126,57 @@ We structured the exam registrations module in a domain-driven feature capsule m
 │  Admin                                    Page 1 of 1  [<] [>]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+# Module 4: Exam Attempts (Marks Entry)
+
+We completed the implementation of the **Exam Attempts (Marks Entry) Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and supports full CRUD capabilities (List, View, Record, Edit, and Delete marks entries) along with pagination, search, and dynamic status/exam filtering.
+
+## 1. Implemented Features
+
+### 🏢 Exam Attempts Feature Capsule (`frontend/features/exam-attempts`)
+We structured the exam attempts module in a domain-driven feature capsule matching the established repository patterns:
+- **[types/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/types/index.ts)**: Declared types for both raw snake_case backend API responses (`RawExamAttempt`, `ExamAttemptFilters`, etc.) and mapped camelCase types (`ExamAttempt`, `ExamAttemptListResponse`, etc.) that hold joined lookup fields.
+- **[schemas/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/schemas/index.ts)**: Created a Zod validation schema (`marksEntryFormSchema`) to validate attempt number, internal marks, external marks, evaluator UUID, and evaluation dates.
+- **[constants/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/constants/index.ts)**: Maintained query keys for exam attempts.
+- **[services/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/services/index.ts)**: Implemented Axios client integrations communicating with real `/exam-attempts` endpoints (`GET /exam-attempts`, `GET /exam-attempts/:id`, `POST /exam-attempts`, `PUT /exam-attempts/:id`, and `DELETE /exam-attempts/:id`). The service automatically resolves student profiles, exam listings, and faculty evaluators in parallel to enrich attempts with candidate names, roll numbers, evaluator names, and maximum marks values. In addition, it supports parsing and formatting the internal/external marks breakdown inside the `remarks` field using a specialized regex parser `[Internal: X, External: Y]` to persist the split marks on the backend.
+- **[hooks/use-exam-attempts.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/hooks/use-exam-attempts.ts)**: Manages load cycles, page indices, search metrics, select parameters, form drawers, and deletion confirmation dialogs.
+- **[components/marks-entry-form/marks-entry-form.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/components/marks-entry-form/marks-entry-form.tsx)**: Form component leveraging React Hook Form. Features input validation that prevents total marks from exceeding maximum exam marks. Real-time dynamic calculator sums internal assessment marks and external exam marks, rendering an active status badge (PASS / FAIL) based on the exam's passing thresholds.
+- **[components/attempt-details/attempt-details.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/components/attempt-details/attempt-details.tsx)**: Renders a structured read-only card of a student's marks logs, including visual metrics of the internal/external marks breakdown, evaluator data, and pass/fail indicators.
+- **[components/attempt-list/attempt-list-view.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/exam-attempts/components/attempt-list/attempt-list-view.tsx)**: Main dashboard view integrating paginated lists, filters (Status, Exam), drawer sheets, and deletion confirmation dialogs.
+
+### 🗺 Page Routing (`frontend/app/exam-attempts/page.tsx`)
+- Configured a route page at `/exam-attempts` implementing standard layout containers and Route guard checks.
+
+### 🧭 Navigation Integration (`frontend/config/navigation.ts`)
+- Added the **Marks Entry** sidebar item under the Academics section, secured by the `exam_attempts.read` permission gate.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
+## 3. Walkthrough Layout Mockup
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  AUMS ERP   [Search Bar]                                  [Admin Profile]
+├────────────────────────────────────────────────────────────────────────┤
+│  Gen       Marks Entry & Evaluations                       + Record Marks│
+│  ├── Dash                                                              │
+│  Acad      [Search student, roll...]  Reg Status: [Select] Exam: [Select]│
+│  ├── Stud  ┌─────────────────────────────────────────────────────────┐ │
+│  ├── Fac   │ Student Name │ Course / Exam │ Attempt   │ Marks  │ Result  │ │
+│  ├── Marks ├──────────────┼───────────────┼───────────┼────────┼─────────┤ │
+│  │  Entry  │ Jane Doe     │ CS-101 - Sem  │ Attempt #1│ 85/100 │  PASS   │ │
+│  │         │ (2026CS101)  │ End Term      │           │        │         │ │
+│  └── Tran  └──────────────┴───────────────┴───────────┴────────┴─────────┘ │
+│  Admin                                    Page 1 of 1  [<] [>]         │
+└────────────────────────────────────────────────────────────────────────┘
+```
