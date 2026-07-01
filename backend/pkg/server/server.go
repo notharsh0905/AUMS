@@ -477,6 +477,11 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	programResultsGroup := api.Group("/program-results")
+	programResultsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
 
 	courseResultsRepo := courseresults.NewRepository(application.DB)
 	courseResultsService := courseresults.NewService(courseResultsRepo)
@@ -1147,6 +1152,7 @@ func New(application *app.Application) *gin.Engine {
 	programresults.RegisterRoutes(
 		programResultsGroup,
 		programResultsHandler,
+		rolePermissionsService,
 	)
 	// ==========================================
 	// AUTH MODULE

@@ -668,6 +668,7 @@ definitions:
       cgpa:
         type: number
       completion_date:
+        description: YYYY-MM-DD
         type: string
       degree_completed:
         type: boolean
@@ -676,18 +677,71 @@ definitions:
       enrollment_id:
         type: string
       published_at:
+        description: RFC3339 format
         type: string
       result_status:
         type: string
       total_credits:
         type: number
     required:
-    - cgpa
-    - completion_date
-    - earned_credits
     - enrollment_id
-    - published_at
-    - total_credits
+    - result_status
+    type: object
+  programresults.ProgramResultResponse:
+    properties:
+      academic_standing:
+        type: string
+      cgpa:
+        type: number
+      completion_date:
+        type: string
+      created_at:
+        type: string
+      credits_remaining:
+        type: number
+      degree_classification:
+        type: string
+      degree_completed:
+        type: boolean
+      earned_credits:
+        type: number
+      enrollment_id:
+        type: string
+      graduation_eligibility:
+        type: string
+      overall_percentage:
+        type: number
+      program_result_id:
+        type: string
+      published_at:
+        type: string
+      result_status:
+        type: string
+      total_credits:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  programresults.UpdateProgramResultRequest:
+    properties:
+      cgpa:
+        type: number
+      completion_date:
+        description: YYYY-MM-DD
+        type: string
+      degree_completed:
+        type: boolean
+      earned_credits:
+        type: number
+      published_at:
+        description: RFC3339 format
+        type: string
+      result_status:
+        type: string
+      total_credits:
+        type: number
+    required:
+    - result_status
     type: object
   programs.CreateProgramRequest:
     properties:
@@ -3024,7 +3078,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a paginated list of program results
+      description: Retrieve a paginated list of program results with filtering
       parameters:
       - default: 1
         description: Page number
@@ -3036,13 +3090,36 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filter by Student ID (profile)
+        in: query
+        name: student_id
+        type: string
+      - description: Filter by Program ID
+        in: query
+        name: program_id
+        type: string
+      - description: Filter by Admission Year or enrollment substring
+        in: query
+        name: batch
+        type: string
+      - description: Filter by result status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/programresults.ProgramResultResponse'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -3059,11 +3136,12 @@ paths:
       - BearerAuth: []
       summary: List Program Results
       tags:
-      - Program Results
+      - ProgramResults
     post:
       consumes:
       - application/json
-      description: Record a new program result details
+      description: Record a new program result (calculates CGPA/Credits automatically
+        if values are empty)
       parameters:
       - description: Create Program Result Payload
         in: body
@@ -3090,7 +3168,113 @@ paths:
       - BearerAuth: []
       summary: Create Program Result
       tags:
-      - Program Results
+      - ProgramResults
+  /program-results/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a program result record
+      parameters:
+      - description: Program Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Program Result
+      tags:
+      - ProgramResults
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a single program result
+      parameters:
+      - description: Program Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/programresults.ProgramResultResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Program Result
+      tags:
+      - ProgramResults
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing program result
+      parameters:
+      - description: Program Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Program Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/programresults.UpdateProgramResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Program Result
+      tags:
+      - ProgramResults
   /programs:
     get:
       consumes:

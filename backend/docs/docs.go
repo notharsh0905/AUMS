@@ -3121,7 +3121,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a paginated list of program results",
+                "description": "Retrieve a paginated list of program results with filtering",
                 "consumes": [
                     "application/json"
                 ],
@@ -3129,7 +3129,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Program Results"
+                    "ProgramResults"
                 ],
                 "summary": "List Program Results",
                 "parameters": [
@@ -3146,13 +3146,52 @@ const docTemplate = `{
                         "description": "Page size",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Student ID (profile)",
+                        "name": "student_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Program ID",
+                        "name": "program_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Admission Year or enrollment substring",
+                        "name": "batch",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by result status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/programresults.ProgramResultResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3181,7 +3220,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Record a new program result details",
+                "description": "Record a new program result (calculates CGPA/Credits automatically if values are empty)",
                 "consumes": [
                     "application/json"
                 ],
@@ -3189,7 +3228,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Program Results"
+                    "ProgramResults"
                 ],
                 "summary": "Create Program Result",
                 "parameters": [
@@ -3206,6 +3245,176 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/program-results/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single program result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProgramResults"
+                ],
+                "summary": "Get Program Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Program Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/programresults.ProgramResultResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update details of an existing program result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProgramResults"
+                ],
+                "summary": "Update Program Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Program Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Program Result Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/programresults.UpdateProgramResultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a program result record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ProgramResults"
+                ],
+                "summary": "Delete Program Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Program Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.SuccessResponse"
                         }
@@ -5821,18 +6030,15 @@ const docTemplate = `{
         "programresults.CreateProgramResultRequest": {
             "type": "object",
             "required": [
-                "cgpa",
-                "completion_date",
-                "earned_credits",
                 "enrollment_id",
-                "published_at",
-                "total_credits"
+                "result_status"
             ],
             "properties": {
                 "cgpa": {
                     "type": "number"
                 },
                 "completion_date": {
+                    "description": "YYYY-MM-DD",
                     "type": "string"
                 },
                 "degree_completed": {
@@ -5845,6 +6051,91 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "published_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "total_credits": {
+                    "type": "number"
+                }
+            }
+        },
+        "programresults.ProgramResultResponse": {
+            "type": "object",
+            "properties": {
+                "academic_standing": {
+                    "type": "string"
+                },
+                "cgpa": {
+                    "type": "number"
+                },
+                "completion_date": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "credits_remaining": {
+                    "type": "number"
+                },
+                "degree_classification": {
+                    "type": "string"
+                },
+                "degree_completed": {
+                    "type": "boolean"
+                },
+                "earned_credits": {
+                    "type": "number"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "graduation_eligibility": {
+                    "type": "string"
+                },
+                "overall_percentage": {
+                    "type": "number"
+                },
+                "program_result_id": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "total_credits": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "programresults.UpdateProgramResultRequest": {
+            "type": "object",
+            "required": [
+                "result_status"
+            ],
+            "properties": {
+                "cgpa": {
+                    "type": "number"
+                },
+                "completion_date": {
+                    "description": "YYYY-MM-DD",
+                    "type": "string"
+                },
+                "degree_completed": {
+                    "type": "boolean"
+                },
+                "earned_credits": {
+                    "type": "number"
+                },
+                "published_at": {
+                    "description": "RFC3339 format",
                     "type": "string"
                 },
                 "result_status": {

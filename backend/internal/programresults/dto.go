@@ -1,20 +1,41 @@
 package programresults
 
-// CreateProgramResultRequest represents the request payload to record a program result.
 type CreateProgramResultRequest struct {
-	EnrollmentID string `json:"enrollment_id" validate:"required,uuid"`
+	EnrollmentID    string  `json:"enrollment_id" validate:"required,uuid"`
+	Cgpa            float64 `json:"cgpa"`
+	TotalCredits    float64 `json:"total_credits"`
+	EarnedCredits   float64 `json:"earned_credits"`
+	DegreeCompleted bool    `json:"degree_completed"`
+	CompletionDate  string  `json:"completion_date"` // YYYY-MM-DD
+	ResultStatus    string  `json:"result_status" validate:"required"`
+	PublishedAt     string  `json:"published_at"` // RFC3339 format
+}
 
-	Cgpa float64 `json:"cgpa" validate:"required"`
+type UpdateProgramResultRequest struct {
+	Cgpa            float64 `json:"cgpa"`
+	TotalCredits    float64 `json:"total_credits"`
+	EarnedCredits   float64 `json:"earned_credits"`
+	DegreeCompleted bool    `json:"degree_completed"`
+	CompletionDate  string  `json:"completion_date"` // YYYY-MM-DD
+	ResultStatus    string  `json:"result_status" validate:"required"`
+	PublishedAt     string  `json:"published_at"` // RFC3339 format
+}
 
-	TotalCredits float64 `json:"total_credits" validate:"required"`
-
-	EarnedCredits float64 `json:"earned_credits" validate:"required"`
-
-	DegreeCompleted bool `json:"degree_completed"`
-
-	CompletionDate string `json:"completion_date" validate:"required"`
-
-	ResultStatus string `json:"result_status"`
-
-	PublishedAt string `json:"published_at" validate:"required"`
+type ProgramResultResponse struct {
+	ProgramResultID       string  `json:"program_result_id"`
+	EnrollmentID          string  `json:"enrollment_id"`
+	Cgpa                  float64 `json:"cgpa"`
+	TotalCredits          float64 `json:"total_credits"`
+	EarnedCredits         float64 `json:"earned_credits"`
+	CreditsRemaining      float64 `json:"credits_remaining"`
+	OverallPercentage     float64 `json:"overall_percentage"`
+	DegreeClassification  string  `json:"degree_classification"`
+	GraduationEligibility string  `json:"graduation_eligibility"`
+	AcademicStanding      string  `json:"academic_standing"`
+	DegreeCompleted       bool    `json:"degree_completed"`
+	CompletionDate        string  `json:"completion_date"`
+	ResultStatus          string  `json:"result_status"`
+	PublishedAt           string  `json:"published_at"`
+	CreatedAt             string  `json:"created_at"`
+	UpdatedAt             string  `json:"updated_at"`
 }
