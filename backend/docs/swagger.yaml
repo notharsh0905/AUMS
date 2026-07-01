@@ -215,9 +215,13 @@ definitions:
     - course_id
     - semester_id
     type: object
-  courseresults.CreateCourseResultRequest:
+  courseresults.CourseResultResponse:
     properties:
       course_offering_id:
+        type: string
+      course_result_id:
+        type: string
+      created_at:
         type: string
       enrollment_id:
         type: string
@@ -233,6 +237,31 @@ definitions:
         type: string
       total_marks:
         type: number
+      updated_at:
+        type: string
+    type: object
+  courseresults.CreateCourseResultRequest:
+    properties:
+      course_offering_id:
+        type: string
+      enrollment_id:
+        type: string
+      grade_scale_id:
+        type: string
+      marks_obtained:
+        minimum: 0
+        type: number
+      percentage:
+        maximum: 100
+        minimum: 0
+        type: number
+      published_at:
+        description: RFC3339 format
+        type: string
+      result_status:
+        type: string
+      total_marks:
+        type: number
     required:
     - course_offering_id
     - enrollment_id
@@ -240,6 +269,33 @@ definitions:
     - marks_obtained
     - percentage
     - published_at
+    - result_status
+    - total_marks
+    type: object
+  courseresults.UpdateCourseResultRequest:
+    properties:
+      grade_scale_id:
+        type: string
+      marks_obtained:
+        minimum: 0
+        type: number
+      percentage:
+        maximum: 100
+        minimum: 0
+        type: number
+      published_at:
+        description: RFC3339 format
+        type: string
+      result_status:
+        type: string
+      total_marks:
+        type: number
+    required:
+    - grade_scale_id
+    - marks_obtained
+    - percentage
+    - published_at
+    - result_status
     - total_marks
     type: object
   courses.CreateCourseRequest:
@@ -1591,7 +1647,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve a paginated list of course results
+      description: Retrieve a paginated list of course results with filtering
       parameters:
       - default: 1
         description: Page number
@@ -1603,13 +1659,32 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filter by Enrollment ID
+        in: query
+        name: enrollment_id
+        type: string
+      - description: Filter by Course Offering ID
+        in: query
+        name: course_offering_id
+        type: string
+      - description: Filter by result status
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/courseresults.CourseResultResponse'
+                  type: array
+              type: object
         "400":
           description: Bad Request
           schema:
@@ -1626,7 +1701,7 @@ paths:
       - BearerAuth: []
       summary: List Course Results
       tags:
-      - Course Results
+      - CourseResults
     post:
       consumes:
       - application/json
@@ -1657,7 +1732,113 @@ paths:
       - BearerAuth: []
       summary: Create Course Result
       tags:
-      - Course Results
+      - CourseResults
+  /course-results/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course result record
+      parameters:
+      - description: Course Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Course Result
+      tags:
+      - CourseResults
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a single course result
+      parameters:
+      - description: Course Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/courseresults.CourseResultResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Course Result
+      tags:
+      - CourseResults
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing course result
+      parameters:
+      - description: Course Result ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Course Result Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/courseresults.UpdateCourseResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Course Result
+      tags:
+      - CourseResults
   /courses:
     get:
       consumes:

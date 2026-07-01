@@ -463,6 +463,12 @@ func New(application *app.Application) *gin.Engine {
 		)
 
 	courseResultsGroup := api.Group("/course-results")
+	courseResultsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
 	semesterResultsGroup := api.Group("/semester-results")
 	programResultsGroup := api.Group("/program-results")
 
@@ -1123,6 +1129,7 @@ func New(application *app.Application) *gin.Engine {
 	courseresults.RegisterRoutes(
 		courseResultsGroup,
 		courseResultsHandler,
+		rolePermissionsService,
 	)
 
 	semesterresults.RegisterRoutes(

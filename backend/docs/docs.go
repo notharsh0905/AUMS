@@ -990,7 +990,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a paginated list of course results",
+                "description": "Retrieve a paginated list of course results with filtering",
                 "consumes": [
                     "application/json"
                 ],
@@ -998,7 +998,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Course Results"
+                    "CourseResults"
                 ],
                 "summary": "List Course Results",
                 "parameters": [
@@ -1015,13 +1015,46 @@ const docTemplate = `{
                         "description": "Page size",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Enrollment ID",
+                        "name": "enrollment_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Course Offering ID",
+                        "name": "course_offering_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by result status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/courseresults.CourseResultResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1058,7 +1091,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Course Results"
+                    "CourseResults"
                 ],
                 "summary": "Create Course Result",
                 "parameters": [
@@ -1075,6 +1108,176 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/course-results/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single course result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CourseResults"
+                ],
+                "summary": "Get Course Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/courseresults.CourseResultResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update details of an existing course result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CourseResults"
+                ],
+                "summary": "Update Course Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Course Result Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/courseresults.UpdateCourseResultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a course result record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CourseResults"
+                ],
+                "summary": "Delete Course Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.SuccessResponse"
                         }
@@ -4755,19 +4958,16 @@ const docTemplate = `{
                 }
             }
         },
-        "courseresults.CreateCourseResultRequest": {
+        "courseresults.CourseResultResponse": {
             "type": "object",
-            "required": [
-                "course_offering_id",
-                "enrollment_id",
-                "grade_scale_id",
-                "marks_obtained",
-                "percentage",
-                "published_at",
-                "total_marks"
-            ],
             "properties": {
                 "course_offering_id": {
+                    "type": "string"
+                },
+                "course_result_id": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "enrollment_id": {
@@ -4783,6 +4983,87 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "published_at": {
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "total_marks": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "courseresults.CreateCourseResultRequest": {
+            "type": "object",
+            "required": [
+                "course_offering_id",
+                "enrollment_id",
+                "grade_scale_id",
+                "marks_obtained",
+                "percentage",
+                "published_at",
+                "result_status",
+                "total_marks"
+            ],
+            "properties": {
+                "course_offering_id": {
+                    "type": "string"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "grade_scale_id": {
+                    "type": "string"
+                },
+                "marks_obtained": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "percentage": {
+                    "type": "number",
+                    "maximum": 100,
+                    "minimum": 0
+                },
+                "published_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "total_marks": {
+                    "type": "number"
+                }
+            }
+        },
+        "courseresults.UpdateCourseResultRequest": {
+            "type": "object",
+            "required": [
+                "grade_scale_id",
+                "marks_obtained",
+                "percentage",
+                "published_at",
+                "result_status",
+                "total_marks"
+            ],
+            "properties": {
+                "grade_scale_id": {
+                    "type": "string"
+                },
+                "marks_obtained": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "percentage": {
+                    "type": "number",
+                    "maximum": 100,
+                    "minimum": 0
+                },
+                "published_at": {
+                    "description": "RFC3339 format",
                     "type": "string"
                 },
                 "result_status": {
