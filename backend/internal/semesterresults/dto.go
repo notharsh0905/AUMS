@@ -1,18 +1,32 @@
 package semesterresults
 
-// CreateSemesterResultRequest represents the request payload to record a semester result.
 type CreateSemesterResultRequest struct {
-	EnrollmentID string `json:"enrollment_id" validate:"required,uuid"`
+	EnrollmentID  string  `json:"enrollment_id" validate:"required,uuid"`
+	SemesterID    string  `json:"semester_id" validate:"required,uuid"`
+	TotalCredits  float64 `json:"total_credits"`
+	EarnedCredits float64 `json:"earned_credits"`
+	Sgpa          float64 `json:"sgpa"`
+	ResultStatus  string  `json:"result_status" validate:"required"`
+	PublishedAt   string  `json:"published_at"` // RFC3339 format
+}
 
-	SemesterID string `json:"semester_id" validate:"required,uuid"`
+type UpdateSemesterResultRequest struct {
+	TotalCredits  float64 `json:"total_credits"`
+	EarnedCredits float64 `json:"earned_credits"`
+	Sgpa          float64 `json:"sgpa"`
+	ResultStatus  string  `json:"result_status" validate:"required"`
+	PublishedAt   string  `json:"published_at"` // RFC3339 format
+}
 
-	TotalCredits float64 `json:"total_credits" validate:"required"`
-
-	EarnedCredits float64 `json:"earned_credits" validate:"required"`
-
-	Sgpa float64 `json:"sgpa" validate:"required"`
-
-	ResultStatus string `json:"result_status"`
-
-	PublishedAt string `json:"published_at" validate:"required"`
+type SemesterResultResponse struct {
+	SemesterResultID string  `json:"semester_result_id"`
+	EnrollmentID     string  `json:"enrollment_id"`
+	SemesterID       string  `json:"semester_id"`
+	TotalCredits     float64 `json:"total_credits"`
+	EarnedCredits    float64 `json:"earned_credits"`
+	Sgpa             float64 `json:"sgpa"`
+	ResultStatus     string  `json:"result_status"`
+	PublishedAt      string  `json:"published_at"`
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }

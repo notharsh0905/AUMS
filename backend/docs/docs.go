@@ -3740,7 +3740,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a paginated list of semester results",
+                "description": "Retrieve a paginated list of semester results with filtering",
                 "consumes": [
                     "application/json"
                 ],
@@ -3748,7 +3748,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Semester Results"
+                    "SemesterResults"
                 ],
                 "summary": "List Semester Results",
                 "parameters": [
@@ -3765,13 +3765,58 @@ const docTemplate = `{
                         "description": "Page size",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Semester ID",
+                        "name": "semester_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Student ID (profile)",
+                        "name": "student_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Program ID",
+                        "name": "program_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Academic Year ID",
+                        "name": "academic_year_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by result status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/semesterresults.SemesterResultResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -3800,7 +3845,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Record a new semester result details",
+                "description": "Record a new semester result details (calculates SGPA automatically if credits/sgpa are empty)",
                 "consumes": [
                     "application/json"
                 ],
@@ -3808,7 +3853,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Semester Results"
+                    "SemesterResults"
                 ],
                 "summary": "Create Semester Result",
                 "parameters": [
@@ -3825,6 +3870,176 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/semester-results/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single semester result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SemesterResults"
+                ],
+                "summary": "Get Semester Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Semester Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/semesterresults.SemesterResultResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update details of an existing semester result",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SemesterResults"
+                ],
+                "summary": "Update Semester Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Semester Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Semester Result Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/semesterresults.UpdateSemesterResultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete a semester result record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "SemesterResults"
+                ],
+                "summary": "Delete Semester Result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Semester Result ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.SuccessResponse"
                         }
@@ -5805,14 +6020,41 @@ const docTemplate = `{
         "semesterresults.CreateSemesterResultRequest": {
             "type": "object",
             "required": [
-                "earned_credits",
                 "enrollment_id",
-                "published_at",
-                "semester_id",
-                "sgpa",
-                "total_credits"
+                "result_status",
+                "semester_id"
             ],
             "properties": {
+                "earned_credits": {
+                    "type": "number"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "semester_id": {
+                    "type": "string"
+                },
+                "sgpa": {
+                    "type": "number"
+                },
+                "total_credits": {
+                    "type": "number"
+                }
+            }
+        },
+        "semesterresults.SemesterResultResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "earned_credits": {
                     "type": "number"
                 },
@@ -5826,6 +6068,36 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "semester_id": {
+                    "type": "string"
+                },
+                "semester_result_id": {
+                    "type": "string"
+                },
+                "sgpa": {
+                    "type": "number"
+                },
+                "total_credits": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "semesterresults.UpdateSemesterResultRequest": {
+            "type": "object",
+            "required": [
+                "result_status"
+            ],
+            "properties": {
+                "earned_credits": {
+                    "type": "number"
+                },
+                "published_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "result_status": {
                     "type": "string"
                 },
                 "sgpa": {
