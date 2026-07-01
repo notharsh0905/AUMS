@@ -16,7 +16,7 @@ interface BaseFieldProps {
 
 // 1. Text / Email / Password Input Component
 interface FormInputProps extends BaseFieldProps, Omit<React.ComponentProps<typeof Input>, 'name'> {
-  type?: 'text' | 'email' | 'password' | 'number';
+  type?: 'text' | 'email' | 'password' | 'number' | 'date' | 'time';
 }
 
 export function FormInput({ name, label, description, required = false, type = 'text', className, ...props }: FormInputProps) {

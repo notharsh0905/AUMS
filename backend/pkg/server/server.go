@@ -20,6 +20,7 @@ import (
 	"aums/backend/internal/departments"
 	"aums/backend/internal/examattempts"
 	"aums/backend/internal/examregistrations"
+	"aums/backend/internal/examrooms"
 	"aums/backend/internal/exams"
 	"aums/backend/internal/examschedules"
 	"aums/backend/internal/faculty"
@@ -399,6 +400,9 @@ func New(application *app.Application) *gin.Engine {
 	examRepository :=
 		exams.NewRepository(application.DB)
 
+	examRoomRepository :=
+		examrooms.NewRepository(application.DB)
+
 	examScheduleRepository :=
 		examschedules.NewRepository(application.DB)
 
@@ -411,6 +415,11 @@ func New(application *app.Application) *gin.Engine {
 	examService :=
 		exams.NewService(
 			examRepository,
+		)
+
+	examRoomService :=
+		examrooms.NewService(
+			examRoomRepository,
 		)
 
 	examScheduleService :=
@@ -431,6 +440,11 @@ func New(application *app.Application) *gin.Engine {
 	examHandler :=
 		exams.NewHandler(
 			examService,
+		)
+
+	examRoomHandler :=
+		examrooms.NewHandler(
+			examRoomService,
 		)
 
 	examScheduleHandler :=
@@ -1061,6 +1075,12 @@ func New(application *app.Application) *gin.Engine {
 	exams.RegisterRoutes(
 		api.Group("/exams"),
 		examHandler,
+	)
+
+	examrooms.RegisterRoutes(
+		api.Group("/exam-rooms"),
+		examRoomHandler,
+		rolePermissionsService,
 	)
 
 	examschedules.RegisterRoutes(

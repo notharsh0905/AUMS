@@ -326,6 +326,112 @@ definitions:
     - enrollment_id
     - exam_id
     type: object
+  examrooms.CreateExamRoomRequest:
+    properties:
+      block:
+        type: string
+      building:
+        type: string
+      capacity:
+        minimum: 1
+        type: integer
+      floor:
+        minimum: 0
+        type: integer
+      has_ac:
+        type: boolean
+      has_projector:
+        type: boolean
+      institution_id:
+        type: string
+      room_name:
+        type: string
+      room_number:
+        type: string
+      room_type:
+        type: string
+      status:
+        type: string
+      wheelchair_accessible:
+        type: boolean
+    required:
+    - building
+    - capacity
+    - floor
+    - institution_id
+    - room_name
+    - room_number
+    - room_type
+    - status
+    type: object
+  examrooms.ExamRoomResponse:
+    properties:
+      block:
+        type: string
+      building:
+        type: string
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      exam_room_id:
+        type: string
+      floor:
+        type: integer
+      has_ac:
+        type: boolean
+      has_projector:
+        type: boolean
+      institution_id:
+        type: string
+      room_name:
+        type: string
+      room_number:
+        type: string
+      room_type:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      wheelchair_accessible:
+        type: boolean
+    type: object
+  examrooms.UpdateExamRoomRequest:
+    properties:
+      block:
+        type: string
+      building:
+        type: string
+      capacity:
+        minimum: 1
+        type: integer
+      floor:
+        minimum: 0
+        type: integer
+      has_ac:
+        type: boolean
+      has_projector:
+        type: boolean
+      room_name:
+        type: string
+      room_number:
+        type: string
+      room_type:
+        type: string
+      status:
+        type: string
+      wheelchair_accessible:
+        type: boolean
+    required:
+    - building
+    - capacity
+    - floor
+    - room_name
+    - room_number
+    - room_type
+    - status
+    type: object
   exams.CreateExamRequest:
     properties:
       course_offering_id:
@@ -1778,6 +1884,203 @@ paths:
       summary: Create Exam Registration
       tags:
       - Exam Registrations
+  /exam-rooms:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of exam rooms with optional filtering
+        and search
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: limit
+        type: integer
+      - description: Search by building, room number or name
+        in: query
+        name: search
+        type: string
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by room type
+        in: query
+        name: room_type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/examrooms.ExamRoomResponse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List Exam Rooms
+      tags:
+      - ExamRooms
+    post:
+      consumes:
+      - application/json
+      description: Create a new exam room profile
+      parameters:
+      - description: Create Exam Room Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examrooms.CreateExamRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create Exam Room
+      tags:
+      - ExamRooms
+  /exam-rooms/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Soft delete an exam room
+      parameters:
+      - description: Exam Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete Exam Room
+      tags:
+      - ExamRooms
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a single exam room
+      parameters:
+      - description: Exam Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/examrooms.ExamRoomResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Exam Room
+      tags:
+      - ExamRooms
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing exam room
+      parameters:
+      - description: Exam Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Exam Room Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/examrooms.UpdateExamRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update Exam Room
+      tags:
+      - ExamRooms
   /exam-schedules:
     get:
       consumes:

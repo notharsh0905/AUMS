@@ -1553,6 +1553,320 @@ const docTemplate = `{
                 }
             }
         },
+        "/exam-rooms": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a paginated list of exam rooms with optional filtering and search",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamRooms"
+                ],
+                "summary": "List Exam Rooms",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Page size",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by building, room number or name",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by room type",
+                        "name": "room_type",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/examrooms.ExamRoomResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Create a new exam room profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamRooms"
+                ],
+                "summary": "Create Exam Room",
+                "parameters": [
+                    {
+                        "description": "Create Exam Room Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/examrooms.CreateExamRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/exam-rooms/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single exam room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamRooms"
+                ],
+                "summary": "Get Exam Room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/examrooms.ExamRoomResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update details of an existing exam room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamRooms"
+                ],
+                "summary": "Update Exam Room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Exam Room Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/examrooms.UpdateExamRoomRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Soft delete an exam room",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamRooms"
+                ],
+                "summary": "Delete Exam Room",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/exam-schedules": {
             "get": {
                 "security": [
@@ -4186,6 +4500,158 @@ const docTemplate = `{
                 },
                 "registration_status": {
                     "type": "string"
+                }
+            }
+        },
+        "examrooms.CreateExamRoomRequest": {
+            "type": "object",
+            "required": [
+                "building",
+                "capacity",
+                "floor",
+                "institution_id",
+                "room_name",
+                "room_number",
+                "room_type",
+                "status"
+            ],
+            "properties": {
+                "block": {
+                    "type": "string"
+                },
+                "building": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "floor": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "has_ac": {
+                    "type": "boolean"
+                },
+                "has_projector": {
+                    "type": "boolean"
+                },
+                "institution_id": {
+                    "type": "string"
+                },
+                "room_name": {
+                    "type": "string"
+                },
+                "room_number": {
+                    "type": "string"
+                },
+                "room_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "wheelchair_accessible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "examrooms.ExamRoomResponse": {
+            "type": "object",
+            "properties": {
+                "block": {
+                    "type": "string"
+                },
+                "building": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "exam_room_id": {
+                    "type": "string"
+                },
+                "floor": {
+                    "type": "integer"
+                },
+                "has_ac": {
+                    "type": "boolean"
+                },
+                "has_projector": {
+                    "type": "boolean"
+                },
+                "institution_id": {
+                    "type": "string"
+                },
+                "room_name": {
+                    "type": "string"
+                },
+                "room_number": {
+                    "type": "string"
+                },
+                "room_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "wheelchair_accessible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "examrooms.UpdateExamRoomRequest": {
+            "type": "object",
+            "required": [
+                "building",
+                "capacity",
+                "floor",
+                "room_name",
+                "room_number",
+                "room_type",
+                "status"
+            ],
+            "properties": {
+                "block": {
+                    "type": "string"
+                },
+                "building": {
+                    "type": "string"
+                },
+                "capacity": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "floor": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "has_ac": {
+                    "type": "boolean"
+                },
+                "has_projector": {
+                    "type": "boolean"
+                },
+                "room_name": {
+                    "type": "string"
+                },
+                "room_number": {
+                    "type": "string"
+                },
+                "room_type": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "wheelchair_accessible": {
+                    "type": "boolean"
                 }
             }
         },

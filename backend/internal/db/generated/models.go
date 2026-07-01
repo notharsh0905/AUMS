@@ -1700,6 +1700,25 @@ type ExamRegistration struct {
 	UpdatedAt          pgtype.Timestamptz     `json:"updated_at"`
 }
 
+type ExamRoom struct {
+	ExamRoomID           pgtype.UUID        `json:"exam_room_id"`
+	Building             string             `json:"building"`
+	RoomNumber           string             `json:"room_number"`
+	RoomName             string             `json:"room_name"`
+	Floor                int32              `json:"floor"`
+	Block                pgtype.Text        `json:"block"`
+	Capacity             int32              `json:"capacity"`
+	RoomType             string             `json:"room_type"`
+	Status               string             `json:"status"`
+	HasProjector         bool               `json:"has_projector"`
+	HasAc                bool               `json:"has_ac"`
+	WheelchairAccessible bool               `json:"wheelchair_accessible"`
+	InstitutionID        pgtype.UUID        `json:"institution_id"`
+	CreatedAt            pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt            pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt            pgtype.Timestamptz `json:"deleted_at"`
+}
+
 type ExamSchedule struct {
 	ExamScheduleID pgtype.UUID        `json:"exam_schedule_id"`
 	ExamID         pgtype.UUID        `json:"exam_id"`
