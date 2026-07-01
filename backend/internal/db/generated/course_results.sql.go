@@ -11,6 +11,27 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countCourseResults = `-- name: CountCourseResults :one
+SELECT COUNT(*)
+FROM course_results
+WHERE ($1::text = '' OR enrollment_id = $1::uuid)
+  AND ($2::text = '' OR course_offering_id = $2::uuid)
+  AND ($3::text = '' OR result_status = $3::text::result_status)
+`
+
+type CountCourseResultsParams struct {
+	Column1 string `json:"column_1"`
+	Column2 string `json:"column_2"`
+	Column3 string `json:"column_3"`
+}
+
+func (q *Queries) CountCourseResults(ctx context.Context, arg CountCourseResultsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countCourseResults, arg.Column1, arg.Column2, arg.Column3)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCourseResult = `-- name: CreateCourseResult :exec
 INSERT INTO course_results (
     course_result_id,
@@ -21,10 +42,12 @@ INSERT INTO course_results (
     percentage,
     grade_scale_id,
     result_status,
-    published_at
+    published_at,
+    created_at,
+    updated_at
 )
 VALUES (
-    $1,$2,$3,$4,$5,$6,$7,$8,$9
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()
 )
 `
 
@@ -53,6 +76,41 @@ func (q *Queries) CreateCourseResult(ctx context.Context, arg CreateCourseResult
 		arg.PublishedAt,
 	)
 	return err
+}
+
+const deleteCourseResult = `-- name: DeleteCourseResult :exec
+DELETE FROM course_results
+WHERE course_result_id = $1
+`
+
+func (q *Queries) DeleteCourseResult(ctx context.Context, courseResultID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteCourseResult, courseResultID)
+	return err
+}
+
+const getCourseResult = `-- name: GetCourseResult :one
+SELECT course_result_id, enrollment_id, course_offering_id, total_marks, marks_obtained, percentage, grade_scale_id, result_status, published_at, created_at, updated_at
+FROM course_results
+WHERE course_result_id = $1
+`
+
+func (q *Queries) GetCourseResult(ctx context.Context, courseResultID pgtype.UUID) (CourseResult, error) {
+	row := q.db.QueryRow(ctx, getCourseResult, courseResultID)
+	var i CourseResult
+	err := row.Scan(
+		&i.CourseResultID,
+		&i.EnrollmentID,
+		&i.CourseOfferingID,
+		&i.TotalMarks,
+		&i.MarksObtained,
+		&i.Percentage,
+		&i.GradeScaleID,
+		&i.ResultStatus,
+		&i.PublishedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listCourseResults = `-- name: ListCourseResults :many
@@ -91,4 +149,97 @@ func (q *Queries) ListCourseResults(ctx context.Context) ([]CourseResult, error)
 		return nil, err
 	}
 	return items, nil
+}
+
+const listCourseResultsPaginated = `-- name: ListCourseResultsPaginated :many
+SELECT course_result_id, enrollment_id, course_offering_id, total_marks, marks_obtained, percentage, grade_scale_id, result_status, published_at, created_at, updated_at
+FROM course_results
+WHERE ($3::text = '' OR enrollment_id = $3::uuid)
+  AND ($4::text = '' OR course_offering_id = $4::uuid)
+  AND ($5::text = '' OR result_status = $5::text::result_status)
+ORDER BY created_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListCourseResultsPaginatedParams struct {
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+}
+
+func (q *Queries) ListCourseResultsPaginated(ctx context.Context, arg ListCourseResultsPaginatedParams) ([]CourseResult, error) {
+	rows, err := q.db.Query(ctx, listCourseResultsPaginated,
+		arg.Limit,
+		arg.Offset,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CourseResult{}
+	for rows.Next() {
+		var i CourseResult
+		if err := rows.Scan(
+			&i.CourseResultID,
+			&i.EnrollmentID,
+			&i.CourseOfferingID,
+			&i.TotalMarks,
+			&i.MarksObtained,
+			&i.Percentage,
+			&i.GradeScaleID,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateCourseResult = `-- name: UpdateCourseResult :exec
+UPDATE course_results
+SET
+    total_marks = $2,
+    marks_obtained = $3,
+    percentage = $4,
+    grade_scale_id = $5,
+    result_status = $6,
+    published_at = $7,
+    updated_at = NOW()
+WHERE course_result_id = $1
+`
+
+type UpdateCourseResultParams struct {
+	CourseResultID pgtype.UUID        `json:"course_result_id"`
+	TotalMarks     pgtype.Numeric     `json:"total_marks"`
+	MarksObtained  pgtype.Numeric     `json:"marks_obtained"`
+	Percentage     pgtype.Numeric     `json:"percentage"`
+	GradeScaleID   pgtype.UUID        `json:"grade_scale_id"`
+	ResultStatus   ResultStatus       `json:"result_status"`
+	PublishedAt    pgtype.Timestamptz `json:"published_at"`
+}
+
+func (q *Queries) UpdateCourseResult(ctx context.Context, arg UpdateCourseResultParams) error {
+	_, err := q.db.Exec(ctx, updateCourseResult,
+		arg.CourseResultID,
+		arg.TotalMarks,
+		arg.MarksObtained,
+		arg.Percentage,
+		arg.GradeScaleID,
+		arg.ResultStatus,
+		arg.PublishedAt,
+	)
+	return err
 }
