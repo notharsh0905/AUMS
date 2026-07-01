@@ -234,3 +234,57 @@ We structured the course results module in a domain-driven feature capsule match
 │  Admin                                    Page 1 of 1  [<] [>]         │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+# Module 6: Semester Results
+
+We completed the implementation of the **Semester Results (SGPA) Management Module** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module connects directly to the real frozen backend APIs (v1.2.0) and supports full CRUD capabilities (List, View, Create, Edit, and Delete semester results entries) along with pagination, search, and dynamic status/student/program/semester filtering.
+
+## 1. Implemented Features
+
+### 🏢 Semester Results Feature Capsule (`frontend/features/semester-results`)
+We structured the semester results module in a domain-driven feature capsule matching the established repository patterns:
+- **[types/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/types/index.ts)**: Declared types for both raw snake_case backend API responses (`RawSemesterResult`, `SemesterResultFilters`, etc.) and mapped camelCase types (`SemesterResult`, `SemesterResultListResponse`, etc.) that hold joined lookup fields.
+- **[schemas/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/schemas/index.ts)**: Created a Zod validation schema (`semesterResultFormSchema`) to validate student enrollment, academic semesters, total registered credits, earned credits, and SGPA ranges (between 0.0 and 10.0).
+- **[constants/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/constants/index.ts)**: Maintained query keys and publication status options (Draft, Published, Withheld, Revised).
+- **[services/index.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/services/index.ts)**: Implemented Axios client integrations communicating with real `/semester-results` endpoints (`GET /semester-results`, `GET /semester-results/:id`, `POST /semester-results`, `PUT /semester-results/:id`, and `DELETE /semester-results/:id`). The service automatically resolves student profiles, programs, and semester titles in parallel. It also counts course backlogs dynamically.
+- **[hooks/use-semester-results.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/hooks/use-semester-results.ts)**: Manages load cycles, page indices, search metrics, select parameters, form drawers, and deletion confirmation dialogs.
+- **[components/semester-result-form/semester-result-form.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/components/semester-result-form/semester-result-form.tsx)**: Form component leveraging React Hook Form. Features dynamic calculations of backlog credits (`totalCredits - earnedCredits`) and translates SGPA inputs to academic standing.
+- **[components/semester-result-details/semester-result-details.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/components/semester-result-details/semester-result-details.tsx)**: Renders a structured read-only card of a student's term progression scorecard, displaying standing classifications, total and earned credits, and backlog warnings.
+- **[components/semester-result-list/semester-result-list-view.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/semester-results/components/semester-result-list/semester-result-list-view.tsx)**: Main semester results log dashboard view containing paginated `DataTable`, search bar, filters (status, student, program, semester), drawers, and confirmation dialogues.
+
+### 🗺 Page Routing (`frontend/app/semester-results/page.tsx`)
+- Configured a route page at `/semester-results` implementing standard layout containers and Route guard checks.
+
+### 🧭 Navigation Integration (`frontend/config/navigation.ts`)
+- Added the **Semester Results** sidebar item under the Academics section, secured by the `semester_results.read` permission gate.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
+## 3. Walkthrough Layout Mockup
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  AUMS ERP   [Search Bar]                                  [Admin Profile]
+├────────────────────────────────────────────────────────────────────────┤
+│  Gen       Semester Results (SGPA)                         + Add Result   │
+│  ├── Dash                                                              │
+│  Acad      [Search student, roll...]  Status: [Select] Semester: [Select]│
+│  ├── Stud  ┌─────────────────────────────────────────────────────────┐ │
+│  ├── Fac   │ Student Name │ Program/Branch│ SGPA   │ Credits│ Standing│ │
+│  ├── Sem   ├──────────────┼───────────────┼────────┼────────┼─────────┤ │
+│  │  Res    │ Jane Doe     │ CS - B.Tech   │ 8.50   │ 20/20  │ Distinc-│ │
+│  │         │ (2026CS101)  │ Computer Sci  │        │        │ tion    │ │
+│  └── Tran  └──────────────┴───────────────┴────────┴────────┴─────────┘ │
+│  Admin                                    Page 1 of 1  [<] [>]         │
+└────────────────────────────────────────────────────────────────────────┘
+```
