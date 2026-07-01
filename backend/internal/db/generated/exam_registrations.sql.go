@@ -11,15 +11,39 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countExamRegistrations = `-- name: CountExamRegistrations :one
+SELECT COUNT(*)
+FROM exam_registrations
+WHERE ($1::text = '' OR exam_id = $1::uuid)
+  AND ($2::text = '' OR enrollment_id = $2::uuid)
+  AND ($3::text = '' OR registration_status = $3)
+`
+
+type CountExamRegistrationsParams struct {
+	Column1 string `json:"column_1"`
+	Column2 string `json:"column_2"`
+	Column3 string `json:"column_3"`
+}
+
+func (q *Queries) CountExamRegistrations(ctx context.Context, arg CountExamRegistrationsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countExamRegistrations, arg.Column1, arg.Column2, arg.Column3)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createExamRegistration = `-- name: CreateExamRegistration :exec
 INSERT INTO exam_registrations (
     exam_registration_id,
     exam_id,
     enrollment_id,
-    registration_status
+    registration_status,
+    registered_at,
+    created_at,
+    updated_at
 )
 VALUES (
-    $1,$2,$3,$4
+    $1, $2, $3, $4, NOW(), NOW(), NOW()
 )
 `
 
@@ -38,6 +62,37 @@ func (q *Queries) CreateExamRegistration(ctx context.Context, arg CreateExamRegi
 		arg.RegistrationStatus,
 	)
 	return err
+}
+
+const deleteExamRegistration = `-- name: DeleteExamRegistration :exec
+DELETE FROM exam_registrations
+WHERE exam_registration_id = $1
+`
+
+func (q *Queries) DeleteExamRegistration(ctx context.Context, examRegistrationID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteExamRegistration, examRegistrationID)
+	return err
+}
+
+const getExamRegistration = `-- name: GetExamRegistration :one
+SELECT exam_registration_id, exam_id, enrollment_id, registration_status, registered_at, created_at, updated_at
+FROM exam_registrations
+WHERE exam_registration_id = $1
+`
+
+func (q *Queries) GetExamRegistration(ctx context.Context, examRegistrationID pgtype.UUID) (ExamRegistration, error) {
+	row := q.db.QueryRow(ctx, getExamRegistration, examRegistrationID)
+	var i ExamRegistration
+	err := row.Scan(
+		&i.ExamRegistrationID,
+		&i.ExamID,
+		&i.EnrollmentID,
+		&i.RegistrationStatus,
+		&i.RegisteredAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listExamRegistrations = `-- name: ListExamRegistrations :many
@@ -72,4 +127,75 @@ func (q *Queries) ListExamRegistrations(ctx context.Context) ([]ExamRegistration
 		return nil, err
 	}
 	return items, nil
+}
+
+const listExamRegistrationsPaginated = `-- name: ListExamRegistrationsPaginated :many
+SELECT exam_registration_id, exam_id, enrollment_id, registration_status, registered_at, created_at, updated_at
+FROM exam_registrations
+WHERE ($3::text = '' OR exam_id = $3::uuid)
+  AND ($4::text = '' OR enrollment_id = $4::uuid)
+  AND ($5::text = '' OR registration_status = $5)
+ORDER BY registered_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListExamRegistrationsPaginatedParams struct {
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+}
+
+func (q *Queries) ListExamRegistrationsPaginated(ctx context.Context, arg ListExamRegistrationsPaginatedParams) ([]ExamRegistration, error) {
+	rows, err := q.db.Query(ctx, listExamRegistrationsPaginated,
+		arg.Limit,
+		arg.Offset,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ExamRegistration{}
+	for rows.Next() {
+		var i ExamRegistration
+		if err := rows.Scan(
+			&i.ExamRegistrationID,
+			&i.ExamID,
+			&i.EnrollmentID,
+			&i.RegistrationStatus,
+			&i.RegisteredAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateExamRegistration = `-- name: UpdateExamRegistration :exec
+UPDATE exam_registrations
+SET
+    registration_status = $2,
+    updated_at = NOW()
+WHERE exam_registration_id = $1
+`
+
+type UpdateExamRegistrationParams struct {
+	ExamRegistrationID pgtype.UUID            `json:"exam_registration_id"`
+	RegistrationStatus ExamRegistrationStatus `json:"registration_status"`
+}
+
+func (q *Queries) UpdateExamRegistration(ctx context.Context, arg UpdateExamRegistrationParams) error {
+	_, err := q.db.Exec(ctx, updateExamRegistration, arg.ExamRegistrationID, arg.RegistrationStatus)
+	return err
 }

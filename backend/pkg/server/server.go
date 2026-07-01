@@ -1077,8 +1077,14 @@ func New(application *app.Application) *gin.Engine {
 		examHandler,
 	)
 
+	examRoomsGroup := api.Group("/exam-rooms")
+	examRoomsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
 	examrooms.RegisterRoutes(
-		api.Group("/exam-rooms"),
+		examRoomsGroup,
 		examRoomHandler,
 		rolePermissionsService,
 	)
@@ -1088,9 +1094,16 @@ func New(application *app.Application) *gin.Engine {
 		examScheduleHandler,
 	)
 
+	examRegistrationsGroup := api.Group("/exam-registrations")
+	examRegistrationsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
 	examregistrations.RegisterRoutes(
-		api.Group("/exam-registrations"),
+		examRegistrationsGroup,
 		examRegistrationHandler,
+		rolePermissionsService,
 	)
 
 	examattempts.RegisterRoutes(
