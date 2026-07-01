@@ -41,6 +41,7 @@ import (
 	"aums/backend/internal/students"
 	"aums/backend/internal/timetable"
 	"aums/backend/internal/timetableentries"
+	"aums/backend/internal/transcripts"
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 
@@ -510,6 +511,19 @@ func New(application *app.Application) *gin.Engine {
 	programResultsHandler := programresults.NewHandler(
 		programResultsService,
 	)
+
+	transcriptsRepo := transcripts.NewRepository(
+		application.DB,
+	)
+
+	transcriptsService := transcripts.NewService(
+		transcriptsRepo,
+	)
+
+	transcriptsHandler := transcripts.NewHandler(
+		transcriptsService,
+	)
+
 	// ==========================================
 	// USERS MODULE
 	// ==========================================
@@ -1154,6 +1168,19 @@ func New(application *app.Application) *gin.Engine {
 		programResultsHandler,
 		rolePermissionsService,
 	)
+
+	transcriptsGroup := api.Group("/transcripts")
+	transcriptsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+	transcripts.RegisterRoutes(
+		transcriptsGroup,
+		transcriptsHandler,
+		rolePermissionsService,
+	)
+
 	// ==========================================
 	// AUTH MODULE
 	// ==========================================

@@ -1075,6 +1075,144 @@ definitions:
     - timetable_id
     - working_day_id
     type: object
+  transcripts.ProgramDetails:
+    properties:
+      degree_type:
+        type: string
+      department_name:
+        type: string
+      program_code:
+        type: string
+      program_id:
+        type: string
+      program_name:
+        type: string
+    type: object
+  transcripts.StudentDetails:
+    properties:
+      blood_group:
+        type: string
+      date_of_birth:
+        type: string
+      email:
+        type: string
+      enrollment_date:
+        type: string
+      enrollment_id:
+        type: string
+      enrollment_number:
+        type: string
+      first_name:
+        type: string
+      gender:
+        type: string
+      graduation_date:
+        type: string
+      last_name:
+        type: string
+      nationality:
+        type: string
+      student_id:
+        type: string
+    type: object
+  transcripts.TranscriptCGPASummary:
+    properties:
+      academic_standing:
+        type: string
+      cgpa:
+        type: number
+      completion_date:
+        type: string
+      credits_remaining:
+        type: number
+      degree_classification:
+        type: string
+      degree_completed:
+        type: boolean
+      earned_credits:
+        type: number
+      graduation_eligibility:
+        type: string
+      overall_percentage:
+        type: number
+      total_credits:
+        type: number
+    type: object
+  transcripts.TranscriptCourse:
+    properties:
+      course_code:
+        type: string
+      course_id:
+        type: string
+      course_name:
+        type: string
+      course_offering_id:
+        type: string
+      course_result_id:
+        type: string
+      credits:
+        type: number
+      grade_code:
+        type: string
+      grade_point:
+        type: number
+      is_passing:
+        type: boolean
+      marks_obtained:
+        type: number
+      percentage:
+        type: number
+      published_at:
+        type: string
+      result_status:
+        type: string
+      semester_id:
+        type: string
+      semester_number:
+        type: integer
+      total_marks:
+        type: number
+    type: object
+  transcripts.TranscriptResponse:
+    properties:
+      cgpa:
+        $ref: '#/definitions/transcripts.TranscriptCGPASummary'
+      courses:
+        items:
+          $ref: '#/definitions/transcripts.TranscriptCourse'
+        type: array
+      generated_at:
+        type: string
+      program:
+        $ref: '#/definitions/transcripts.ProgramDetails'
+      semesters:
+        items:
+          $ref: '#/definitions/transcripts.TranscriptSemester'
+        type: array
+      student:
+        $ref: '#/definitions/transcripts.StudentDetails'
+    type: object
+  transcripts.TranscriptSemester:
+    properties:
+      earned_credits:
+        type: number
+      published_at:
+        type: string
+      result_status:
+        type: string
+      semester_id:
+        type: string
+      semester_name:
+        type: string
+      semester_number:
+        type: integer
+      semester_result_id:
+        type: string
+      sgpa:
+        type: number
+      total_credits:
+        type: number
+    type: object
   users.CreateUserRequest:
     properties:
       email:
@@ -4207,6 +4345,173 @@ paths:
       summary: Create Timetable
       tags:
       - Timetables
+  /transcripts/{student_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the complete structured academic transcript for a student
+      parameters:
+      - description: Student Profile ID
+        in: path
+        name: student_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/transcripts.TranscriptResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Student Transcript
+      tags:
+      - Transcripts
+  /transcripts/{student_id}/courses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the complete detailed grade-wise breakdown of all courses
+        taken by a student
+      parameters:
+      - description: Student Profile ID
+        in: path
+        name: student_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/transcripts.TranscriptCourse'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Transcript Course Results Breakdown
+      tags:
+      - Transcripts
+  /transcripts/{student_id}/semesters:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a breakdown of semester-wise credit attempts and SGPA
+        for a student
+      parameters:
+      - description: Student Profile ID
+        in: path
+        name: student_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/transcripts.TranscriptSemester'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Transcript Semesters Summary
+      tags:
+      - Transcripts
+  /transcripts/{student_id}/summary:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the overall CGPA, graduation standing, and credit summaries
+        for a student
+      parameters:
+      - description: Student Profile ID
+        in: path
+        name: student_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/transcripts.TranscriptCGPASummary'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Transcript CGPA Summary
+      tags:
+      - Transcripts
   /users:
     get:
       consumes:
