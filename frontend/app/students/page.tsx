@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { PageContainer, PageHeader } from '@/components/layouts/page-container';
 import { ProtectedRoute } from '@/utils/route-guards';
 import { RequirePermission } from '@/components/shared/rbac';
-import { StudentListView } from '@/features/students/components/student-list-view';
+import { StudentListView } from '@/features/students';
 
 export default function StudentsPage() {
   return (

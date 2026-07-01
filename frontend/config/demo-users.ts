@@ -20,6 +20,7 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
       'students.read',
       'faculty.read',
       'courses.read',
+      'departments.read',
     ],
   },
   faculty: {
@@ -34,7 +35,7 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     roles: ['FACULTY'],
-    permissions: ['students.read', 'faculty.read', 'courses.read'],
+    permissions: ['students.read', 'faculty.read', 'courses.read', 'departments.read'],
   },
   student: {
     userId: 'demo-student-id',
@@ -48,7 +49,7 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     roles: ['STUDENT'],
-    permissions: ['students.read', 'courses.read'],
+    permissions: ['students.read', 'courses.read', 'departments.read'],
   },
   parent: {
     userId: 'demo-parent-id',
@@ -62,6 +63,6 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     roles: ['PARENT'],
-    permissions: ['students.read'],
+    permissions: ['students.read', 'departments.read'],
   },
 };

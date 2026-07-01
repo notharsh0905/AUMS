@@ -5,13 +5,17 @@ import { ColumnDef } from '@tanstack/react-table';
 import { Eye, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useStudents } from '../hooks/use-students';
-import { Student } from '../types';
-import { STATUS_OPTIONS, DEPARTMENT_OPTIONS, PROGRAM_OPTIONS } from '../constants';
+import { useStudents } from '../../hooks/use-students';
+import { Student } from '../../types';
+import { STATUS_OPTIONS, DEPARTMENT_OPTIONS, PROGRAM_OPTIONS } from '../../constants';
 import { DataTable } from '@/components/shared/data-table';
 import { SearchBar } from '@/components/shared/search-bar';
 import { SelectFilter } from '@/components/shared/filters';
 import { Toolbar } from '@/components/shared/toolbar';
+import { Drawer } from '@/components/shared/drawer-modal';
+import { ConfirmDialog } from '@/components/shared/confirm-dialog';
+import { StudentForm } from '../student-form/student-form';
+import { StudentDetails } from '../student-details/student-details';
 
 export function StudentListView() {
   const {
@@ -21,8 +25,23 @@ export function StudentListView() {
     pageIndex,
     pageSize,
     isLoading,
+    isMutating,
     search,
     filters,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    drawerMode,
+    selectedStudent,
+    isConfirmOpen,
+    setIsConfirmOpen,
+    studentToDelete,
+    triggerCreate,
+    triggerEdit,
+    triggerView,
+    triggerDelete,
+    createStudent,
+    updateStudent,
+    deleteStudent,
     handlePageChange,
     handlePageSizeChange,
     handleSearchChange,
@@ -82,9 +101,9 @@ export function StudentListView() {
                 status === 'inactive' &&
                   "bg-zinc-50 text-zinc-650 ring-zinc-500/10 dark:bg-zinc-500/10 dark:text-zinc-400 dark:ring-zinc-500/20",
                 status === 'suspended' &&
-                  "bg-red-50 text-red-700 ring-red-600/10 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20",
+                  "bg-red-50 text-red-750 ring-red-600/10 dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/20",
                 status === 'graduated' &&
-                  "bg-blue-50 text-blue-700 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20"
+                  "bg-blue-50 text-blue-750 ring-blue-600/10 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20"
               )}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -95,12 +114,13 @@ export function StudentListView() {
       {
         id: 'actions',
         header: 'Actions',
-        cell: () => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
               size="icon"
               className="h-7 w-7 text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-50"
+              onClick={() => triggerView(row.original)}
               aria-label="View student details"
             >
               <Eye className="h-3.5 w-3.5" />
@@ -109,6 +129,7 @@ export function StudentListView() {
               variant="outline"
               size="icon"
               className="h-7 w-7 text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-50"
+              onClick={() => triggerEdit(row.original)}
               aria-label="Edit student profile"
             >
               <Edit className="h-3.5 w-3.5" />
@@ -116,7 +137,8 @@ export function StudentListView() {
             <Button
               variant="outline"
               size="icon"
-              className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+              className="h-7 w-7 text-red-650 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20"
+              onClick={() => triggerDelete(row.original)}
               aria-label="Delete student record"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -125,8 +147,23 @@ export function StudentListView() {
         ),
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const drawerTitle =
+    drawerMode === 'create'
+      ? 'Add New Student'
+      : drawerMode === 'edit'
+        ? 'Edit Student Profile'
+        : 'Student Details';
+
+  const drawerDescription =
+    drawerMode === 'create'
+      ? 'Fill in the information to register a new student'
+      : drawerMode === 'edit'
+        ? 'Update academic or personal attributes'
+        : 'Read-only administrative overview';
 
   return (
     <div className="flex flex-col gap-6">
@@ -161,7 +198,7 @@ export function StudentListView() {
             />
           </div>
         }
-        onCreateClick={() => {}}
+        onCreateClick={triggerCreate}
         createLabel="Add Student"
       />
 
@@ -176,6 +213,49 @@ export function StudentListView() {
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
         isLoading={isLoading}
+      />
+
+      {/* 1. Modal Drawer for form submissions / details view */}
+      <Drawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title={drawerTitle}
+        description={drawerDescription}
+        size="lg"
+      >
+        {drawerMode === 'view' && selectedStudent ? (
+          <StudentDetails student={selectedStudent} />
+        ) : (
+          <StudentForm
+            initialData={selectedStudent}
+            isSubmitting={isMutating}
+            onSubmit={(values) => {
+              if (drawerMode === 'create') {
+                createStudent(values);
+              } else if (drawerMode === 'edit' && selectedStudent) {
+                updateStudent(selectedStudent.studentId, values);
+              }
+            }}
+          />
+        )}
+      </Drawer>
+
+      {/* 2. Deletion Confirm Alert dialog */}
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={async () => {
+          if (studentToDelete) {
+            await deleteStudent(studentToDelete.studentId);
+          }
+        }}
+        title="Delete Student Record"
+        description={`Are you sure you want to delete ${
+          studentToDelete ? `${studentToDelete.firstName} ${studentToDelete.lastName}` : 'this student'
+        }? This action is irreversible.`}
+        actionType="delete"
+        confirmLabel="Delete Record"
+        isLoading={isMutating}
       />
     </div>
   );

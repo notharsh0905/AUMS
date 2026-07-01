@@ -7,6 +7,7 @@ import {
   Shield,
   UserCheck,
   Key,
+  Building2,
   LucideIcon
 } from 'lucide-react';
 
@@ -63,6 +64,13 @@ export const navigationConfig: NavigationGroup[] = [
         icon: BookOpen,
         href: '/courses',
         requiredPermissions: ['courses.read'],
+      },
+      {
+        id: 'departments',
+        title: 'Departments',
+        icon: Building2,
+        href: '/departments',
+        requiredPermissions: ['departments.read'],
       }
     ]
   },

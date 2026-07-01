@@ -6,9 +6,13 @@ export interface Student {
   firstName: string;
   lastName: string;
   email: string;
-  program: string;
+  phone: string;
+  gender: string;
+  dateOfBirth: string;
   department: string;
+  program: string;
   semester: number;
+  admissionDate: string;
   status: StudentStatus;
   createdAt: string;
   updatedAt: string;
