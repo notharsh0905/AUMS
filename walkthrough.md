@@ -398,3 +398,59 @@ We created a custom coordinator hook at **[use-student-dashboard.ts](file:///Use
 │            └──────────────────────────────┘ └─────────────────────────┘ │
 └────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+# Module 9: Faculty Dashboard Integration
+
+We successfully completed the **Faculty Dashboard Integration** in the AUMS Frontend client on the `feature/frontend-v1` branch. The module dynamically resolves the logged-in user profile, and if the user has the `FACULTY` role, it replaces the landing page with a complete, live academic instructor workspace. If the user has other roles (Admin/Student), it preserves their respective dashboards.
+
+## 1. Implemented Features
+
+### 🔄 Dynamic Faculty Dashboard Hook (`useFacultyDashboard`)
+We created a custom coordinator hook at **[use-faculty-dashboard.ts](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/dashboard/hooks/use-faculty-dashboard.ts)** that handles all data joins:
+- **Profile Resolution**: Maps the logged-in user email to `/faculty` and retrieves their `faculty_profile_id`, department, and designation.
+- **Teaching Summary**: Fetches `/faculty-course-allocations` and matches courses, count of active classes, and counts unique registered students.
+- **Timetable Slots**: Loads `/timetable-entries` and matches them with course offerings to show today's schedule.
+- **Attendance Status**: Evaluates class sessions to track pending versus completed attendance marking logs.
+- **Assignments Review**: Integrates `/assignments` and `/assignment-submissions` to count pending review evaluations and submission due dates.
+- **Upcoming Examinations**: Fetches `/exams` and `/exam-schedules` to calendar upcoming assessments.
+- **Results Status**: Identifies course results pending publication and final validation.
+- **Dynamic Alerts (Notifications)**: Instantly generates alert feed notifications based on active warnings (e.g. pending assignment reviews, drafted results, or due assignments).
+
+### 🖥 UI Component (`FacultyDashboard`)
+- Created the dashboard UI component at **[faculty-dashboard.tsx](file:///Users/harshupadhyay/AUMS_ANTI/AUMS/frontend/features/dashboard/components/faculty-dashboard.tsx)**.
+- Renders responsive grids with cards, progress indicators, schedules, list feeds, quick actions, and critical notifications.
+
+### 🔀 Router Integration (`app/dashboard/page.tsx`)
+- Updated the main dashboard routing entry to perform role checks and conditionally render the faculty home page workspace.
+
+---
+
+## 2. Verification & Correctness
+
+- **Type Safety**: Fully type-safe code with 0 TypeScript compilation errors.
+- **Linter Status**: Passes `npm run lint` cleanly.
+- **Compilation Status**: Passes Next.js production compilation (`npm run build`) successfully.
+
+---
+
+## 3. Walkthrough Layout Mockup
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│  AUMS ERP   [Search Bar]                                  [Admin Profile]
+├────────────────────────────────────────────────────────────────────────┤
+│  Gen       Faculty Portal                                               │
+│  ├── Dash  ┌──────────────────────────────┐ ┌─────────────────────────┐ │
+│  Acad      │ Dr. Alan Turing (FAC101)     │ │ Courses: 3   Weekly: 5  │ │
+│  ├── Stud  │ Computer Science Department  │ │ Students: 48 Enrolled   │ │
+│  ├── Fac   └──────────────────────────────┘ └─────────────────────────┘ │
+│  │         Quick Actions: [Mark Attendance] [Review Assignments]        │
+│  └── Tran  ┌──────────────────────────────┐ ┌─────────────────────────┐ │
+│  Admin     │ Today's Schedule             │ │ Attendance: 1 Pending   │ │
+│            │ 09:00 - Database Systems     │ │ Assignments: 4 Review   │ │
+│            │ 14:00 - Operating Systems    │ │ Upcoming Exams: CS-302  │ │
+│            └──────────────────────────────┘ └─────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────┘
+```

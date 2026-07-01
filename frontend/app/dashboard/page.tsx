@@ -14,6 +14,7 @@ import { NotificationsPanel } from '@/features/dashboard/components/notification
 import { UpcomingEvents } from '@/features/dashboard/components/upcoming-events';
 import { SystemStatus } from '@/features/dashboard/components/system-status';
 import { StudentDashboard } from '@/features/dashboard/components/student-dashboard';
+import { FacultyDashboard } from '@/features/dashboard/components/faculty-dashboard';
 
 import {
   STATS_CARDS,
@@ -29,23 +30,28 @@ import {
 export default function DashboardPage() {
   const { user } = useAuth();
   const isStudent = user?.roles?.includes('STUDENT');
+  const isFaculty = user?.roles?.includes('FACULTY');
 
   return (
     <ProtectedRoute>
       <DashboardLayout>
         <PageContainer>
           <PageHeader
-            title={isStudent ? "Student Portal" : "Dashboard"}
+            title={isStudent ? "Student Portal" : isFaculty ? "Faculty Portal" : "Dashboard"}
             description={
               isStudent
                 ? "Your academic timeline, class schedule, and latest achievements"
-                : "Overview of AUMS institutional metrics and system parameters"
+                : isFaculty
+                  ? "Your assigned courses, timetable schedule, and grading workspace"
+                  : "Overview of AUMS institutional metrics and system parameters"
             }
           />
 
           <ContentArea>
             {isStudent ? (
               <StudentDashboard />
+            ) : isFaculty ? (
+              <FacultyDashboard />
             ) : (
               <>
                 {/* 1. Statistics Cards Section */}
