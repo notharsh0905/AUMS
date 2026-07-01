@@ -11,6 +11,35 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countExamAttempts = `-- name: CountExamAttempts :one
+SELECT COUNT(*)
+FROM exam_attempts ea
+JOIN exam_registrations er ON ea.exam_registration_id = er.exam_registration_id
+WHERE ($1::text = '' OR er.exam_id = $1::uuid)
+  AND ($2::text = '' OR ea.exam_registration_id = $2::uuid)
+  AND ($3::text = '' OR er.enrollment_id = $3::uuid)
+  AND ($4::text = '' OR er.registration_status = $4)
+`
+
+type CountExamAttemptsParams struct {
+	Column1 string `json:"column_1"`
+	Column2 string `json:"column_2"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+}
+
+func (q *Queries) CountExamAttempts(ctx context.Context, arg CountExamAttemptsParams) (int64, error) {
+	row := q.db.QueryRow(ctx, countExamAttempts,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+	)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createExamAttempt = `-- name: CreateExamAttempt :exec
 INSERT INTO exam_attempts (
     exam_attempt_id,
@@ -19,10 +48,12 @@ INSERT INTO exam_attempts (
     marks_obtained,
     evaluator_id,
     evaluated_at,
-    remarks
+    remarks,
+    created_at,
+    updated_at
 )
 VALUES (
-    $1,$2,$3,$4,$5,$6,$7
+    $1, $2, $3, $4, $5, $6, $7, NOW(), NOW()
 )
 `
 
@@ -47,6 +78,39 @@ func (q *Queries) CreateExamAttempt(ctx context.Context, arg CreateExamAttemptPa
 		arg.Remarks,
 	)
 	return err
+}
+
+const deleteExamAttempt = `-- name: DeleteExamAttempt :exec
+DELETE FROM exam_attempts
+WHERE exam_attempt_id = $1
+`
+
+func (q *Queries) DeleteExamAttempt(ctx context.Context, examAttemptID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteExamAttempt, examAttemptID)
+	return err
+}
+
+const getExamAttempt = `-- name: GetExamAttempt :one
+SELECT exam_attempt_id, exam_registration_id, attempt_number, marks_obtained, evaluator_id, evaluated_at, remarks, created_at, updated_at
+FROM exam_attempts
+WHERE exam_attempt_id = $1
+`
+
+func (q *Queries) GetExamAttempt(ctx context.Context, examAttemptID pgtype.UUID) (ExamAttempt, error) {
+	row := q.db.QueryRow(ctx, getExamAttempt, examAttemptID)
+	var i ExamAttempt
+	err := row.Scan(
+		&i.ExamAttemptID,
+		&i.ExamRegistrationID,
+		&i.AttemptNumber,
+		&i.MarksObtained,
+		&i.EvaluatorID,
+		&i.EvaluatedAt,
+		&i.Remarks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const listExamAttempts = `-- name: ListExamAttempts :many
@@ -83,4 +147,93 @@ func (q *Queries) ListExamAttempts(ctx context.Context) ([]ExamAttempt, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const listExamAttemptsPaginated = `-- name: ListExamAttemptsPaginated :many
+SELECT ea.exam_attempt_id, ea.exam_registration_id, ea.attempt_number, ea.marks_obtained, ea.evaluator_id, ea.evaluated_at, ea.remarks, ea.created_at, ea.updated_at
+FROM exam_attempts ea
+JOIN exam_registrations er ON ea.exam_registration_id = er.exam_registration_id
+WHERE ($3::text = '' OR er.exam_id = $3::uuid)
+  AND ($4::text = '' OR ea.exam_registration_id = $4::uuid)
+  AND ($5::text = '' OR er.enrollment_id = $5::uuid)
+  AND ($6::text = '' OR er.registration_status = $6)
+ORDER BY ea.created_at DESC
+LIMIT $1
+OFFSET $2
+`
+
+type ListExamAttemptsPaginatedParams struct {
+	Limit   int32  `json:"limit"`
+	Offset  int32  `json:"offset"`
+	Column3 string `json:"column_3"`
+	Column4 string `json:"column_4"`
+	Column5 string `json:"column_5"`
+	Column6 string `json:"column_6"`
+}
+
+func (q *Queries) ListExamAttemptsPaginated(ctx context.Context, arg ListExamAttemptsPaginatedParams) ([]ExamAttempt, error) {
+	rows, err := q.db.Query(ctx, listExamAttemptsPaginated,
+		arg.Limit,
+		arg.Offset,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
+		arg.Column6,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ExamAttempt{}
+	for rows.Next() {
+		var i ExamAttempt
+		if err := rows.Scan(
+			&i.ExamAttemptID,
+			&i.ExamRegistrationID,
+			&i.AttemptNumber,
+			&i.MarksObtained,
+			&i.EvaluatorID,
+			&i.EvaluatedAt,
+			&i.Remarks,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateExamAttempt = `-- name: UpdateExamAttempt :exec
+UPDATE exam_attempts
+SET
+    marks_obtained = $2,
+    evaluator_id = $3,
+    evaluated_at = $4,
+    remarks = $5,
+    updated_at = NOW()
+WHERE exam_attempt_id = $1
+`
+
+type UpdateExamAttemptParams struct {
+	ExamAttemptID pgtype.UUID        `json:"exam_attempt_id"`
+	MarksObtained pgtype.Numeric     `json:"marks_obtained"`
+	EvaluatorID   pgtype.UUID        `json:"evaluator_id"`
+	EvaluatedAt   pgtype.Timestamptz `json:"evaluated_at"`
+	Remarks       pgtype.Text        `json:"remarks"`
+}
+
+func (q *Queries) UpdateExamAttempt(ctx context.Context, arg UpdateExamAttemptParams) error {
+	_, err := q.db.Exec(ctx, updateExamAttempt,
+		arg.ExamAttemptID,
+		arg.MarksObtained,
+		arg.EvaluatorID,
+		arg.EvaluatedAt,
+		arg.Remarks,
+	)
+	return err
 }

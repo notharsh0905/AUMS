@@ -1338,7 +1338,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieve a paginated list of exam attempts",
+                "description": "Retrieve a paginated list of exam attempts with filtering",
                 "consumes": [
                     "application/json"
                 ],
@@ -1346,7 +1346,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Exam Attempts"
+                    "ExamAttempts"
                 ],
                 "summary": "List Exam Attempts",
                 "parameters": [
@@ -1363,13 +1363,52 @@ const docTemplate = `{
                         "description": "Page size",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Exam ID",
+                        "name": "exam_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Exam Registration ID",
+                        "name": "registration_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Enrollment ID",
+                        "name": "enrollment_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by Exam Registration Status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/examattempts.ExamAttemptResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1406,7 +1445,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Exam Attempts"
+                    "ExamAttempts"
                 ],
                 "summary": "Create Exam Attempt",
                 "parameters": [
@@ -1423,6 +1462,176 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/exam-attempts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve details of a single exam attempt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamAttempts"
+                ],
+                "summary": "Get Exam Attempt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Attempt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/examattempts.ExamAttemptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update details of an existing exam attempt",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamAttempts"
+                ],
+                "summary": "Update Exam Attempt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Attempt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update Attempt Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/examattempts.UpdateExamAttemptRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete an exam attempt record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "ExamAttempts"
+                ],
+                "summary": "Delete Exam Attempt",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Exam Attempt ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.SuccessResponse"
                         }
@@ -4672,6 +4881,7 @@ const docTemplate = `{
                     "minimum": 1
                 },
                 "evaluated_at": {
+                    "description": "RFC3339 format",
                     "type": "string"
                 },
                 "evaluator_id": {
@@ -4681,7 +4891,64 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "marks_obtained": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "remarks": {
+                    "type": "string"
+                }
+            }
+        },
+        "examattempts.ExamAttemptResponse": {
+            "type": "object",
+            "properties": {
+                "attempt_number": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "evaluated_at": {
+                    "type": "string"
+                },
+                "evaluator_id": {
+                    "type": "string"
+                },
+                "exam_attempt_id": {
+                    "type": "string"
+                },
+                "exam_registration_id": {
+                    "type": "string"
+                },
+                "marks_obtained": {
                     "type": "number"
+                },
+                "remarks": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "examattempts.UpdateExamAttemptRequest": {
+            "type": "object",
+            "required": [
+                "evaluated_at",
+                "evaluator_id",
+                "marks_obtained"
+            ],
+            "properties": {
+                "evaluated_at": {
+                    "description": "RFC3339 format",
+                    "type": "string"
+                },
+                "evaluator_id": {
+                    "type": "string"
+                },
+                "marks_obtained": {
+                    "type": "number",
+                    "minimum": 0
                 },
                 "remarks": {
                     "type": "string"
