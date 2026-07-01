@@ -4916,6 +4916,280 @@ const docTemplate = `{
                 }
             }
         },
+        "/transcripts/{student_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the complete structured academic transcript for a student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transcripts"
+                ],
+                "summary": "Get Student Transcript",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student Profile ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/transcripts.TranscriptResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcripts/{student_id}/courses": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the complete detailed grade-wise breakdown of all courses taken by a student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transcripts"
+                ],
+                "summary": "Get Transcript Course Results Breakdown",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student Profile ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/transcripts.TranscriptCourse"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcripts/{student_id}/semesters": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve a breakdown of semester-wise credit attempts and SGPA for a student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transcripts"
+                ],
+                "summary": "Get Transcript Semesters Summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student Profile ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/transcripts.TranscriptSemester"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcripts/{student_id}/summary": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieve the overall CGPA, graduation standing, and credit summaries for a student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transcripts"
+                ],
+                "summary": "Get Transcript CGPA Summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Student Profile ID",
+                        "name": "student_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/transcripts.TranscriptCGPASummary"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "security": [
@@ -6633,6 +6907,216 @@ const docTemplate = `{
                 },
                 "working_day_id": {
                     "type": "string"
+                }
+            }
+        },
+        "transcripts.ProgramDetails": {
+            "type": "object",
+            "properties": {
+                "degree_type": {
+                    "type": "string"
+                },
+                "department_name": {
+                    "type": "string"
+                },
+                "program_code": {
+                    "type": "string"
+                },
+                "program_id": {
+                    "type": "string"
+                },
+                "program_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcripts.StudentDetails": {
+            "type": "object",
+            "properties": {
+                "blood_group": {
+                    "type": "string"
+                },
+                "date_of_birth": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "enrollment_date": {
+                    "type": "string"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "enrollment_number": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "graduation_date": {
+                    "type": "string"
+                },
+                "last_name": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "student_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcripts.TranscriptCGPASummary": {
+            "type": "object",
+            "properties": {
+                "academic_standing": {
+                    "type": "string"
+                },
+                "cgpa": {
+                    "type": "number"
+                },
+                "completion_date": {
+                    "type": "string"
+                },
+                "credits_remaining": {
+                    "type": "number"
+                },
+                "degree_classification": {
+                    "type": "string"
+                },
+                "degree_completed": {
+                    "type": "boolean"
+                },
+                "earned_credits": {
+                    "type": "number"
+                },
+                "graduation_eligibility": {
+                    "type": "string"
+                },
+                "overall_percentage": {
+                    "type": "number"
+                },
+                "total_credits": {
+                    "type": "number"
+                }
+            }
+        },
+        "transcripts.TranscriptCourse": {
+            "type": "object",
+            "properties": {
+                "course_code": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_name": {
+                    "type": "string"
+                },
+                "course_offering_id": {
+                    "type": "string"
+                },
+                "course_result_id": {
+                    "type": "string"
+                },
+                "credits": {
+                    "type": "number"
+                },
+                "grade_code": {
+                    "type": "string"
+                },
+                "grade_point": {
+                    "type": "number"
+                },
+                "is_passing": {
+                    "type": "boolean"
+                },
+                "marks_obtained": {
+                    "type": "number"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "semester_id": {
+                    "type": "string"
+                },
+                "semester_number": {
+                    "type": "integer"
+                },
+                "total_marks": {
+                    "type": "number"
+                }
+            }
+        },
+        "transcripts.TranscriptResponse": {
+            "type": "object",
+            "properties": {
+                "cgpa": {
+                    "$ref": "#/definitions/transcripts.TranscriptCGPASummary"
+                },
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/transcripts.TranscriptCourse"
+                    }
+                },
+                "generated_at": {
+                    "type": "string"
+                },
+                "program": {
+                    "$ref": "#/definitions/transcripts.ProgramDetails"
+                },
+                "semesters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/transcripts.TranscriptSemester"
+                    }
+                },
+                "student": {
+                    "$ref": "#/definitions/transcripts.StudentDetails"
+                }
+            }
+        },
+        "transcripts.TranscriptSemester": {
+            "type": "object",
+            "properties": {
+                "earned_credits": {
+                    "type": "number"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "result_status": {
+                    "type": "string"
+                },
+                "semester_id": {
+                    "type": "string"
+                },
+                "semester_name": {
+                    "type": "string"
+                },
+                "semester_number": {
+                    "type": "integer"
+                },
+                "semester_result_id": {
+                    "type": "string"
+                },
+                "sgpa": {
+                    "type": "number"
+                },
+                "total_credits": {
+                    "type": "number"
                 }
             }
         },
