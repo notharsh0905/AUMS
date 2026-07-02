@@ -45,6 +45,8 @@ import (
 	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 
+	"github.com/gin-contrib/cors"
+
 	pkgmiddleware "aums/backend/pkg/middleware"
 
 	"aums/backend/pkg/app"
@@ -58,6 +60,30 @@ import (
 func New(application *app.Application) *gin.Engine {
 
 	router := gin.Default()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{
+			"http://localhost:3000",
+		},
+		AllowMethods: []string{
+			"GET",
+			"POST",
+			"PUT",
+			"PATCH",
+			"DELETE",
+			"OPTIONS",
+		},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Type",
+			"Accept",
+			"Authorization",
+		},
+		ExposeHeaders: []string{
+			"Content-Length",
+		},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Secure configuration of trusted proxies for production
 	_ = router.SetTrustedProxies(nil)

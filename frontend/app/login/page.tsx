@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { AlertCircle, GraduationCap } from 'lucide-react';
+import { DEMO_CREDENTIALS } from '@/config/demo-users';
 
 export default function LoginPage() {
   const { login, error, clearError } = useAuth();
@@ -31,10 +32,11 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoUserSelect = (demoEmail: string) => {
+  const handleDemoUserSelect = (demoKey: keyof typeof DEMO_CREDENTIALS) => {
     clearError();
-    setEmail(demoEmail);
-    setPassword('password123'); // Demo fallback password
+    const creds = DEMO_CREDENTIALS[demoKey];
+    setEmail(creds.email);
+    setPassword(creds.password);
   };
 
   return (
@@ -113,7 +115,7 @@ export default function LoginPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoUserSelect('admin@aums.edu')}
+                onClick={() => handleDemoUserSelect('superAdmin')}
                 className="h-8 text-xs font-semibold"
               >
                 Super Admin
@@ -121,7 +123,7 @@ export default function LoginPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoUserSelect('smith@aums.edu')}
+                onClick={() => handleDemoUserSelect('faculty')}
                 className="h-8 text-xs font-semibold"
               >
                 Faculty
@@ -129,7 +131,7 @@ export default function LoginPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoUserSelect('doe@aums.edu')}
+                onClick={() => handleDemoUserSelect('student')}
                 className="h-8 text-xs font-semibold"
               >
                 Student
@@ -137,7 +139,7 @@ export default function LoginPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoUserSelect('parent.doe@aums.edu')}
+                onClick={() => handleDemoUserSelect('parent')}
                 className="h-8 text-xs font-semibold"
               >
                 Parent

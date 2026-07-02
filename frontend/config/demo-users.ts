@@ -4,7 +4,7 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
   super_admin: {
     userId: 'demo-super-admin-id',
     username: 'super_admin',
-    email: 'admin@aums.edu',
+    email: 'admin@aums.com',
     firstName: 'System',
     lastName: 'Admin',
     status: 'active',
@@ -78,3 +78,23 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
     permissions: ['students.read', 'departments.read', 'programs.read', 'academic_years.read', 'semesters.read', 'course_offerings.read', 'faculty_course_allocations.read', 'student_course_registrations.read', 'timetable.read', 'attendance.read', 'assignments.read', 'assignment_submissions.read', 'internal_assessments.read', 'examinations.read'],
   },
 };
+
+export const DEMO_CREDENTIALS = {
+  superAdmin: {
+    email: 'admin@aums.com',
+    password: 'Admin@123',
+  },
+  faculty: {
+    email: 'smith@aums.edu',
+    password: 'Admin@123',
+  },
+  student: {
+    email: 'doe@aums.edu',
+    password: 'Admin@123',
+  },
+  parent: {
+    email: 'parent.doe@aums.edu',
+    password: 'Admin@123',
+  },
+};
+

@@ -1,0 +1,151 @@
+-- ==========================================
+-- AUMS DEMO USERS SEED
+-- ==========================================
+
+INSERT INTO users (
+    user_id,
+    username,
+    email,
+    phone_number,
+    password_hash,
+    first_name,
+    last_name,
+    status,
+    is_email_verified,
+    is_phone_verified
+)
+VALUES
+(
+    gen_random_uuid(),
+    'admin',
+    'admin@aums.edu',
+    '+15550100',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Super',
+    'Admin',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'institution_admin',
+    'institution.admin@aums.edu',
+    '+15550101',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Institution',
+    'Admin',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'dean_engineering',
+    'dean.engineering@aums.edu',
+    '+15550102',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Engineering',
+    'Dean',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'hod_cse',
+    'hod.cse@aums.edu',
+    '+15550103',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'CSE',
+    'HOD',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'faculty_cse1',
+    'faculty.cse1@aums.edu',
+    '+15550104',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'CSE Faculty',
+    'One',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'faculty_cse2',
+    'faculty.cse2@aums.edu',
+    '+15550105',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'CSE Faculty',
+    'Two',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'student1',
+    'student1@aums.edu',
+    '+15550106',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Student',
+    'One',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'student2',
+    'student2@aums.edu',
+    '+15550107',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Student',
+    'Two',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'student3',
+    'student3@aums.edu',
+    '+15550108',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Student',
+    'Three',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'parent1',
+    'parent1@aums.edu',
+    '+15550109',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Parent',
+    'One',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+),
+(
+    gen_random_uuid(),
+    'parent2',
+    'parent2@aums.edu',
+    '+15550110',
+    '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
+    'Parent',
+    'Two',
+    'ACTIVE'::user_status,
+    TRUE,
+    TRUE
+)
+ON CONFLICT (email)
+DO NOTHING;

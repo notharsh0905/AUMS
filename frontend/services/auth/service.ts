@@ -6,7 +6,7 @@ import {
   RefreshTokenResponse,
   CurrentUser,
 } from '@/types/auth';
-import { DEMO_USERS } from '@/config/demo-users';
+import { DEMO_USERS, DEMO_CREDENTIALS } from '@/config/demo-users';
 
 const b64url = (str: string): string => {
   if (typeof window !== 'undefined') {
@@ -32,10 +32,10 @@ export const authService = {
       const email = data.email.toLowerCase();
       let matchedKey: string | null = null;
 
-      if (email === 'admin@aums.edu') matchedKey = 'super_admin';
-      else if (email === 'smith@aums.edu') matchedKey = 'faculty';
-      else if (email === 'doe@aums.edu') matchedKey = 'student';
-      else if (email === 'parent.doe@aums.edu') matchedKey = 'parent';
+      if (email === DEMO_CREDENTIALS.superAdmin.email) matchedKey = 'super_admin';
+      else if (email === DEMO_CREDENTIALS.faculty.email) matchedKey = 'faculty';
+      else if (email === DEMO_CREDENTIALS.student.email) matchedKey = 'student';
+      else if (email === DEMO_CREDENTIALS.parent.email) matchedKey = 'parent';
 
       if (matchedKey) {
         const demoUser = DEMO_USERS[matchedKey];
