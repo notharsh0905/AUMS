@@ -18,7 +18,7 @@ VALUES
 (
     gen_random_uuid(),
     'admin',
-    'admin@aums.edu',
+    'admin@aums.com',
     '+15550100',
     '$2a$10$GNDFMD3s/UrVx7AyGrGKtep6/OzNUaCuU/NwtC9OUL/pdnxaDz8KO',
     'Super',

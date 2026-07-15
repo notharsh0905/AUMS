@@ -17,7 +17,7 @@ require (
 	golang.org/x/crypto v0.53.0
 )
 
-require github.com/gin-contrib/cors v1.7.7 // indirect
+require github.com/gin-contrib/cors v1.7.7 // direct
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect

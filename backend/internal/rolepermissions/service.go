@@ -45,19 +45,6 @@ func (s *Service) GetRolePermissions(
 	)
 }
 
-/*func (s *Service) RemovePermissionFromRole(
-	ctx context.Context,
-	roleID pgtype.UUID,
-	permissionID pgtype.UUID,
-) error {
-
-	return s.repository.RemovePermissionFromRole(
-		ctx,
-		roleID,
-		permissionID,
-	)
-}*/
-
 func (s *Service) HasPermission(
 	ctx context.Context,
 	userID pgtype.UUID,
@@ -93,5 +80,16 @@ func (s *Service) RemovePermissionFromRole(
 		ctx,
 		roleID,
 		permissionID,
+	)
+}
+
+func (s *Service) GetUserPermissions(
+	ctx context.Context,
+	userID pgtype.UUID,
+) ([]generated.Permission, error) {
+
+	return s.repository.GetUserPermissions(
+		ctx,
+		userID,
 	)
 }

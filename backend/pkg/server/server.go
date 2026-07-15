@@ -1216,6 +1216,8 @@ func New(application *app.Application) *gin.Engine {
 		userRepository,
 		sessionRepository,
 		auditService,
+		userRolesService,
+		rolePermissionsService,
 	)
 
 	authHandler := auth.NewHandler(
@@ -1225,6 +1227,7 @@ func New(application *app.Application) *gin.Engine {
 	auth.RegisterRoutes(
 		api.Group("/auth"),
 		authHandler,
+		middleware.Auth(application.Config),
 	)
 
 	return router

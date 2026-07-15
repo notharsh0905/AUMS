@@ -8,7 +8,9 @@ import (
 	"aums/backend/configs"
 	"aums/backend/internal/audit"
 	"aums/backend/internal/db/generated"
+	"aums/backend/internal/rolepermissions"
 	"aums/backend/internal/sessions"
+	"aums/backend/internal/userroles"
 	"aums/backend/internal/users"
 	aumsjwt "aums/backend/pkg/jwt"
 	"aums/backend/pkg/password"
@@ -26,6 +28,10 @@ type Service struct {
 	sessionRepository *sessions.Repository
 
 	auditService *audit.Service
+
+	userRolesService *userroles.Service
+
+	rolePermissionsService *rolepermissions.Service
 }
 
 func NewService(
@@ -33,6 +39,8 @@ func NewService(
 	userRepository *users.Repository,
 	sessionRepository *sessions.Repository,
 	auditService *audit.Service,
+	userRolesService *userroles.Service,
+	rolePermissionsService *rolepermissions.Service,
 ) *Service {
 
 	return &Service{
@@ -43,6 +51,10 @@ func NewService(
 		sessionRepository: sessionRepository,
 
 		auditService: auditService,
+
+		userRolesService: userRolesService,
+
+		rolePermissionsService: rolePermissionsService,
 	}
 }
 
@@ -273,4 +285,52 @@ func (s *Service) Logout(
 		ctx,
 		session.SessionID,
 	)
+}
+
+func (s *Service) GetMe(
+	ctx context.Context,
+	userIDStr string,
+) (*GetMeResponse, error) {
+
+	var userID pgtype.UUID
+	err := userID.Scan(userIDStr)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userRepository.GetByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	roles, err := s.userRolesService.GetUserRoles(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	roleCodes := make([]string, 0, len(roles))
+	for _, r := range roles {
+		roleCodes = append(roleCodes, r.RoleCode)
+	}
+
+	permissions, err := s.rolePermissionsService.GetUserPermissions(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	permissionCodes := make([]string, 0, len(permissions))
+	for _, p := range permissions {
+		permissionCodes = append(permissionCodes, p.PermissionCode)
+	}
+
+	return &GetMeResponse{
+		UserID:      user.UserID.String(),
+		Username:    user.Username.String,
+		Email:       user.Email,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName.String,
+		Status:      string(user.Status),
+		Roles:       roleCodes,
+		Permissions: permissionCodes,
+	}, nil
 }

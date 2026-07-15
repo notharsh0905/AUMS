@@ -6,6 +6,7 @@ import {
   RefreshTokenResponse,
   CurrentUser,
 } from '@/types/auth';
+import { UserStatus } from '@/types/user';
 import { DEMO_USERS, DEMO_CREDENTIALS } from '@/config/demo-users';
 
 const b64url = (str: string): string => {
@@ -92,8 +93,47 @@ export const authService = {
 
   getCurrentUser: async (userId?: string): Promise<CurrentUser> => {
     try {
-      const res = await api.get<CurrentUser>(API_ENDPOINTS.AUTH.ME);
-      return res.data;
+      interface BackendGetMeResponse {
+        user_id?: string;
+        userId?: string;
+        username: string;
+        email: string;
+        first_name?: string;
+        firstName?: string;
+        last_name?: string;
+        lastName?: string;
+        status?: string;
+        roles?: string[];
+        permissions?: string[];
+        is_email_verified?: boolean;
+        isEmailVerified?: boolean;
+        is_phone_verified?: boolean;
+        isPhoneVerified?: boolean;
+        created_at?: string;
+        createdAt?: string;
+        updated_at?: string;
+        updatedAt?: string;
+      }
+      const res = await api.get<BackendGetMeResponse>(API_ENDPOINTS.AUTH.ME);
+      const data = res.data;
+      
+      // Default to 'active' if status is missing or not a valid UserStatus
+      const userStatus: UserStatus = (data.status as UserStatus) || 'active';
+
+      return {
+        userId: data.user_id || data.userId || '',
+        username: data.username,
+        email: data.email,
+        firstName: data.first_name || data.firstName || '',
+        lastName: data.last_name || data.lastName || '',
+        status: userStatus,
+        roles: data.roles || [],
+        permissions: data.permissions || [],
+        isEmailVerified: data.is_email_verified ?? data.isEmailVerified ?? true,
+        isPhoneVerified: data.is_phone_verified ?? data.isPhoneVerified ?? false,
+        createdAt: data.created_at || data.createdAt || new Date().toISOString(),
+        updatedAt: data.updated_at || data.updatedAt || new Date().toISOString(),
+      };
     } catch (error) {
       console.warn(
         'Failed to fetch /auth/me from backend, falling back to stub user details:',

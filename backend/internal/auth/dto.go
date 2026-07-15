@@ -38,3 +38,15 @@ type RefreshResponse struct {
 type LogoutRequest struct {
 	RefreshToken string `json:"refresh_token" validate:"required"`
 }
+
+// GetMeResponse represents the response details of the authenticated user.
+type GetMeResponse struct {
+	UserID      string   `json:"user_id"`
+	Username    string   `json:"username"`
+	Email       string   `json:"email"`
+	FirstName   string   `json:"first_name"`
+	LastName    string   `json:"last_name"`
+	Status      string   `json:"status"`
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
+}

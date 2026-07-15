@@ -6,7 +6,7 @@ INSERT INTO user_roles (user_role_id, user_id, role_id)
 VALUES
 (
     gen_random_uuid(),
-    (SELECT user_id FROM users WHERE email = 'admin@aums.edu'),
+    (SELECT user_id FROM users WHERE email = 'admin@aums.com'),
     (SELECT role_id FROM roles WHERE role_code = 'SUPER_ADMIN')
 ),
 (

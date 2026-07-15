@@ -208,3 +208,54 @@ func (h *Handler) Logout(
 		nil,
 	)
 }
+
+// GetMe godoc
+// @Summary      Get Current Authenticated User Details
+// @Description  Retrieve full profile, roles, and permissions of the currently logged in session
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200     {object}  response.SuccessResponse{data=GetMeResponse}
+// @Failure      401     {object}  response.ErrorResponse
+// @Failure      500     {object}  response.ErrorResponse
+// @Router       /auth/me [get]
+func (h *Handler) GetMe(
+	c *gin.Context,
+) {
+
+	userID, exists := c.Get("user_id")
+	if !exists {
+
+		response.Error(
+			c,
+			http.StatusUnauthorized,
+			"unauthorized",
+		)
+
+		return
+	}
+
+	resp, err := h.service.GetMe(
+		c.Request.Context(),
+		userID.(string),
+	)
+
+	if err != nil {
+
+		response.Error(
+			c,
+			http.StatusInternalServerError,
+			err.Error(),
+		)
+
+		return
+	}
+
+	response.Success(
+		c,
+		http.StatusOK,
+		"user profile retrieved successfully",
+		resp,
+	)
+}

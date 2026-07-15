@@ -5,7 +5,7 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
     userId: 'demo-super-admin-id',
     username: 'super_admin',
     email: 'admin@aums.com',
-    firstName: 'System',
+    firstName: 'Super',
     lastName: 'Admin',
     status: 'active',
     isEmailVerified: true,
@@ -37,10 +37,10 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
   },
   faculty: {
     userId: 'demo-faculty-id',
-    username: 'prof_smith',
-    email: 'smith@aums.edu',
-    firstName: 'John',
-    lastName: 'Smith',
+    username: 'faculty_cse1',
+    email: 'faculty.cse1@aums.edu',
+    firstName: 'CSE Faculty',
+    lastName: 'One',
     status: 'active',
     isEmailVerified: true,
     isPhoneVerified: true,
@@ -51,10 +51,10 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
   },
   student: {
     userId: 'demo-student-id',
-    username: 'student_doe',
-    email: 'doe@aums.edu',
-    firstName: 'Jane',
-    lastName: 'Doe',
+    username: 'student1',
+    email: 'student1@aums.edu',
+    firstName: 'Student',
+    lastName: 'One',
     status: 'active',
     isEmailVerified: true,
     isPhoneVerified: false,
@@ -65,10 +65,10 @@ export const DEMO_USERS: Record<string, CurrentUser> = {
   },
   parent: {
     userId: 'demo-parent-id',
-    username: 'parent_doe',
-    email: 'parent.doe@aums.edu',
-    firstName: 'Robert',
-    lastName: 'Doe',
+    username: 'parent1',
+    email: 'parent1@aums.edu',
+    firstName: 'Parent',
+    lastName: 'One',
     status: 'active',
     isEmailVerified: true,
     isPhoneVerified: false,
@@ -84,17 +84,44 @@ export const DEMO_CREDENTIALS = {
     email: 'admin@aums.com',
     password: 'Admin@123',
   },
+  institutionAdmin: {
+    email: 'institution.admin@aums.edu',
+    password: 'Admin@123',
+  },
+  dean: {
+    email: 'dean.engineering@aums.edu',
+    password: 'Admin@123',
+  },
+  hod: {
+    email: 'hod.cse@aums.edu',
+    password: 'Admin@123',
+  },
   faculty: {
-    email: 'smith@aums.edu',
+    email: 'faculty.cse1@aums.edu',
+    password: 'Admin@123',
+  },
+  faculty2: {
+    email: 'faculty.cse2@aums.edu',
     password: 'Admin@123',
   },
   student: {
-    email: 'doe@aums.edu',
+    email: 'student1@aums.edu',
+    password: 'Admin@123',
+  },
+  student2: {
+    email: 'student2@aums.edu',
+    password: 'Admin@123',
+  },
+  student3: {
+    email: 'student3@aums.edu',
     password: 'Admin@123',
   },
   parent: {
-    email: 'parent.doe@aums.edu',
+    email: 'parent1@aums.edu',
+    password: 'Admin@123',
+  },
+  parent2: {
+    email: 'parent2@aums.edu',
     password: 'Admin@123',
   },
 };
-

@@ -3,6 +3,8 @@ package userroles
 import (
 	"context"
 
+	"aums/backend/internal/db/generated"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -30,22 +32,26 @@ func (s *Service) HasRole(
 		userID,
 	)
 
-	println("ROLES FOUND:", len(roles))
-
 	if err != nil {
 		return false, err
 	}
 
-	println("ROLES FOUND:", len(roles))
-
 	for _, role := range roles {
-
-		println("ROLE:", role.RoleCode)
-
 		if role.RoleCode == roleCode {
 			return true, nil
 		}
 	}
 
 	return false, nil
+}
+
+func (s *Service) GetUserRoles(
+	ctx context.Context,
+	userID pgtype.UUID,
+) ([]generated.Role, error) {
+
+	return s.repository.GetUserRoles(
+		ctx,
+		userID,
+	)
 }
