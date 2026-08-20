@@ -1,4 +1,4 @@
-# Phase 1 — Foundation Database Design 
+# Phase 1 — Foundation Database Design
 
 * 001 Extensions
 * 002 Core
