@@ -278,6 +278,169 @@ VALUES
     'A',
     60,
     'ACTIVE'::offering_status
+),
+(
+    '00000000-0000-0000-0000-000000000402',
+    '00000000-0000-0000-0000-000000000102',
+    (SELECT academic_year_id FROM academic_years WHERE academic_year_name = '2026-2027'),
+    '00000000-0000-0000-0000-000000000301',
+    'A',
+    60,
+    'ACTIVE'::offering_status
+)
+ON CONFLICT DO NOTHING;
+
+-- Seed Student Course Registrations
+INSERT INTO student_course_registrations (
+    student_course_registration_id,
+    enrollment_id,
+    course_offering_id,
+    registration_status,
+    registered_at
+)
+VALUES
+(
+    gen_random_uuid(),
+    (SELECT enrollment_id FROM student_enrollments WHERE enrollment_number = 'CS2026001'),
+    '00000000-0000-0000-0000-000000000401',
+    'REGISTERED'::registration_status,
+    CURRENT_DATE - INTERVAL '6 months'
+),
+(
+    gen_random_uuid(),
+    (SELECT enrollment_id FROM student_enrollments WHERE enrollment_number = 'CS2026001'),
+    '00000000-0000-0000-0000-000000000402',
+    'REGISTERED'::registration_status,
+    CURRENT_DATE - INTERVAL '6 months'
+)
+ON CONFLICT DO NOTHING;
+
+-- Seed Buildings & Rooms
+INSERT INTO buildings (
+    building_id,
+    campus_id,
+    building_code,
+    building_name
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000701',
+    (SELECT campus_id FROM campuses LIMIT 1),
+    'BLKA',
+    'Academic Block A'
+)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO rooms (
+    room_id,
+    building_id,
+    room_code,
+    room_name,
+    floor_number,
+    capacity,
+    room_type
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000801',
+    '00000000-0000-0000-0000-000000000701',
+    'R101',
+    'Lecture Hall 101',
+    1,
+    60,
+    'CLASSROOM'
+),
+(
+    '00000000-0000-0000-0000-000000000802',
+    '00000000-0000-0000-0000-000000000701',
+    'LAB201',
+    'Advanced Computing Lab',
+    2,
+    45,
+    'LABORATORY'
+)
+ON CONFLICT DO NOTHING;
+
+-- Seed Working Days
+INSERT INTO working_days (
+    working_day_id,
+    day_name,
+    is_working_day
+)
+VALUES
+('00000000-0000-0000-0000-000000000901', 'MONDAY'::day_of_week, TRUE),
+('00000000-0000-0000-0000-000000000902', 'TUESDAY'::day_of_week, TRUE),
+('00000000-0000-0000-0000-000000000903', 'WEDNESDAY'::day_of_week, TRUE),
+('00000000-0000-0000-0000-000000000904', 'THURSDAY'::day_of_week, TRUE),
+('00000000-0000-0000-0000-000000000905', 'FRIDAY'::day_of_week, TRUE)
+ON CONFLICT (day_name) DO NOTHING;
+
+-- Seed Time Slots
+INSERT INTO time_slots (
+    time_slot_id,
+    slot_name,
+    start_time,
+    end_time
+)
+VALUES
+('00000000-0000-0000-0000-000000000951', 'Morning Slot 1', '09:00:00', '10:00:00'),
+('00000000-0000-0000-0000-000000000952', 'Morning Slot 2', '10:15:00', '11:15:00'),
+('00000000-0000-0000-0000-000000000953', 'Afternoon Lab Slot', '14:00:00', '16:00:00')
+ON CONFLICT (start_time, end_time) DO NOTHING;
+
+-- Seed Master Timetable
+INSERT INTO timetables (
+    timetable_id,
+    timetable_name,
+    academic_year_id,
+    semester_id,
+    effective_from,
+    effective_to,
+    is_active
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000981',
+    'CSE Fall 2026 Master Schedule',
+    (SELECT academic_year_id FROM academic_years WHERE academic_year_name = '2026-2027'),
+    '00000000-0000-0000-0000-000000000301',
+    '2026-07-01',
+    '2026-12-31',
+    TRUE
+)
+ON CONFLICT DO NOTHING;
+
+-- Seed Timetable Entries
+INSERT INTO timetable_entries (
+    timetable_entry_id,
+    timetable_id,
+    course_offering_id,
+    faculty_profile_id,
+    room_id,
+    working_day_id,
+    time_slot_id,
+    entry_type
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000991',
+    '00000000-0000-0000-0000-000000000981',
+    '00000000-0000-0000-0000-000000000401',
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    '00000000-0000-0000-0000-000000000801',
+    '00000000-0000-0000-0000-000000000901',
+    '00000000-0000-0000-0000-000000000951',
+    'LECTURE'::timetable_entry_type
+),
+(
+    '00000000-0000-0000-0000-000000000992',
+    '00000000-0000-0000-0000-000000000981',
+    '00000000-0000-0000-0000-000000000402',
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    '00000000-0000-0000-0000-000000000802',
+    '00000000-0000-0000-0000-000000000903',
+    '00000000-0000-0000-0000-000000000953',
+    'LAB'::timetable_entry_type
 )
 ON CONFLICT DO NOTHING;
 

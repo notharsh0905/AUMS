@@ -2,21 +2,26 @@ package timetableentries
 
 import (
 	"context"
+	"errors"
 
 	"aums/backend/internal/db/generated"
+	"aums/backend/internal/userroles"
 	aumsuuid "aums/backend/pkg/uuid"
 )
 
 type Service struct {
-	repository *Repository
+	repository       *Repository
+	userRolesService *userroles.Service
 }
 
 func NewService(
 	repository *Repository,
+	userRolesService *userroles.Service,
 ) *Service {
 
 	return &Service{
-		repository: repository,
+		repository:       repository,
+		userRolesService: userRolesService,
 	}
 }
 
@@ -27,6 +32,62 @@ func (s *Service) List(
 	return s.repository.List(
 		ctx,
 	)
+}
+
+func (s *Service) ListScoped(
+	ctx context.Context,
+	callerUserIDStr string,
+) ([]generated.TimetableEntry, error) {
+
+	if callerUserIDStr == "" {
+		return s.repository.List(ctx)
+	}
+
+	callerUserID, err := aumsuuid.Parse(callerUserIDStr)
+	if err != nil {
+		return s.repository.List(ctx)
+	}
+
+	// 1. Broad academic administrative roles retain full timetable visibility
+	isAdmin, err := s.userRolesService.HasRole(ctx, callerUserID, "SUPER_ADMIN")
+	if err == nil && isAdmin {
+		return s.repository.List(ctx)
+	}
+
+	isInstAdmin, err := s.userRolesService.HasRole(ctx, callerUserID, "INSTITUTION_ADMIN")
+	if err == nil && isInstAdmin {
+		return s.repository.List(ctx)
+	}
+
+	isDean, err := s.userRolesService.HasRole(ctx, callerUserID, "DEAN")
+	if err == nil && isDean {
+		return s.repository.List(ctx)
+	}
+
+	isHOD, err := s.userRolesService.HasRole(ctx, callerUserID, "HOD")
+	if err == nil && isHOD {
+		return s.repository.List(ctx)
+	}
+
+	// 2. Faculty role: scope to assigned teaching slots
+	isFaculty, err := s.userRolesService.HasRole(ctx, callerUserID, "FACULTY")
+	if err == nil && isFaculty {
+		faculty, err := s.repository.GetFacultyProfileByUserID(ctx, callerUserID)
+		if err == nil {
+			return s.repository.ListForFaculty(ctx, faculty.FacultyProfileID)
+		}
+	}
+
+	// 3. Student role: scope to enrolled course offerings
+	isStudent, err := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
+	if err == nil && isStudent {
+		student, err := s.repository.GetStudentProfileByUserID(ctx, callerUserID)
+		if err == nil {
+			return s.repository.ListForStudent(ctx, student.StudentProfileID)
+		}
+	}
+
+	return s.repository.List(ctx)
 }
 
 func (s *Service) Create(
@@ -84,4 +145,17 @@ func (s *Service) Create(
 			),
 		},
 	)
+}
+
+func (s *Service) Delete(
+	ctx context.Context,
+	idStr string,
+) error {
+
+	id, err := aumsuuid.Parse(idStr)
+	if err != nil {
+		return errors.New("invalid timetable entry id")
+	}
+
+	return s.repository.Delete(ctx, id)
 }

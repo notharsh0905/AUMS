@@ -59,6 +59,40 @@ func (q *Queries) CreateTimetableEntry(ctx context.Context, arg CreateTimetableE
 	return err
 }
 
+const deleteTimetableEntry = `-- name: DeleteTimetableEntry :exec
+DELETE FROM timetable_entries
+WHERE timetable_entry_id = $1
+`
+
+func (q *Queries) DeleteTimetableEntry(ctx context.Context, timetableEntryID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteTimetableEntry, timetableEntryID)
+	return err
+}
+
+const getTimetableEntryByID = `-- name: GetTimetableEntryByID :one
+SELECT timetable_entry_id, timetable_id, course_offering_id, faculty_profile_id, room_id, working_day_id, time_slot_id, entry_type, created_at, updated_at
+FROM timetable_entries
+WHERE timetable_entry_id = $1
+`
+
+func (q *Queries) GetTimetableEntryByID(ctx context.Context, timetableEntryID pgtype.UUID) (TimetableEntry, error) {
+	row := q.db.QueryRow(ctx, getTimetableEntryByID, timetableEntryID)
+	var i TimetableEntry
+	err := row.Scan(
+		&i.TimetableEntryID,
+		&i.TimetableID,
+		&i.CourseOfferingID,
+		&i.FacultyProfileID,
+		&i.RoomID,
+		&i.WorkingDayID,
+		&i.TimeSlotID,
+		&i.EntryType,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listTimetableEntries = `-- name: ListTimetableEntries :many
 SELECT timetable_entry_id, timetable_id, course_offering_id, faculty_profile_id, room_id, working_day_id, time_slot_id, entry_type, created_at, updated_at
 FROM timetable_entries
@@ -67,6 +101,84 @@ ORDER BY created_at DESC
 
 func (q *Queries) ListTimetableEntries(ctx context.Context) ([]TimetableEntry, error) {
 	rows, err := q.db.Query(ctx, listTimetableEntries)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TimetableEntry{}
+	for rows.Next() {
+		var i TimetableEntry
+		if err := rows.Scan(
+			&i.TimetableEntryID,
+			&i.TimetableID,
+			&i.CourseOfferingID,
+			&i.FacultyProfileID,
+			&i.RoomID,
+			&i.WorkingDayID,
+			&i.TimeSlotID,
+			&i.EntryType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTimetableEntriesForFaculty = `-- name: ListTimetableEntriesForFaculty :many
+SELECT te.timetable_entry_id, te.timetable_id, te.course_offering_id, te.faculty_profile_id, te.room_id, te.working_day_id, te.time_slot_id, te.entry_type, te.created_at, te.updated_at
+FROM timetable_entries te
+WHERE te.faculty_profile_id = $1
+ORDER BY te.created_at DESC
+`
+
+func (q *Queries) ListTimetableEntriesForFaculty(ctx context.Context, facultyProfileID pgtype.UUID) ([]TimetableEntry, error) {
+	rows, err := q.db.Query(ctx, listTimetableEntriesForFaculty, facultyProfileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []TimetableEntry{}
+	for rows.Next() {
+		var i TimetableEntry
+		if err := rows.Scan(
+			&i.TimetableEntryID,
+			&i.TimetableID,
+			&i.CourseOfferingID,
+			&i.FacultyProfileID,
+			&i.RoomID,
+			&i.WorkingDayID,
+			&i.TimeSlotID,
+			&i.EntryType,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTimetableEntriesForStudent = `-- name: ListTimetableEntriesForStudent :many
+SELECT te.timetable_entry_id, te.timetable_id, te.course_offering_id, te.faculty_profile_id, te.room_id, te.working_day_id, te.time_slot_id, te.entry_type, te.created_at, te.updated_at
+FROM timetable_entries te
+JOIN student_course_registrations scr ON scr.course_offering_id = te.course_offering_id
+JOIN student_enrollments se ON se.enrollment_id = scr.enrollment_id
+WHERE se.student_profile_id = $1
+ORDER BY te.created_at DESC
+`
+
+func (q *Queries) ListTimetableEntriesForStudent(ctx context.Context, studentProfileID pgtype.UUID) ([]TimetableEntry, error) {
+	rows, err := q.db.Query(ctx, listTimetableEntriesForStudent, studentProfileID)
 	if err != nil {
 		return nil, err
 	}

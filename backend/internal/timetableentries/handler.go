@@ -24,7 +24,7 @@ func NewHandler(
 
 // List godoc
 // @Summary      List Timetable Entries
-// @Description  Retrieve a paginated list of timetable entries
+// @Description  Retrieve a paginated list of timetable entries scoped to the caller's role
 // @Tags         Timetable Entries
 // @Accept       json
 // @Produce      json
@@ -32,8 +32,6 @@ func NewHandler(
 // @Param        page   query      int  false  "Page number"   default(1)
 // @Param        limit  query      int  false  "Page size"     default(20)
 // @Success      200    {object}   response.SuccessResponse
-// @Failure      400    {object}   response.ErrorResponse
-// @Failure      401    {object}   response.ErrorResponse
 // @Failure      500    {object}   response.ErrorResponse
 // @Router       /timetable-entries [get]
 func (h *Handler) List(
@@ -43,8 +41,11 @@ func (h *Handler) List(
 	page := response.GetPage(c)
 	limit := response.GetLimit(c)
 
-	data, err := h.service.List(
+	callerUserID := c.GetString("user_id")
+
+	data, err := h.service.ListScoped(
 		c.Request.Context(),
+		callerUserID,
 	)
 
 	if err != nil {
@@ -85,7 +86,7 @@ func (h *Handler) List(
 
 // Create godoc
 // @Summary      Create Timetable Entry
-// @Description  Create a new timetable entry record
+// @Description  Create a new entry in the timetable schedule
 // @Tags         Timetable Entries
 // @Accept       json
 // @Produce      json
@@ -141,6 +142,53 @@ func (h *Handler) Create(
 		c,
 		http.StatusCreated,
 		"timetable entry created successfully",
+		nil,
+	)
+}
+
+// Delete godoc
+// @Summary      Delete Timetable Entry
+// @Description  Remove an entry from the timetable schedule
+// @Tags         Timetable Entries
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   path      string  true  "Timetable Entry ID"
+// @Success      200  {object}  response.SuccessResponse
+// @Failure      400  {object}  response.ErrorResponse
+// @Router       /timetable-entries/{id} [delete]
+func (h *Handler) Delete(
+	c *gin.Context,
+) {
+
+	id := c.Param("id")
+	if id == "" {
+		response.Error(
+			c,
+			http.StatusBadRequest,
+			"timetable entry id is required",
+		)
+		return
+	}
+
+	err := h.service.Delete(
+		c.Request.Context(),
+		id,
+	)
+
+	if err != nil {
+		response.Error(
+			c,
+			http.StatusBadRequest,
+			err.Error(),
+		)
+		return
+	}
+
+	response.Success(
+		c,
+		http.StatusOK,
+		"timetable entry deleted successfully",
 		nil,
 	)
 }

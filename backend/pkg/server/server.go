@@ -379,6 +379,7 @@ func New(application *app.Application) *gin.Engine {
 	timetableEntryService :=
 		timetableentries.NewService(
 			timetableEntryRepository,
+			userRolesService,
 		)
 
 	timetableEntryHandler :=
@@ -1037,7 +1038,7 @@ func New(application *app.Application) *gin.Engine {
 	timetableGroup.Use(
 		middleware.RequirePermission(
 			rolePermissionsService,
-			"timetable.read",
+			"timetables.read",
 		),
 	)
 
@@ -1063,13 +1064,14 @@ func New(application *app.Application) *gin.Engine {
 	timetableEntriesGroup.Use(
 		middleware.RequirePermission(
 			rolePermissionsService,
-			"timetable.read",
+			"timetables.read",
 		),
 	)
 
 	timetableentries.RegisterRoutes(
 		timetableEntriesGroup,
 		timetableEntryHandler,
+		rolePermissionsService,
 	)
 
 	// ==========================================
