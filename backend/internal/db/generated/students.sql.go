@@ -73,6 +73,62 @@ func (q *Queries) CreateStudent(ctx context.Context, arg CreateStudentParams) er
 	return err
 }
 
+const getStudentProfileByID = `-- name: GetStudentProfileByID :one
+SELECT student_profile_id, user_id, admission_date, date_of_birth, gender, blood_group, nationality, category, religion, emergency_contact_name, emergency_contact_phone, created_at, updated_at, deleted_at
+FROM student_profiles
+WHERE student_profile_id = $1
+`
+
+func (q *Queries) GetStudentProfileByID(ctx context.Context, studentProfileID pgtype.UUID) (StudentProfile, error) {
+	row := q.db.QueryRow(ctx, getStudentProfileByID, studentProfileID)
+	var i StudentProfile
+	err := row.Scan(
+		&i.StudentProfileID,
+		&i.UserID,
+		&i.AdmissionDate,
+		&i.DateOfBirth,
+		&i.Gender,
+		&i.BloodGroup,
+		&i.Nationality,
+		&i.Category,
+		&i.Religion,
+		&i.EmergencyContactName,
+		&i.EmergencyContactPhone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getStudentProfileByUserID = `-- name: GetStudentProfileByUserID :one
+SELECT student_profile_id, user_id, admission_date, date_of_birth, gender, blood_group, nationality, category, religion, emergency_contact_name, emergency_contact_phone, created_at, updated_at, deleted_at
+FROM student_profiles
+WHERE user_id = $1
+`
+
+func (q *Queries) GetStudentProfileByUserID(ctx context.Context, userID pgtype.UUID) (StudentProfile, error) {
+	row := q.db.QueryRow(ctx, getStudentProfileByUserID, userID)
+	var i StudentProfile
+	err := row.Scan(
+		&i.StudentProfileID,
+		&i.UserID,
+		&i.AdmissionDate,
+		&i.DateOfBirth,
+		&i.Gender,
+		&i.BloodGroup,
+		&i.Nationality,
+		&i.Category,
+		&i.Religion,
+		&i.EmergencyContactName,
+		&i.EmergencyContactPhone,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const listStudents = `-- name: ListStudents :many
 SELECT student_profile_id, user_id, admission_date, date_of_birth, gender, blood_group, nationality, category, religion, emergency_contact_name, emergency_contact_phone, created_at, updated_at, deleted_at
 FROM student_profiles
@@ -81,6 +137,52 @@ ORDER BY created_at DESC
 
 func (q *Queries) ListStudents(ctx context.Context) ([]StudentProfile, error) {
 	rows, err := q.db.Query(ctx, listStudents)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []StudentProfile{}
+	for rows.Next() {
+		var i StudentProfile
+		if err := rows.Scan(
+			&i.StudentProfileID,
+			&i.UserID,
+			&i.AdmissionDate,
+			&i.DateOfBirth,
+			&i.Gender,
+			&i.BloodGroup,
+			&i.Nationality,
+			&i.Category,
+			&i.Religion,
+			&i.EmergencyContactName,
+			&i.EmergencyContactPhone,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStudentsByParentUserID = `-- name: ListStudentsByParentUserID :many
+SELECT sp.student_profile_id, sp.user_id, sp.admission_date, sp.date_of_birth, sp.gender, sp.blood_group, sp.nationality, sp.category, sp.religion, sp.emergency_contact_name, sp.emergency_contact_phone, sp.created_at, sp.updated_at, sp.deleted_at
+FROM student_profiles sp
+JOIN student_parent_relationships spr
+    ON spr.student_profile_id = sp.student_profile_id
+JOIN parent_profiles pp
+    ON pp.parent_profile_id = spr.parent_profile_id
+WHERE pp.user_id = $1
+ORDER BY sp.created_at DESC
+`
+
+func (q *Queries) ListStudentsByParentUserID(ctx context.Context, userID pgtype.UUID) ([]StudentProfile, error) {
+	rows, err := q.db.Query(ctx, listStudentsByParentUserID, userID)
 	if err != nil {
 		return nil, err
 	}

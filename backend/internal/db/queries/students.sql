@@ -31,3 +31,23 @@ OFFSET $2;
 -- name: CountStudents :one
 SELECT COUNT(*)
 FROM student_profiles;
+
+-- name: GetStudentProfileByUserID :one
+SELECT *
+FROM student_profiles
+WHERE user_id = $1;
+
+-- name: GetStudentProfileByID :one
+SELECT *
+FROM student_profiles
+WHERE student_profile_id = $1;
+
+-- name: ListStudentsByParentUserID :many
+SELECT sp.*
+FROM student_profiles sp
+JOIN student_parent_relationships spr
+    ON spr.student_profile_id = sp.student_profile_id
+JOIN parent_profiles pp
+    ON pp.parent_profile_id = spr.parent_profile_id
+WHERE pp.user_id = $1
+ORDER BY sp.created_at DESC;

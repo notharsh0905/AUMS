@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, Bell, Sun, Moon, ChevronDown, User, LogOut, Settings } from 'lucide-react';
+import { Menu, Search, Sun, Moon, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import Link from 'next/link';
 import { Breadcrumb } from './breadcrumb';
 import { useAuth } from '@/providers/auth-provider';
+import { CommandPalette } from '@/components/shared/command-palette';
 
 interface HeaderProps {
   isMobileOpen: boolean;
@@ -23,6 +25,7 @@ export function Header({
   const { user, logout } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   // Avoid hydration mismatch for theme toggle
   useEffect(() => {
@@ -40,125 +43,132 @@ export function Header({
   };
 
   return (
-    <header className="h-16 sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between z-20">
-      <div className="flex items-center gap-3">
-        {/* Mobile menu trigger */}
-        <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 md:hidden"
-          aria-label="Toggle mobile menu"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
-
-        {/* Collapsed sidebar trigger */}
-        {isCollapsed && (
+    <>
+      <header className="h-16 sticky top-0 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between z-20">
+        <div className="flex items-center gap-3">
+          {/* Mobile menu trigger */}
           <button
-            onClick={() => setIsCollapsed(false)}
-            className="hidden md:flex p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400"
-            aria-label="Expand sidebar"
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            className="p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 md:hidden"
+            aria-label="Toggle mobile menu"
           >
             <Menu className="h-5 w-5" />
           </button>
-        )}
 
-        {/* Breadcrumb container */}
-        <div className="hidden sm:block">
-          <Breadcrumb />
-        </div>
-      </div>
+          {/* Collapsed sidebar trigger */}
+          {isCollapsed && (
+            <button
+              onClick={() => setIsCollapsed(false)}
+              className="hidden md:flex p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400"
+              aria-label="Expand sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
 
-      <div className="flex items-center gap-4">
-        {/* Search Input bar */}
-        <div className="relative hidden md:block w-64">
-          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-zinc-400">
-            <Search className="h-4 w-4" />
-          </span>
-          <input
-            type="search"
-            placeholder="Search console..."
-            className="w-full text-sm bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-lg pl-9 pr-4 py-1.5 focus:outline-none focus:ring-1 focus:ring-zinc-900 dark:focus:ring-zinc-50 text-zinc-900 dark:text-zinc-50 placeholder-zinc-400"
-          />
+          {/* Breadcrumb container */}
+          <div className="hidden sm:block">
+            <Breadcrumb />
+          </div>
         </div>
 
-        {/* Notifications Mock button */}
-        <button
-          className="p-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 relative"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4.5 w-4.5" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-zinc-900 dark:bg-zinc-50" />
-        </button>
-
-        {/* Theme Toggle button */}
-        {mounted && (
+        <div className="flex items-center gap-3">
+          {/* Command Palette Trigger Input */}
           <button
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="p-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400"
-            aria-label="Toggle theme"
+            type="button"
+            onClick={() => setCommandPaletteOpen(true)}
+            className="relative hidden md:flex items-center justify-between w-64 px-3 py-1.5 text-xs bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-lg text-zinc-400 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
           >
-            {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
-          </button>
-        )}
-
-        {/* User avatar dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-1.5 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
-            aria-label="User menu"
-          >
-            <div className="h-8 w-8 rounded-full bg-zinc-900 dark:bg-zinc-50 flex items-center justify-center font-bold text-xs text-white dark:text-zinc-950">
-              {user?.firstName?.charAt(0) || 'U'}
-            </div>
-            <ChevronDown className="h-4 w-4 text-zinc-500 dark:text-zinc-400 hidden sm:block" />
+            <span className="flex items-center gap-2">
+              <Search className="h-3.5 w-3.5" />
+              <span>Search modules...</span>
+            </span>
+            <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-mono text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700">
+              ⌘K
+            </kbd>
           </button>
 
-          {dropdownOpen && (
-            <>
-              <div
-                className="fixed inset-0 z-30"
-                onClick={() => setDropdownOpen(false)}
-              />
-              <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2 shadow-lg z-40 animate-in fade-in slide-in-from-top-2 duration-150">
-                {user && (
-                  <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-900 flex flex-col min-w-0">
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 truncate">
-                      {user.firstName} {user.lastName}
-                    </span>
-                    <span className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-                      {user.email}
-                    </span>
+          {/* Theme Toggle button */}
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-500 dark:text-zinc-400 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+          )}
+
+          {/* User Profile Menu Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-2.5 p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+              aria-label="User profile menu"
+            >
+              <div className="h-8 w-8 rounded-full bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs">
+                {user?.firstName?.charAt(0) || user?.username?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="hidden lg:flex flex-col items-start text-left">
+                <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-50 leading-tight">
+                  {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.username || 'User'}
+                </span>
+                <span className="text-[10px] text-zinc-400 leading-tight">
+                  {user?.roles?.[0] || 'SUPER_ADMIN'}
+                </span>
+              </div>
+              <ChevronDown className="h-3.5 w-3.5 text-zinc-400 hidden lg:block" />
+            </button>
+
+            {dropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setDropdownOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-2 shadow-xl z-40 animate-in fade-in-50 zoom-in-95">
+                  <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800/60 mb-1">
+                    <p className="text-xs font-bold text-zinc-900 dark:text-zinc-50">
+                      {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.username || 'User'}
+                    </p>
+                    <p className="text-[11px] text-zinc-400 truncate">{user?.email || 'user@aums.edu'}</p>
+                    <div className="mt-1.5">
+                      <span className="inline-block px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-850 text-zinc-700 dark:text-zinc-300 text-[10px] font-mono uppercase font-bold">
+                        {user?.roles?.[0] || 'SUPER_ADMIN'}
+                      </span>
+                    </div>
                   </div>
-                )}
-                <div className="mt-1 flex flex-col gap-0.5">
-                  <button
+
+                  <Link
+                    href="/settings"
                     onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-900 w-full text-left"
-                  >
-                    <User className="h-4 w-4" />
-                    <span>My Profile</span>
-                  </button>
-                  <button
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-zinc-700 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-50 dark:hover:bg-zinc-900 w-full text-left"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
                   >
                     <Settings className="h-4 w-4" />
-                    <span>Account Settings</span>
-                  </button>
+                    <span>Settings & Preferences</span>
+                  </Link>
+
+                  <div className="h-px bg-zinc-100 dark:bg-zinc-850 my-1" />
+
                   <button
                     onClick={handleLogout}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/20 w-full text-left mt-1 border-t border-zinc-100 dark:border-zinc-900 pt-2"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors text-left"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
+                    <span>Log Out</span>
                   </button>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Global Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
+    </>
   );
 }

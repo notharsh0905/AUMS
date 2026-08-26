@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ThemeProvider } from "./theme-provider";
 import { AuthProvider } from "./auth-provider";
+import { AcademicProvider } from "./academic-context";
 import { ToastProvider } from "./toast-provider";
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -14,8 +15,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <AuthProvider>
-        {children}
-        <ToastProvider />
+        <AcademicProvider>
+          {children}
+          <ToastProvider />
+        </AcademicProvider>
       </AuthProvider>
     </ThemeProvider>
   );

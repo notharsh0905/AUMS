@@ -255,6 +255,8 @@ WHERE r.role_code = 'HOD'
 AND p.permission_code IN (
 
 
+'departments.read',
+
 'faculty.read',
 
 'students.read',
@@ -465,11 +467,15 @@ AND p.permission_code IN (
 
     'parent_portal.access',
 
+    'students.read',
+
     'attendance.read',
 
     'academic_records.read',
 
     'results.read',
+
+    'transcripts.read',
 
     'notifications.read'
 )

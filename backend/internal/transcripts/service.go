@@ -5,17 +5,70 @@ import (
 	"strconv"
 	"time"
 
+	"aums/backend/internal/userroles"
 	aumsuuid "aums/backend/pkg/uuid"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service struct {
-	repository *Repository
+	repository       *Repository
+	userRolesService *userroles.Service
 }
 
-func NewService(repository *Repository) *Service {
+func NewService(
+	repository *Repository,
+	userRolesService *userroles.Service,
+) *Service {
 	return &Service{
-		repository: repository,
+		repository:       repository,
+		userRolesService: userRolesService,
 	}
+}
+
+func (s *Service) CanAccessStudent(
+	ctx context.Context,
+	callerUserID pgtype.UUID,
+	studentProfileID pgtype.UUID,
+) (bool, error) {
+	if s.userRolesService == nil {
+		return true, nil
+	}
+
+	// Administrators and Deans/HODs have institutional oversight
+	isSuperAdmin, _ := s.userRolesService.HasRole(ctx, callerUserID, "SUPER_ADMIN")
+	isInstAdmin, _ := s.userRolesService.HasRole(ctx, callerUserID, "INSTITUTION_ADMIN")
+	isDean, _ := s.userRolesService.HasRole(ctx, callerUserID, "DEAN")
+	isHOD, _ := s.userRolesService.HasRole(ctx, callerUserID, "HOD")
+	if isSuperAdmin || isInstAdmin || isDean || isHOD {
+		return true, nil
+	}
+
+	// Students may only view their own transcript
+	isStudent, _ := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
+	if isStudent {
+		studentProfile, err := s.repository.queries.GetStudentProfileByUserID(ctx, callerUserID)
+		if err == nil && studentProfile.StudentProfileID == studentProfileID {
+			return true, nil
+		}
+		return false, nil
+	}
+
+	// Parents may only view their linked wards' transcripts
+	isParent, _ := s.userRolesService.HasRole(ctx, callerUserID, "PARENT")
+	if isParent {
+		wards, err := s.repository.queries.ListParentWards(ctx, callerUserID)
+		if err == nil {
+			for _, w := range wards {
+				if w.StudentProfileID == studentProfileID {
+					return true, nil
+				}
+			}
+		}
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func (s *Service) GetTranscript(ctx context.Context, studentIDStr string) (TranscriptResponse, error) {
@@ -148,36 +201,25 @@ func (s *Service) GetTranscriptSummary(ctx context.Context, enrollmentIDStr stri
 		creditsRemaining = 0
 	}
 
-	overallPercentage := cgpaVal * 10.0
+	degreeCompleted := pr.DegreeCompleted
 
-	degreeClassification := "Fail"
-	if cgpaVal >= 8.5 {
-		degreeClassification = "First Class with Distinction"
-	} else if cgpaVal >= 6.5 {
-		degreeClassification = "First Class"
-	} else if cgpaVal >= 5.0 {
-		degreeClassification = "Second Class"
-	} else if cgpaVal >= 4.0 {
-		degreeClassification = "Pass Class"
-	}
-
+	degreeClassification := "Pass"
+	academicStanding := "Good Standing"
 	graduationEligibility := "INELIGIBLE"
-	if earnedCreditsVal >= requiredCredits && cgpaVal >= 4.0 {
+
+	if cgpaVal >= 3.75 {
+		degreeClassification = "First Class with Distinction"
+	} else if cgpaVal >= 3.0 {
+		degreeClassification = "First Class"
+	} else if cgpaVal >= 2.0 {
+		degreeClassification = "Second Class"
+	} else {
+		degreeClassification = "Fail"
+		academicStanding = "Academic Probation"
+	}
+
+	if degreeCompleted && earnedCreditsVal >= requiredCredits && cgpaVal >= 2.0 {
 		graduationEligibility = "ELIGIBLE"
-	}
-
-	academicStanding := "Academic Probation"
-	if cgpaVal >= 8.5 {
-		academicStanding = "Excellent"
-	} else if cgpaVal >= 6.5 {
-		academicStanding = "Good"
-	} else if cgpaVal >= 4.0 {
-		academicStanding = "Satisfactory"
-	}
-
-	var completionDateStr string
-	if pr.CompletionDate.Valid {
-		completionDateStr = pr.CompletionDate.Time.Format("2006-01-02")
 	}
 
 	return TranscriptCGPASummary{
@@ -185,12 +227,11 @@ func (s *Service) GetTranscriptSummary(ctx context.Context, enrollmentIDStr stri
 		TotalCredits:          totalCreditsVal,
 		EarnedCredits:         earnedCreditsVal,
 		CreditsRemaining:      creditsRemaining,
-		OverallPercentage:     overallPercentage,
+		OverallPercentage:     cgpaVal * 9.5, // Standard university CGPA conversion
 		DegreeClassification:  degreeClassification,
 		GraduationEligibility: graduationEligibility,
 		AcademicStanding:      academicStanding,
-		DegreeCompleted:       pr.DegreeCompleted,
-		CompletionDate:        completionDateStr,
+		DegreeCompleted:       degreeCompleted,
 	}, nil
 }
 
@@ -200,62 +241,62 @@ func (s *Service) GetTranscriptSemesters(ctx context.Context, enrollmentIDStr st
 		return nil, err
 	}
 
-	rows, err := s.repository.GetSemesterSummary(ctx, enrollmentID)
+	summaries, err := s.repository.GetSemesterSummary(ctx, enrollmentID)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]TranscriptSemester, 0, len(rows))
-	for _, row := range rows {
-		var totalCredits float64
-		if row.TotalCredits.Valid {
+	result := make([]TranscriptSemester, 0, len(summaries))
+	for _, sem := range summaries {
+		var sgpaVal float64
+		if sem.Sgpa.Valid {
 			var str string
-			if err := row.TotalCredits.Scan(&str); err == nil {
+			if err := sem.Sgpa.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					totalCredits = val
+					sgpaVal = val
 				}
 			}
 		}
 
-		var earnedCredits float64
-		if row.EarnedCredits.Valid {
+		var totalCreditsVal float64
+		if sem.TotalCredits.Valid {
 			var str string
-			if err := row.EarnedCredits.Scan(&str); err == nil {
+			if err := sem.TotalCredits.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					earnedCredits = val
+					totalCreditsVal = val
 				}
 			}
 		}
 
-		var sgpa float64
-		if row.Sgpa.Valid {
+		var earnedCreditsVal float64
+		if sem.EarnedCredits.Valid {
 			var str string
-			if err := row.Sgpa.Scan(&str); err == nil {
+			if err := sem.EarnedCredits.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					sgpa = val
+					earnedCreditsVal = val
 				}
 			}
 		}
 
 		var publishedAtStr string
-		if row.PublishedAt.Valid {
-			publishedAtStr = row.PublishedAt.Time.Format(time.RFC3339)
+		if sem.PublishedAt.Valid {
+			publishedAtStr = sem.PublishedAt.Time.Format(time.RFC3339)
 		}
 
-		res = append(res, TranscriptSemester{
-			SemesterResultID: row.SemesterResultID.String(),
-			SemesterID:       row.SemesterID.String(),
-			SemesterNumber:   row.SemesterNumber,
-			SemesterName:     row.SemesterName,
-			TotalCredits:     totalCredits,
-			EarnedCredits:    earnedCredits,
-			Sgpa:             sgpa,
-			ResultStatus:     string(row.ResultStatus),
+		result = append(result, TranscriptSemester{
+			SemesterResultID: sem.SemesterResultID.String(),
+			SemesterID:       sem.SemesterID.String(),
+			SemesterNumber:   sem.SemesterNumber,
+			SemesterName:     sem.SemesterName,
+			TotalCredits:     totalCreditsVal,
+			EarnedCredits:    earnedCreditsVal,
+			Sgpa:             sgpaVal,
+			ResultStatus:     string(sem.ResultStatus),
 			PublishedAt:      publishedAtStr,
 		})
 	}
 
-	return res, nil
+	return result, nil
 }
 
 func (s *Service) GetTranscriptCourses(ctx context.Context, enrollmentIDStr string) ([]TranscriptCourse, error) {
@@ -269,82 +310,87 @@ func (s *Service) GetTranscriptCourses(ctx context.Context, enrollmentIDStr stri
 		return nil, err
 	}
 
-	res := make([]TranscriptCourse, 0, len(rows))
-	for _, row := range rows {
-		var credits float64
-		if row.Credits.Valid {
+	result := make([]TranscriptCourse, 0, len(rows))
+	for _, c := range rows {
+		var creditsVal float64
+		if c.Credits.Valid {
 			var str string
-			if err := row.Credits.Scan(&str); err == nil {
+			if err := c.Credits.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					credits = val
+					creditsVal = val
 				}
 			}
 		}
 
-		var totalMarks float64
-		if row.TotalMarks.Valid {
+		var totalMarksVal float64
+		if c.TotalMarks.Valid {
 			var str string
-			if err := row.TotalMarks.Scan(&str); err == nil {
+			if err := c.TotalMarks.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					totalMarks = val
+					totalMarksVal = val
 				}
 			}
 		}
 
-		var marksObtained float64
-		if row.MarksObtained.Valid {
+		var marksObtainedVal float64
+		if c.MarksObtained.Valid {
 			var str string
-			if err := row.MarksObtained.Scan(&str); err == nil {
+			if err := c.MarksObtained.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					marksObtained = val
+					marksObtainedVal = val
 				}
 			}
 		}
 
-		var percentage float64
-		if row.Percentage.Valid {
+		var percentageVal float64
+		if c.Percentage.Valid {
 			var str string
-			if err := row.Percentage.Scan(&str); err == nil {
+			if err := c.Percentage.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					percentage = val
+					percentageVal = val
 				}
 			}
 		}
 
-		var gradePoint float64
-		if row.GradePoint.Valid {
+		var gradePointVal float64
+		if c.GradePoint.Valid {
 			var str string
-			if err := row.GradePoint.Scan(&str); err == nil {
+			if err := c.GradePoint.Scan(&str); err == nil {
 				if val, err := strconv.ParseFloat(str, 64); err == nil {
-					gradePoint = val
+					gradePointVal = val
 				}
 			}
 		}
 
 		var publishedAtStr string
-		if row.PublishedAt.Valid {
-			publishedAtStr = row.PublishedAt.Time.Format(time.RFC3339)
+		if c.PublishedAt.Valid {
+			publishedAtStr = c.PublishedAt.Time.Format(time.RFC3339)
 		}
 
-		res = append(res, TranscriptCourse{
-			CourseResultID:   row.CourseResultID.String(),
-			CourseOfferingID: row.CourseOfferingID.String(),
-			CourseID:         row.CourseID.String(),
-			CourseCode:       row.CourseCode,
-			CourseName:       row.CourseName,
-			Credits:          credits,
-			SemesterID:       row.SemesterID.String(),
-			SemesterNumber:   row.SemesterNumber,
-			TotalMarks:       totalMarks,
-			MarksObtained:    marksObtained,
-			Percentage:       percentage,
-			GradeCode:        row.GradeCode.String,
-			GradePoint:       gradePoint,
-			IsPassing:        row.IsPassing.Bool,
-			ResultStatus:     string(row.ResultStatus),
+		var isPassingBool bool
+		if c.IsPassing.Valid {
+			isPassingBool = c.IsPassing.Bool
+		}
+
+		result = append(result, TranscriptCourse{
+			CourseResultID:   c.CourseResultID.String(),
+			CourseOfferingID: c.CourseOfferingID.String(),
+			CourseID:         c.CourseID.String(),
+			CourseCode:       c.CourseCode,
+			CourseName:       c.CourseName,
+			Credits:          creditsVal,
+			SemesterID:       c.SemesterID.String(),
+			SemesterNumber:   c.SemesterNumber,
+			TotalMarks:       totalMarksVal,
+			MarksObtained:    marksObtainedVal,
+			Percentage:       percentageVal,
+			GradeCode:        c.GradeCode.String,
+			GradePoint:       gradePointVal,
+			IsPassing:        isPassingBool,
+			ResultStatus:     string(c.ResultStatus),
 			PublishedAt:      publishedAtStr,
 		})
 	}
 
-	return res, nil
+	return result, nil
 }

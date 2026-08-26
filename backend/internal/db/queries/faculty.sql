@@ -41,3 +41,19 @@ OFFSET $2;
 -- name: CountFaculty :one
 SELECT COUNT(*)
 FROM faculty_profiles;
+
+-- name: GetFacultyProfileByUserID :one
+SELECT *
+FROM faculty_profiles
+WHERE user_id = $1;
+
+-- name: GetFacultyProfileByID :one
+SELECT *
+FROM faculty_profiles
+WHERE faculty_profile_id = $1;
+
+-- name: ListFacultyByDepartment :many
+SELECT *
+FROM faculty_profiles
+WHERE department_id = $1
+ORDER BY employee_code;

@@ -86,3 +86,89 @@ func (q *Queries) ListAttendanceRecords(ctx context.Context) ([]AttendanceRecord
 	}
 	return items, nil
 }
+
+const listAttendanceRecordsForParentUser = `-- name: ListAttendanceRecordsForParentUser :many
+SELECT ar.attendance_record_id, ar.class_session_id, ar.enrollment_id, ar.attendance_status, ar.marked_at, ar.marked_by, ar.remarks, ar.created_at, ar.updated_at
+FROM attendance_records ar
+JOIN student_enrollments se
+    ON se.enrollment_id = ar.enrollment_id
+JOIN student_profiles sp
+    ON sp.student_profile_id = se.student_profile_id
+JOIN student_parent_relationships spr
+    ON spr.student_profile_id = sp.student_profile_id
+JOIN parent_profiles pp
+    ON pp.parent_profile_id = spr.parent_profile_id
+WHERE pp.user_id = $1
+ORDER BY ar.marked_at DESC
+`
+
+func (q *Queries) ListAttendanceRecordsForParentUser(ctx context.Context, userID pgtype.UUID) ([]AttendanceRecord, error) {
+	rows, err := q.db.Query(ctx, listAttendanceRecordsForParentUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AttendanceRecord{}
+	for rows.Next() {
+		var i AttendanceRecord
+		if err := rows.Scan(
+			&i.AttendanceRecordID,
+			&i.ClassSessionID,
+			&i.EnrollmentID,
+			&i.AttendanceStatus,
+			&i.MarkedAt,
+			&i.MarkedBy,
+			&i.Remarks,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAttendanceRecordsForStudentUser = `-- name: ListAttendanceRecordsForStudentUser :many
+SELECT ar.attendance_record_id, ar.class_session_id, ar.enrollment_id, ar.attendance_status, ar.marked_at, ar.marked_by, ar.remarks, ar.created_at, ar.updated_at
+FROM attendance_records ar
+JOIN student_enrollments se
+    ON se.enrollment_id = ar.enrollment_id
+JOIN student_profiles sp
+    ON sp.student_profile_id = se.student_profile_id
+WHERE sp.user_id = $1
+ORDER BY ar.marked_at DESC
+`
+
+func (q *Queries) ListAttendanceRecordsForStudentUser(ctx context.Context, userID pgtype.UUID) ([]AttendanceRecord, error) {
+	rows, err := q.db.Query(ctx, listAttendanceRecordsForStudentUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AttendanceRecord{}
+	for rows.Next() {
+		var i AttendanceRecord
+		if err := rows.Scan(
+			&i.AttendanceRecordID,
+			&i.ClassSessionID,
+			&i.EnrollmentID,
+			&i.AttendanceStatus,
+			&i.MarkedAt,
+			&i.MarkedBy,
+			&i.Remarks,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

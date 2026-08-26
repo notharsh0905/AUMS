@@ -5,6 +5,7 @@ import (
 
 	"aums/backend/internal/db/generated"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -29,6 +30,28 @@ func (r *Repository) List(
 
 	return r.queries.ListAttendanceRecords(
 		ctx,
+	)
+}
+
+func (r *Repository) ListForStudentUser(
+	ctx context.Context,
+	studentUserID pgtype.UUID,
+) ([]generated.AttendanceRecord, error) {
+
+	return r.queries.ListAttendanceRecordsForStudentUser(
+		ctx,
+		studentUserID,
+	)
+}
+
+func (r *Repository) ListForParentUser(
+	ctx context.Context,
+	parentUserID pgtype.UUID,
+) ([]generated.AttendanceRecord, error) {
+
+	return r.queries.ListAttendanceRecordsForParentUser(
+		ctx,
+		parentUserID,
 	)
 }
 

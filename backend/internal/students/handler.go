@@ -1,7 +1,9 @@
 package students
 
 import (
+	"aums/backend/internal/middleware"
 	"aums/backend/pkg/response"
+	aumsuuid "aums/backend/pkg/uuid"
 	"aums/backend/pkg/validator"
 	"net/http"
 
@@ -35,8 +37,12 @@ func (h *Handler) ListStudents(
 	page := response.GetPage(c)
 	limit := response.GetLimit(c)
 
-	students, total, err := h.service.ListPaginated(
+	userIDString := middleware.GetUserID(c)
+	callerUserID, _ := aumsuuid.Parse(userIDString)
+
+	students, total, err := h.service.ListPaginatedScoped(
 		c.Request.Context(),
+		callerUserID,
 		page,
 		limit,
 	)

@@ -83,6 +83,64 @@ func (q *Queries) CreateFaculty(ctx context.Context, arg CreateFacultyParams) er
 	return err
 }
 
+const getFacultyProfileByID = `-- name: GetFacultyProfileByID :one
+SELECT faculty_profile_id, user_id, employee_code, department_id, designation, employment_type, joining_date, relieving_date, status, years_of_experience, office_location, bio, created_at, updated_at, deleted_at
+FROM faculty_profiles
+WHERE faculty_profile_id = $1
+`
+
+func (q *Queries) GetFacultyProfileByID(ctx context.Context, facultyProfileID pgtype.UUID) (FacultyProfile, error) {
+	row := q.db.QueryRow(ctx, getFacultyProfileByID, facultyProfileID)
+	var i FacultyProfile
+	err := row.Scan(
+		&i.FacultyProfileID,
+		&i.UserID,
+		&i.EmployeeCode,
+		&i.DepartmentID,
+		&i.Designation,
+		&i.EmploymentType,
+		&i.JoiningDate,
+		&i.RelievingDate,
+		&i.Status,
+		&i.YearsOfExperience,
+		&i.OfficeLocation,
+		&i.Bio,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getFacultyProfileByUserID = `-- name: GetFacultyProfileByUserID :one
+SELECT faculty_profile_id, user_id, employee_code, department_id, designation, employment_type, joining_date, relieving_date, status, years_of_experience, office_location, bio, created_at, updated_at, deleted_at
+FROM faculty_profiles
+WHERE user_id = $1
+`
+
+func (q *Queries) GetFacultyProfileByUserID(ctx context.Context, userID pgtype.UUID) (FacultyProfile, error) {
+	row := q.db.QueryRow(ctx, getFacultyProfileByUserID, userID)
+	var i FacultyProfile
+	err := row.Scan(
+		&i.FacultyProfileID,
+		&i.UserID,
+		&i.EmployeeCode,
+		&i.DepartmentID,
+		&i.Designation,
+		&i.EmploymentType,
+		&i.JoiningDate,
+		&i.RelievingDate,
+		&i.Status,
+		&i.YearsOfExperience,
+		&i.OfficeLocation,
+		&i.Bio,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const listFaculty = `-- name: ListFaculty :many
 SELECT faculty_profile_id, user_id, employee_code, department_id, designation, employment_type, joining_date, relieving_date, status, years_of_experience, office_location, bio, created_at, updated_at, deleted_at
 FROM faculty_profiles
@@ -91,6 +149,49 @@ ORDER BY employee_code
 
 func (q *Queries) ListFaculty(ctx context.Context) ([]FacultyProfile, error) {
 	rows, err := q.db.Query(ctx, listFaculty)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []FacultyProfile{}
+	for rows.Next() {
+		var i FacultyProfile
+		if err := rows.Scan(
+			&i.FacultyProfileID,
+			&i.UserID,
+			&i.EmployeeCode,
+			&i.DepartmentID,
+			&i.Designation,
+			&i.EmploymentType,
+			&i.JoiningDate,
+			&i.RelievingDate,
+			&i.Status,
+			&i.YearsOfExperience,
+			&i.OfficeLocation,
+			&i.Bio,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listFacultyByDepartment = `-- name: ListFacultyByDepartment :many
+SELECT faculty_profile_id, user_id, employee_code, department_id, designation, employment_type, joining_date, relieving_date, status, years_of_experience, office_location, bio, created_at, updated_at, deleted_at
+FROM faculty_profiles
+WHERE department_id = $1
+ORDER BY employee_code
+`
+
+func (q *Queries) ListFacultyByDepartment(ctx context.Context, departmentID pgtype.UUID) ([]FacultyProfile, error) {
+	rows, err := q.db.Query(ctx, listFacultyByDepartment, departmentID)
 	if err != nil {
 		return nil, err
 	}

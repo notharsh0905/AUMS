@@ -3,6 +3,7 @@ package transcripts
 import (
 	"net/http"
 
+	"aums/backend/internal/middleware"
 	"aums/backend/pkg/response"
 	aumsuuid "aums/backend/pkg/uuid"
 
@@ -30,6 +31,7 @@ func NewHandler(service *Service) *Handler {
 // @Success      200         {object}  response.SuccessResponse{data=TranscriptResponse}
 // @Failure      400         {object}  response.ErrorResponse
 // @Failure      401         {object}  response.ErrorResponse
+// @Failure      403         {object}  response.ErrorResponse
 // @Failure      404         {object}  response.ErrorResponse
 // @Router       /transcripts/{student_id} [get]
 func (h *Handler) GetTranscript(c *gin.Context) {
@@ -37,6 +39,22 @@ func (h *Handler) GetTranscript(c *gin.Context) {
 	if studentID == "" {
 		response.Error(c, http.StatusBadRequest, "student_id parameter is required")
 		return
+	}
+
+	studentProfileID, err := aumsuuid.Parse(studentID)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid student id")
+		return
+	}
+
+	userIDString := middleware.GetUserID(c)
+	callerUserID, err := aumsuuid.Parse(userIDString)
+	if err == nil {
+		allowed, _ := h.service.CanAccessStudent(c.Request.Context(), callerUserID, studentProfileID)
+		if !allowed {
+			response.Error(c, http.StatusForbidden, "insufficient permissions to access this student transcript")
+			return
+		}
 	}
 
 	res, err := h.service.GetTranscript(c.Request.Context(), studentID)
@@ -59,6 +77,7 @@ func (h *Handler) GetTranscript(c *gin.Context) {
 // @Success      200         {object}  response.SuccessResponse{data=TranscriptCGPASummary}
 // @Failure      400         {object}  response.ErrorResponse
 // @Failure      401         {object}  response.ErrorResponse
+// @Failure      403         {object}  response.ErrorResponse
 // @Failure      404         {object}  response.ErrorResponse
 // @Router       /transcripts/{student_id}/summary [get]
 func (h *Handler) GetTranscriptSummary(c *gin.Context) {
@@ -72,6 +91,16 @@ func (h *Handler) GetTranscriptSummary(c *gin.Context) {
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid student id")
 		return
+	}
+
+	userIDString := middleware.GetUserID(c)
+	callerUserID, err := aumsuuid.Parse(userIDString)
+	if err == nil {
+		allowed, _ := h.service.CanAccessStudent(c.Request.Context(), callerUserID, studentProfileID)
+		if !allowed {
+			response.Error(c, http.StatusForbidden, "insufficient permissions to access this student transcript summary")
+			return
+		}
 	}
 
 	info, err := h.service.repository.GetStudentInfo(c.Request.Context(), studentProfileID)
@@ -100,6 +129,7 @@ func (h *Handler) GetTranscriptSummary(c *gin.Context) {
 // @Success      200         {object}  response.SuccessResponse{data=[]TranscriptSemester}
 // @Failure      400         {object}  response.ErrorResponse
 // @Failure      401         {object}  response.ErrorResponse
+// @Failure      403         {object}  response.ErrorResponse
 // @Failure      404         {object}  response.ErrorResponse
 // @Router       /transcripts/{student_id}/semesters [get]
 func (h *Handler) GetTranscriptSemesters(c *gin.Context) {
@@ -113,6 +143,16 @@ func (h *Handler) GetTranscriptSemesters(c *gin.Context) {
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid student id")
 		return
+	}
+
+	userIDString := middleware.GetUserID(c)
+	callerUserID, err := aumsuuid.Parse(userIDString)
+	if err == nil {
+		allowed, _ := h.service.CanAccessStudent(c.Request.Context(), callerUserID, studentProfileID)
+		if !allowed {
+			response.Error(c, http.StatusForbidden, "insufficient permissions to access this student transcript semesters")
+			return
+		}
 	}
 
 	info, err := h.service.repository.GetStudentInfo(c.Request.Context(), studentProfileID)
@@ -141,6 +181,7 @@ func (h *Handler) GetTranscriptSemesters(c *gin.Context) {
 // @Success      200         {object}  response.SuccessResponse{data=[]TranscriptCourse}
 // @Failure      400         {object}  response.ErrorResponse
 // @Failure      401         {object}  response.ErrorResponse
+// @Failure      403         {object}  response.ErrorResponse
 // @Failure      404         {object}  response.ErrorResponse
 // @Router       /transcripts/{student_id}/courses [get]
 func (h *Handler) GetTranscriptCourses(c *gin.Context) {
@@ -154,6 +195,16 @@ func (h *Handler) GetTranscriptCourses(c *gin.Context) {
 	if err != nil {
 		response.Error(c, http.StatusBadRequest, "invalid student id")
 		return
+	}
+
+	userIDString := middleware.GetUserID(c)
+	callerUserID, err := aumsuuid.Parse(userIDString)
+	if err == nil {
+		allowed, _ := h.service.CanAccessStudent(c.Request.Context(), callerUserID, studentProfileID)
+		if !allowed {
+			response.Error(c, http.StatusForbidden, "insufficient permissions to access this student transcript courses")
+			return
+		}
 	}
 
 	info, err := h.service.repository.GetStudentInfo(c.Request.Context(), studentProfileID)

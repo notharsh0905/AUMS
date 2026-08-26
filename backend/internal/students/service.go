@@ -5,21 +5,25 @@ import (
 	"time"
 
 	"aums/backend/internal/db/generated"
+	"aums/backend/internal/userroles"
 	aumsuuid "aums/backend/pkg/uuid"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service struct {
-	repository *Repository
+	repository       *Repository
+	userRolesService *userroles.Service
 }
 
 func NewService(
 	repository *Repository,
+	userRolesService *userroles.Service,
 ) *Service {
 
 	return &Service{
-		repository: repository,
+		repository:       repository,
+		userRolesService: userRolesService,
 	}
 }
 
@@ -160,4 +164,77 @@ func (s *Service) ListPaginated(
 	}
 
 	return students, total, nil
+}
+
+func (s *Service) ListPaginatedScoped(
+	ctx context.Context,
+	callerUserID pgtype.UUID,
+	page int,
+	limit int,
+) (
+	[]generated.StudentProfile,
+	int64,
+	error,
+) {
+	if s.userRolesService != nil {
+		// Scoping for student: only own student profile
+		isStudent, _ := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
+		if isStudent {
+			profile, err := s.repository.GetByUserID(ctx, callerUserID)
+			if err != nil {
+				return []generated.StudentProfile{}, 0, nil
+			}
+			return []generated.StudentProfile{profile}, 1, nil
+		}
+
+		// Scoping for parent: only linked children
+		isParent, _ := s.userRolesService.HasRole(ctx, callerUserID, "PARENT")
+		if isParent {
+			profiles, err := s.repository.ListByParentUserID(ctx, callerUserID)
+			if err != nil {
+				return []generated.StudentProfile{}, 0, nil
+			}
+			return profiles, int64(len(profiles)), nil
+		}
+	}
+
+	// Default administrative & academic listing
+	return s.ListPaginated(ctx, page, limit)
+}
+
+func (s *Service) GetByID(
+	ctx context.Context,
+	callerUserID pgtype.UUID,
+	studentProfileID pgtype.UUID,
+) (generated.StudentProfile, bool, error) {
+	profile, err := s.repository.GetByID(ctx, studentProfileID)
+	if err != nil {
+		return generated.StudentProfile{}, false, err
+	}
+
+	if s.userRolesService != nil {
+		isStudent, _ := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
+		if isStudent {
+			if profile.UserID != callerUserID {
+				return generated.StudentProfile{}, false, nil
+			}
+		}
+
+		isParent, _ := s.userRolesService.HasRole(ctx, callerUserID, "PARENT")
+		if isParent {
+			wards, _ := s.repository.ListByParentUserID(ctx, callerUserID)
+			isWard := false
+			for _, w := range wards {
+				if w.StudentProfileID == studentProfileID {
+					isWard = true
+					break
+				}
+			}
+			if !isWard {
+				return generated.StudentProfile{}, false, nil
+			}
+		}
+	}
+
+	return profile, true, nil
 }

@@ -3,7 +3,9 @@ package attendance
 import (
 	"net/http"
 
+	"aums/backend/internal/middleware"
 	"aums/backend/pkg/response"
+	aumsuuid "aums/backend/pkg/uuid"
 	"aums/backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
@@ -43,8 +45,12 @@ func (h *Handler) List(
 	page := response.GetPage(c)
 	limit := response.GetLimit(c)
 
-	data, err := h.service.List(
+	userIDString := middleware.GetUserID(c)
+	callerUserID, _ := aumsuuid.Parse(userIDString)
+
+	data, err := h.service.ListScoped(
 		c.Request.Context(),
+		callerUserID,
 	)
 
 	if err != nil {

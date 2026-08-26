@@ -5,6 +5,7 @@ import (
 
 	"aums/backend/internal/db/generated"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -64,5 +65,38 @@ func (r *Repository) Count(
 
 	return r.queries.CountStudents(
 		ctx,
+	)
+}
+
+func (r *Repository) GetByUserID(
+	ctx context.Context,
+	userID pgtype.UUID,
+) (generated.StudentProfile, error) {
+
+	return r.queries.GetStudentProfileByUserID(
+		ctx,
+		userID,
+	)
+}
+
+func (r *Repository) GetByID(
+	ctx context.Context,
+	studentProfileID pgtype.UUID,
+) (generated.StudentProfile, error) {
+
+	return r.queries.GetStudentProfileByID(
+		ctx,
+		studentProfileID,
+	)
+}
+
+func (r *Repository) ListByParentUserID(
+	ctx context.Context,
+	parentUserID pgtype.UUID,
+) ([]generated.StudentProfile, error) {
+
+	return r.queries.ListStudentsByParentUserID(
+		ctx,
+		parentUserID,
 	)
 }

@@ -10,6 +10,9 @@ import {
   Building2,
   Calendar,
   FileText,
+  DoorOpen,
+  ClipboardList,
+  GraduationCap as TranscriptIcon,
   LucideIcon
 } from 'lucide-react';
 
@@ -31,7 +34,7 @@ export interface NavigationGroup {
 
 export const navigationConfig: NavigationGroup[] = [
   {
-    id: 'dashboard-group',
+    id: 'general',
     title: 'General',
     items: [
       {
@@ -43,8 +46,83 @@ export const navigationConfig: NavigationGroup[] = [
     ]
   },
   {
-    id: 'academic',
-    title: 'Academic',
+    id: 'hierarchy',
+    title: 'Institution Structure',
+    items: [
+      {
+        id: 'campuses',
+        title: 'Campuses',
+        icon: Building2,
+        href: '/campuses',
+        requiredPermissions: ['campuses.read'],
+      },
+      {
+        id: 'schools',
+        title: 'Schools',
+        icon: Building2,
+        href: '/schools',
+        requiredPermissions: ['schools.read'],
+      },
+      {
+        id: 'departments',
+        title: 'Departments',
+        icon: Building2,
+        href: '/departments',
+        requiredPermissions: ['departments.read'],
+      },
+      {
+        id: 'programs',
+        title: 'Programs',
+        icon: BookOpen,
+        href: '/programs',
+        requiredPermissions: ['programs.read'],
+      }
+    ]
+  },
+  {
+    id: 'catalog',
+    title: 'Academic Structure',
+    items: [
+      {
+        id: 'academic-years',
+        title: 'Academic Years',
+        icon: Calendar,
+        href: '/academic-years',
+        requiredPermissions: ['academic_years.read'],
+      },
+      {
+        id: 'semesters',
+        title: 'Semesters',
+        icon: Calendar,
+        href: '/semesters',
+        requiredPermissions: ['semesters.read'],
+      },
+      {
+        id: 'courses',
+        title: 'Courses',
+        icon: BookOpen,
+        href: '/courses',
+        requiredPermissions: ['courses.read'],
+      },
+      {
+        id: 'course-offerings',
+        title: 'Course Offerings',
+        icon: BookOpen,
+        href: '/course-offerings',
+        requiredPermissions: ['course_offerings.read'],
+      },
+      {
+        id: 'timetable',
+        title: 'Timetable',
+        icon: Calendar,
+        href: '/timetable',
+        requiredPermissions: ['timetable.read'],
+      }
+    ]
+  },
+  {
+    id: 'people',
+    title: 'People & Lifecycle',
     items: [
       {
         id: 'students',
@@ -61,48 +139,6 @@ export const navigationConfig: NavigationGroup[] = [
         requiredPermissions: ['faculty.read'],
       },
       {
-        id: 'courses',
-        title: 'Courses',
-        icon: BookOpen,
-        href: '/courses',
-        requiredPermissions: ['courses.read'],
-      },
-      {
-        id: 'departments',
-        title: 'Departments',
-        icon: Building2,
-        href: '/departments',
-        requiredPermissions: ['departments.read'],
-      },
-      {
-        id: 'programs',
-        title: 'Programs',
-        icon: BookOpen,
-        href: '/programs',
-        requiredPermissions: ['programs.read'],
-      },
-      {
-        id: 'academic-years',
-        title: 'Academic Years',
-        icon: Calendar,
-        href: '/academic-years',
-        requiredPermissions: ['academic_years.read'],
-      },
-      {
-        id: 'semesters',
-        title: 'Semesters',
-        icon: Calendar,
-        href: '/semesters',
-        requiredPermissions: ['semesters.read'],
-      },
-      {
-        id: 'course-offerings',
-        title: 'Course Offerings',
-        icon: BookOpen,
-        href: '/course-offerings',
-        requiredPermissions: ['course_offerings.read'],
-      },
-      {
         id: 'faculty-course-allocations',
         title: 'Faculty Allocations',
         icon: GraduationCap,
@@ -111,18 +147,17 @@ export const navigationConfig: NavigationGroup[] = [
       },
       {
         id: 'student-course-registrations',
-        title: 'Student Registrations',
+        title: 'Course Registrations',
         icon: Users,
         href: '/student-course-registrations',
         requiredPermissions: ['student_course_registrations.read'],
-      },
-      {
-        id: 'timetable',
-        title: 'Timetable',
-        icon: Calendar,
-        href: '/timetable',
-        requiredPermissions: ['timetable.read'],
-      },
+      }
+    ]
+  },
+  {
+    id: 'classroom',
+    title: 'Classroom & Learning',
+    items: [
       {
         id: 'attendance',
         title: 'Attendance',
@@ -147,16 +182,29 @@ export const navigationConfig: NavigationGroup[] = [
       {
         id: 'internal-assessments',
         title: 'Internal Assessments',
-        icon: FileText,
+        icon: ClipboardList,
         href: '/internal-assessments',
         requiredPermissions: ['internal_assessments.read'],
-      },
+      }
+    ]
+  },
+  {
+    id: 'examinations',
+    title: 'Examinations',
+    items: [
       {
         id: 'examinations',
         title: 'Examinations',
         icon: FileText,
         href: '/examinations',
         requiredPermissions: ['examinations.read'],
+      },
+      {
+        id: 'exam-rooms',
+        title: 'Exam Rooms',
+        icon: DoorOpen,
+        href: '/exam-rooms',
+        requiredPermissions: ['exam_rooms.read'],
       },
       {
         id: 'exam-registrations',
@@ -171,21 +219,13 @@ export const navigationConfig: NavigationGroup[] = [
         icon: FileText,
         href: '/exam-attempts',
         requiredPermissions: ['exam_attempts.read'],
-      },
-      {
-        id: 'exam-rooms',
-        title: 'Exam Rooms',
-        icon: FileText,
-        href: '/exam-rooms',
-        requiredPermissions: ['exam_rooms.read'],
-      },
-      {
-        id: 'transcripts',
-        title: 'Transcripts',
-        icon: FileText,
-        href: '/transcripts',
-        requiredPermissions: ['transcripts.read'],
-      },
+      }
+    ]
+  },
+  {
+    id: 'records',
+    title: 'Graduation & Records',
+    items: [
       {
         id: 'course-results',
         title: 'Course Results',
@@ -195,17 +235,24 @@ export const navigationConfig: NavigationGroup[] = [
       },
       {
         id: 'semester-results',
-        title: 'Semester Results',
+        title: 'Semester SGPA',
         icon: FileText,
         href: '/semester-results',
         requiredPermissions: ['semester_results.read'],
       },
       {
         id: 'program-results',
-        title: 'Program Results',
+        title: 'Program CGPA',
         icon: FileText,
         href: '/program-results',
         requiredPermissions: ['program_results.read'],
+      },
+      {
+        id: 'transcripts',
+        title: 'Official Transcripts',
+        icon: TranscriptIcon,
+        href: '/transcripts',
+        requiredPermissions: ['transcripts.read'],
       }
     ]
   },
@@ -223,7 +270,7 @@ export const navigationConfig: NavigationGroup[] = [
       },
       {
         id: 'roles',
-        title: 'Roles',
+        title: 'Roles & RBAC',
         icon: Shield,
         href: '/admin/roles',
         requiredRoles: ['SUPER_ADMIN'],
@@ -236,13 +283,7 @@ export const navigationConfig: NavigationGroup[] = [
         href: '/admin/permissions',
         requiredRoles: ['SUPER_ADMIN'],
         requiredPermissions: ['permissions.read'],
-      }
-    ]
-  },
-  {
-    id: 'settings-group',
-    title: 'Settings',
-    items: [
+      },
       {
         id: 'settings',
         title: 'Settings',

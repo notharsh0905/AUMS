@@ -4,21 +4,25 @@ import (
 	"context"
 
 	"aums/backend/internal/db/generated"
+	"aums/backend/internal/userroles"
 	aumsuuid "aums/backend/pkg/uuid"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Service struct {
-	repository *Repository
+	repository       *Repository
+	userRolesService *userroles.Service
 }
 
 func NewService(
 	repository *Repository,
+	userRolesService *userroles.Service,
 ) *Service {
 
 	return &Service{
-		repository: repository,
+		repository:       repository,
+		userRolesService: userRolesService,
 	}
 }
 
@@ -29,6 +33,26 @@ func (s *Service) List(
 	return s.repository.List(
 		ctx,
 	)
+}
+
+func (s *Service) ListScoped(
+	ctx context.Context,
+	callerUserID pgtype.UUID,
+) ([]generated.AttendanceRecord, error) {
+	if s.userRolesService != nil {
+		isStudent, _ := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
+		if isStudent {
+			return s.repository.ListForStudentUser(ctx, callerUserID)
+		}
+
+		isParent, _ := s.userRolesService.HasRole(ctx, callerUserID, "PARENT")
+		if isParent {
+			return s.repository.ListForParentUser(ctx, callerUserID)
+		}
+	}
+
+	// Default administrative & academic listing
+	return s.repository.List(ctx)
 }
 
 func (s *Service) Create(

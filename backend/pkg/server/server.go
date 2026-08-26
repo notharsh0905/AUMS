@@ -26,6 +26,7 @@ import (
 	"aums/backend/internal/faculty"
 	"aums/backend/internal/facultycourseallocations"
 	"aums/backend/internal/middleware"
+	"aums/backend/internal/parents"
 	"aums/backend/internal/permissions"
 	"aums/backend/internal/programcurriculum"
 	"aums/backend/internal/programresults"
@@ -265,10 +266,23 @@ func New(application *app.Application) *gin.Engine {
 
 	studentService := students.NewService(
 		studentRepository,
+		userRolesService,
 	)
 
 	studentHandler := students.NewHandler(
 		studentService,
+	)
+
+	parentRepository := parents.NewRepository(
+		application.DB,
+	)
+
+	parentService := parents.NewService(
+		parentRepository,
+	)
+
+	parentHandler := parents.NewHandler(
+		parentService,
 	)
 
 	studentEnrollmentRepository := studentenrollments.NewRepository(
@@ -397,6 +411,7 @@ func New(application *app.Application) *gin.Engine {
 	)
 	attendanceService := attendance.NewService(
 		attendanceRepository,
+		userRolesService,
 	)
 	attendanceHandler := attendance.NewHandler(
 		attendanceService,
@@ -544,6 +559,7 @@ func New(application *app.Application) *gin.Engine {
 
 	transcriptsService := transcripts.NewService(
 		transcriptsRepo,
+		userRolesService,
 	)
 
 	transcriptsHandler := transcripts.NewHandler(
@@ -656,9 +672,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	campusesGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"campuses.read",
 		),
 	)
 
@@ -680,9 +696,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	schoolsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"schools.read",
 		),
 	)
 
@@ -704,9 +720,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	departmentsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"departments.read",
 		),
 	)
 
@@ -728,9 +744,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	programsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"programs.read",
 		),
 	)
 
@@ -752,10 +768,15 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	academicYearsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"academic_years.read",
 		),
+	)
+
+	academicyears.RegisterRoutes(
+		academicYearsGroup,
+		academicYearHandler,
 	)
 
 	// ==========================================
@@ -771,9 +792,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	semestersGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"semesters.read",
 		),
 	)
 
@@ -782,10 +803,6 @@ func New(application *app.Application) *gin.Engine {
 		semesterHandler,
 	)
 
-	academicyears.RegisterRoutes(
-		academicYearsGroup,
-		academicYearHandler,
-	)
 	// ==========================================
 	// STUDENT MODULE
 	// ==========================================
@@ -799,15 +816,33 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	studentsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"students.read",
 		),
 	)
 
 	students.RegisterRoutes(
 		studentsGroup,
 		studentHandler,
+		rolePermissionsService,
+	)
+
+	// ==========================================
+	// PARENTS MODULE
+	// ==========================================
+
+	parentsGroup := api.Group("/parents")
+
+	parentsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+
+	parents.RegisterRoutes(
+		parentsGroup,
+		parentHandler,
 		rolePermissionsService,
 	)
 
@@ -825,9 +860,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	studentEnrollmentsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"students.read",
 		),
 	)
 
@@ -835,6 +870,7 @@ func New(application *app.Application) *gin.Engine {
 		studentEnrollmentsGroup,
 		studentEnrollmentHandler,
 	)
+
 	// ==========================================
 	// COURSES MODULE
 	// ==========================================
@@ -848,9 +884,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	coursesGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"courses.read",
 		),
 	)
 
@@ -858,6 +894,7 @@ func New(application *app.Application) *gin.Engine {
 		coursesGroup,
 		courseHandler,
 	)
+
 	// ==========================================
 	// CURRICULUM MODULE
 	// ==========================================
@@ -873,9 +910,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	curriculumGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"courses.read",
 		),
 	)
 
@@ -883,6 +920,7 @@ func New(application *app.Application) *gin.Engine {
 		curriculumGroup,
 		programCurriculumHandler,
 	)
+
 	// ==========================================
 	// COURSEOFFERINGS MODULE
 	// ==========================================
@@ -897,9 +935,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	courseOfferingsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"course_offerings.read",
 		),
 	)
 
@@ -922,9 +960,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	facultyGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"faculty.read",
 		),
 	)
 
@@ -932,6 +970,7 @@ func New(application *app.Application) *gin.Engine {
 		facultyGroup,
 		facultyHandler,
 	)
+
 	// ==========================================
 	// FACULTY_COURSE_ALLOCATIONS MODULE
 	// ==========================================
@@ -947,9 +986,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	facultyAllocationsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"faculty_course_allocations.read",
 		),
 	)
 
@@ -972,9 +1011,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	studentCourseRegistrationsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"student_course_registrations.read",
 		),
 	)
 
@@ -982,6 +1021,7 @@ func New(application *app.Application) *gin.Engine {
 		studentCourseRegistrationsGroup,
 		studentCourseRegistrationHandler,
 	)
+
 	// ==========================================
 	// TIME TABLE MODULE
 	// ==========================================
@@ -994,9 +1034,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	timetableGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"timetable.read",
 		),
 	)
 
@@ -1004,6 +1044,7 @@ func New(application *app.Application) *gin.Engine {
 		timetableGroup,
 		timetableHandler,
 	)
+
 	// ==========================================
 	// TIME TABLE ENTRIES MODULE
 	// ==========================================
@@ -1019,9 +1060,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	timetableEntriesGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"timetable.read",
 		),
 	)
 
@@ -1044,9 +1085,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	classSessionsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"timetable.read",
 		),
 	)
 
@@ -1054,8 +1095,9 @@ func New(application *app.Application) *gin.Engine {
 		classSessionsGroup,
 		classSessionHandler,
 	)
+
 	// ==========================================
-	// ATTANDANCE MODULE
+	// ATTENDANCE MODULE
 	// ==========================================
 	attendanceGroup := api.Group(
 		"/attendance",
@@ -1068,9 +1110,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	attendanceGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"attendance.read",
 		),
 	)
 
@@ -1078,6 +1120,7 @@ func New(application *app.Application) *gin.Engine {
 		attendanceGroup,
 		attendanceHandler,
 	)
+
 	// ==========================================
 	// ASSIGNMENTS MODULE
 	// ==========================================
@@ -1092,9 +1135,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	assignmentsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"assignments.read",
 		),
 	)
 
@@ -1102,6 +1145,7 @@ func New(application *app.Application) *gin.Engine {
 		assignmentsGroup,
 		assignmentHandler,
 	)
+
 	// ==========================================
 	// ASSIGNMENTS SUBMISSION MODULE
 	// ==========================================
@@ -1116,9 +1160,9 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	assignmentSubmissionsGroup.Use(
-		middleware.RequireRole(
-			userRolesService,
-			"SUPER_ADMIN",
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"assignment_submissions.read",
 		),
 	)
 
@@ -1126,11 +1170,24 @@ func New(application *app.Application) *gin.Engine {
 		assignmentSubmissionsGroup,
 		assignmentSubmissionHandler,
 	)
+
 	// ==========================================
 	// EXAMS MODULE
 	// ==========================================
+	examsGroup := api.Group("/exams")
+	examsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+	examsGroup.Use(
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"examinations.read",
+		),
+	)
 	exams.RegisterRoutes(
-		api.Group("/exams"),
+		examsGroup,
 		examHandler,
 	)
 
@@ -1146,8 +1203,20 @@ func New(application *app.Application) *gin.Engine {
 		rolePermissionsService,
 	)
 
+	examSchedulesGroup := api.Group("/exam-schedules")
+	examSchedulesGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+	examSchedulesGroup.Use(
+		middleware.RequirePermission(
+			rolePermissionsService,
+			"examinations.read",
+		),
+	)
 	examschedules.RegisterRoutes(
-		api.Group("/exam-schedules"),
+		examSchedulesGroup,
 		examScheduleHandler,
 	)
 
@@ -1174,6 +1243,7 @@ func New(application *app.Application) *gin.Engine {
 		examAttemptHandler,
 		rolePermissionsService,
 	)
+
 	// ==========================================
 	// RESULTS MODULE
 	// ==========================================

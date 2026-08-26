@@ -20,3 +20,27 @@ VALUES (
     $5,
     $6
 );
+
+-- name: ListAttendanceRecordsForStudentUser :many
+SELECT ar.*
+FROM attendance_records ar
+JOIN student_enrollments se
+    ON se.enrollment_id = ar.enrollment_id
+JOIN student_profiles sp
+    ON sp.student_profile_id = se.student_profile_id
+WHERE sp.user_id = $1
+ORDER BY ar.marked_at DESC;
+
+-- name: ListAttendanceRecordsForParentUser :many
+SELECT ar.*
+FROM attendance_records ar
+JOIN student_enrollments se
+    ON se.enrollment_id = ar.enrollment_id
+JOIN student_profiles sp
+    ON sp.student_profile_id = se.student_profile_id
+JOIN student_parent_relationships spr
+    ON spr.student_profile_id = sp.student_profile_id
+JOIN parent_profiles pp
+    ON pp.parent_profile_id = spr.parent_profile_id
+WHERE pp.user_id = $1
+ORDER BY ar.marked_at DESC;
