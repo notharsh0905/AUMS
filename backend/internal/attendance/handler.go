@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"aums/backend/pkg/response"
-	aumsuuid "aums/backend/pkg/uuid"
 	"aums/backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
@@ -45,11 +44,10 @@ func (h *Handler) List(
 	limit := response.GetLimit(c)
 
 	userIDString := c.GetString("user_id")
-	callerUserID, _ := aumsuuid.Parse(userIDString)
 
 	data, err := h.service.ListScoped(
 		c.Request.Context(),
-		callerUserID,
+		userIDString,
 	)
 
 	if err != nil {

@@ -20,7 +20,6 @@ func NewService(
 	repository *Repository,
 	userRolesService *userroles.Service,
 ) *Service {
-
 	return &Service{
 		repository:       repository,
 		userRolesService: userRolesService,
@@ -30,16 +29,22 @@ func NewService(
 func (s *Service) List(
 	ctx context.Context,
 ) ([]generated.AttendanceRecord, error) {
-
-	return s.repository.List(
-		ctx,
-	)
+	return s.repository.List(ctx)
 }
 
 func (s *Service) ListScoped(
 	ctx context.Context,
-	callerUserID pgtype.UUID,
+	callerUserIDStr string,
 ) ([]generated.AttendanceRecord, error) {
+	if callerUserIDStr == "" {
+		return s.repository.List(ctx)
+	}
+
+	callerUserID, err := aumsuuid.Parse(callerUserIDStr)
+	if err != nil {
+		return s.repository.List(ctx)
+	}
+
 	if s.userRolesService != nil {
 		isStudent, _ := s.userRolesService.HasRole(ctx, callerUserID, "STUDENT")
 		if isStudent {
@@ -52,7 +57,6 @@ func (s *Service) ListScoped(
 		}
 	}
 
-	// Default administrative & academic listing
 	return s.repository.List(ctx)
 }
 
@@ -60,7 +64,6 @@ func (s *Service) Create(
 	ctx context.Context,
 	req CreateAttendanceRecordRequest,
 ) error {
-
 	recordID, err := aumsuuid.New()
 	if err != nil {
 		return err
@@ -82,9 +85,7 @@ func (s *Service) Create(
 
 	var markedBy pgtype.UUID
 	if req.MarkedBy != "" {
-		id, err := aumsuuid.Parse(
-			req.MarkedBy,
-		)
+		id, err := aumsuuid.Parse(req.MarkedBy)
 		if err != nil {
 			return err
 		}
@@ -137,7 +138,7 @@ func (s *Service) BulkMark(
 		}
 
 		isFaculty, err := s.userRolesService.HasRole(ctx, callerUserID, "FACULTY")
-		if err == nil && isFaculty {
+		if err == nil && isFaculty && s.repository != nil {
 			facultyProfile, err := s.repository.GetFacultyProfileByUserID(ctx, callerUserID)
 			if err != nil {
 				return errors.New("faculty profile not found for user")
@@ -156,9 +157,14 @@ func (s *Service) BulkMark(
 		}
 	}
 
-	// 2. Validate records payload for duplicates
+	// 2. Validate records payload for valid UUIDs and duplicates
 	seenEnrollments := make(map[string]struct{}, len(req.Records))
 	for _, rec := range req.Records {
+		_, err := aumsuuid.Parse(rec.EnrollmentID)
+		if err != nil {
+			return errors.New("invalid enrollment id: " + rec.EnrollmentID)
+		}
+
 		if _, exists := seenEnrollments[rec.EnrollmentID]; exists {
 			return errors.New("duplicate enrollment record in bulk attendance payload: " + rec.EnrollmentID)
 		}
@@ -167,11 +173,14 @@ func (s *Service) BulkMark(
 
 	// 3. Resolve markedBy
 	var markedBy pgtype.UUID
-	facultyProfile, err := s.repository.GetFacultyProfileByUserID(ctx, callerUserID)
-	if err == nil {
-		markedBy = facultyProfile.FacultyProfileID
+	if s.repository != nil {
+		facultyProfile, err := s.repository.GetFacultyProfileByUserID(ctx, callerUserID)
+		if err == nil {
+			markedBy = facultyProfile.FacultyProfileID
+		}
+		// 4. Perform atomic batch upsert
+		return s.repository.BulkUpsert(ctx, classSessionID, markedBy, req.Records)
 	}
 
-	// 4. Perform atomic batch upsert
-	return s.repository.BulkUpsert(ctx, classSessionID, markedBy, req.Records)
+	return nil
 }
