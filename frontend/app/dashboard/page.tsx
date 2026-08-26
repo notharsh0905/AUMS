@@ -9,12 +9,15 @@ import { StudentDashboard } from '@/features/dashboard/components/student-dashbo
 import { FacultyDashboard } from '@/features/dashboard/components/faculty-dashboard';
 import { AdminDashboard } from '@/features/dashboard/components/admin-dashboard';
 import { ParentDashboard } from '@/features/dashboard/components/parent-dashboard';
+import { AcademicOversightDashboard } from '@/features/dashboard/components/academic-oversight-dashboard';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const isStudent = user?.roles?.includes('STUDENT');
   const isFaculty = user?.roles?.includes('FACULTY');
   const isParent = user?.roles?.includes('PARENT');
+  const isDean = user?.roles?.includes('DEAN');
+  const isHOD = user?.roles?.includes('HOD');
 
   return (
     <ProtectedRoute>
@@ -28,7 +31,11 @@ export default function DashboardPage() {
                   ? "Faculty Portal"
                   : isParent
                     ? "Parent Portal"
-                    : "Admin Portal"
+                    : isDean
+                      ? "School Oversight Portal"
+                      : isHOD
+                        ? "Department Oversight Portal"
+                        : "Admin Portal"
             }
             description={
               isStudent
@@ -37,7 +44,11 @@ export default function DashboardPage() {
                   ? "Your assigned courses, timetable schedule, and grading workspace"
                   : isParent
                     ? "Overview of your child's academic standing, progress, and achievements"
-                    : "AUMS Institutional operational control center, registrations, and metrics"
+                    : isDean
+                      ? "Operational oversight across subordinate academic departments, faculty, and programs"
+                      : isHOD
+                        ? "Departmental operational control center, lecture allocation, and student performance"
+                        : "AUMS Institutional operational control center, registrations, and metrics"
             }
           />
 
@@ -48,6 +59,8 @@ export default function DashboardPage() {
               <FacultyDashboard />
             ) : isParent ? (
               <ParentDashboard />
+            ) : isDean || isHOD ? (
+              <AcademicOversightDashboard />
             ) : (
               <AdminDashboard />
             )}
