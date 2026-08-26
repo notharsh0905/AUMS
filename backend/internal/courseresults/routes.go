@@ -14,26 +14,34 @@ func RegisterRoutes(
 ) {
 	router.GET(
 		"",
-		middleware.RequirePermission(
+		middleware.RequireAnyPermission(
 			rolePermissionService,
+			"results.read",
+			"grades.read",
 			"course_results.read",
+			"academic_records.read",
 		),
 		handler.List,
 	)
 
 	router.GET(
 		"/:id",
-		middleware.RequirePermission(
+		middleware.RequireAnyPermission(
 			rolePermissionService,
+			"results.read",
+			"grades.read",
 			"course_results.read",
+			"academic_records.read",
 		),
 		handler.Get,
 	)
 
 	router.POST(
 		"",
-		middleware.RequirePermission(
+		middleware.RequireAnyPermission(
 			rolePermissionService,
+			"results.create",
+			"grades.create",
 			"course_results.create",
 		),
 		handler.Create,
@@ -41,8 +49,10 @@ func RegisterRoutes(
 
 	router.PUT(
 		"/:id",
-		middleware.RequirePermission(
+		middleware.RequireAnyPermission(
 			rolePermissionService,
+			"results.update",
+			"grades.update",
 			"course_results.update",
 		),
 		handler.Update,
@@ -50,8 +60,10 @@ func RegisterRoutes(
 
 	router.DELETE(
 		"/:id",
-		middleware.RequirePermission(
+		middleware.RequireAnyPermission(
 			rolePermissionService,
+			"results.delete",
+			"grades.delete",
 			"course_results.delete",
 		),
 		handler.Delete,

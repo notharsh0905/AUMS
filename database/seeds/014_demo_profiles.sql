@@ -533,3 +533,51 @@ VALUES
     'Attended and participated actively'
 )
 ON CONFLICT (class_session_id, enrollment_id) DO NOTHING;
+
+-- Seed Faculty Course Allocations
+INSERT INTO faculty_course_allocations (
+    faculty_course_allocation_id,
+    faculty_profile_id,
+    course_offering_id,
+    allocated_at
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000771',
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    '00000000-0000-0000-0000-000000000401',
+    NOW() - INTERVAL '30 days'
+),
+(
+    '00000000-0000-0000-0000-000000000772',
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    '00000000-0000-0000-0000-000000000402',
+    NOW() - INTERVAL '30 days'
+)
+ON CONFLICT (faculty_profile_id, course_offering_id) DO NOTHING;
+
+-- Seed Demo Course Results / Assessment Marks
+INSERT INTO course_results (
+    course_result_id,
+    enrollment_id,
+    course_offering_id,
+    total_marks,
+    marks_obtained,
+    percentage,
+    grade_scale_id,
+    result_status,
+    published_at
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000881',
+    (SELECT enrollment_id FROM student_enrollments WHERE enrollment_number = 'CS2026001'),
+    '00000000-0000-0000-0000-000000000401',
+    50.00,
+    44.50,
+    89.00,
+    (SELECT grade_scale_id FROM grade_scales WHERE grade_code = 'A'),
+    'PUBLISHED'::result_status,
+    NOW()
+)
+ON CONFLICT (enrollment_id, course_offering_id) DO NOTHING;

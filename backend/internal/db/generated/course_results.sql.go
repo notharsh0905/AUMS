@@ -151,6 +151,130 @@ func (q *Queries) ListCourseResults(ctx context.Context) ([]CourseResult, error)
 	return items, nil
 }
 
+const listCourseResultsForFaculty = `-- name: ListCourseResultsForFaculty :many
+SELECT cr.course_result_id, cr.enrollment_id, cr.course_offering_id, cr.total_marks, cr.marks_obtained, cr.percentage, cr.grade_scale_id, cr.result_status, cr.published_at, cr.created_at, cr.updated_at
+FROM course_results cr
+JOIN faculty_course_allocations fca ON fca.course_offering_id = cr.course_offering_id
+WHERE fca.faculty_profile_id = $1
+ORDER BY cr.created_at DESC
+`
+
+func (q *Queries) ListCourseResultsForFaculty(ctx context.Context, facultyProfileID pgtype.UUID) ([]CourseResult, error) {
+	rows, err := q.db.Query(ctx, listCourseResultsForFaculty, facultyProfileID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CourseResult{}
+	for rows.Next() {
+		var i CourseResult
+		if err := rows.Scan(
+			&i.CourseResultID,
+			&i.EnrollmentID,
+			&i.CourseOfferingID,
+			&i.TotalMarks,
+			&i.MarksObtained,
+			&i.Percentage,
+			&i.GradeScaleID,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCourseResultsForParentUser = `-- name: ListCourseResultsForParentUser :many
+SELECT cr.course_result_id, cr.enrollment_id, cr.course_offering_id, cr.total_marks, cr.marks_obtained, cr.percentage, cr.grade_scale_id, cr.result_status, cr.published_at, cr.created_at, cr.updated_at
+FROM course_results cr
+JOIN student_enrollments se ON se.enrollment_id = cr.enrollment_id
+JOIN student_profiles sp ON sp.student_profile_id = se.student_profile_id
+JOIN student_parent_relationships spr ON spr.student_profile_id = sp.student_profile_id
+JOIN parent_profiles pp ON pp.parent_profile_id = spr.parent_profile_id
+WHERE pp.user_id = $1
+ORDER BY cr.created_at DESC
+`
+
+func (q *Queries) ListCourseResultsForParentUser(ctx context.Context, userID pgtype.UUID) ([]CourseResult, error) {
+	rows, err := q.db.Query(ctx, listCourseResultsForParentUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CourseResult{}
+	for rows.Next() {
+		var i CourseResult
+		if err := rows.Scan(
+			&i.CourseResultID,
+			&i.EnrollmentID,
+			&i.CourseOfferingID,
+			&i.TotalMarks,
+			&i.MarksObtained,
+			&i.Percentage,
+			&i.GradeScaleID,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listCourseResultsForStudentUser = `-- name: ListCourseResultsForStudentUser :many
+SELECT cr.course_result_id, cr.enrollment_id, cr.course_offering_id, cr.total_marks, cr.marks_obtained, cr.percentage, cr.grade_scale_id, cr.result_status, cr.published_at, cr.created_at, cr.updated_at
+FROM course_results cr
+JOIN student_enrollments se ON se.enrollment_id = cr.enrollment_id
+JOIN student_profiles sp ON sp.student_profile_id = se.student_profile_id
+WHERE sp.user_id = $1
+ORDER BY cr.created_at DESC
+`
+
+func (q *Queries) ListCourseResultsForStudentUser(ctx context.Context, userID pgtype.UUID) ([]CourseResult, error) {
+	rows, err := q.db.Query(ctx, listCourseResultsForStudentUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []CourseResult{}
+	for rows.Next() {
+		var i CourseResult
+		if err := rows.Scan(
+			&i.CourseResultID,
+			&i.EnrollmentID,
+			&i.CourseOfferingID,
+			&i.TotalMarks,
+			&i.MarksObtained,
+			&i.Percentage,
+			&i.GradeScaleID,
+			&i.ResultStatus,
+			&i.PublishedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCourseResultsPaginated = `-- name: ListCourseResultsPaginated :many
 SELECT course_result_id, enrollment_id, course_offering_id, total_marks, marks_obtained, percentage, grade_scale_id, result_status, published_at, created_at, updated_at
 FROM course_results
@@ -234,6 +358,61 @@ type UpdateCourseResultParams struct {
 func (q *Queries) UpdateCourseResult(ctx context.Context, arg UpdateCourseResultParams) error {
 	_, err := q.db.Exec(ctx, updateCourseResult,
 		arg.CourseResultID,
+		arg.TotalMarks,
+		arg.MarksObtained,
+		arg.Percentage,
+		arg.GradeScaleID,
+		arg.ResultStatus,
+		arg.PublishedAt,
+	)
+	return err
+}
+
+const upsertCourseResult = `-- name: UpsertCourseResult :exec
+INSERT INTO course_results (
+    course_result_id,
+    enrollment_id,
+    course_offering_id,
+    total_marks,
+    marks_obtained,
+    percentage,
+    grade_scale_id,
+    result_status,
+    published_at,
+    created_at,
+    updated_at
+)
+VALUES (
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()
+)
+ON CONFLICT (enrollment_id, course_offering_id)
+DO UPDATE SET
+    total_marks = EXCLUDED.total_marks,
+    marks_obtained = EXCLUDED.marks_obtained,
+    percentage = EXCLUDED.percentage,
+    grade_scale_id = EXCLUDED.grade_scale_id,
+    result_status = EXCLUDED.result_status,
+    published_at = EXCLUDED.published_at,
+    updated_at = NOW()
+`
+
+type UpsertCourseResultParams struct {
+	CourseResultID   pgtype.UUID        `json:"course_result_id"`
+	EnrollmentID     pgtype.UUID        `json:"enrollment_id"`
+	CourseOfferingID pgtype.UUID        `json:"course_offering_id"`
+	TotalMarks       pgtype.Numeric     `json:"total_marks"`
+	MarksObtained    pgtype.Numeric     `json:"marks_obtained"`
+	Percentage       pgtype.Numeric     `json:"percentage"`
+	GradeScaleID     pgtype.UUID        `json:"grade_scale_id"`
+	ResultStatus     ResultStatus       `json:"result_status"`
+	PublishedAt      pgtype.Timestamptz `json:"published_at"`
+}
+
+func (q *Queries) UpsertCourseResult(ctx context.Context, arg UpsertCourseResultParams) error {
+	_, err := q.db.Exec(ctx, upsertCourseResult,
+		arg.CourseResultID,
+		arg.EnrollmentID,
+		arg.CourseOfferingID,
 		arg.TotalMarks,
 		arg.MarksObtained,
 		arg.Percentage,

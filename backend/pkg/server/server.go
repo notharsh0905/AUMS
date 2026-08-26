@@ -528,7 +528,7 @@ func New(application *app.Application) *gin.Engine {
 	)
 
 	courseResultsRepo := courseresults.NewRepository(application.DB)
-	courseResultsService := courseresults.NewService(courseResultsRepo)
+	courseResultsService := courseresults.NewService(courseResultsRepo, userRolesService)
 	courseResultsHandler := courseresults.NewHandler(courseResultsService)
 
 	semesterResultsRepo := semesterresults.NewRepository(

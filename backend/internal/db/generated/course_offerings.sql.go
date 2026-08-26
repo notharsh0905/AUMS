@@ -55,6 +55,30 @@ func (q *Queries) CreateCourseOffering(ctx context.Context, arg CreateCourseOffe
 	return err
 }
 
+const getCourseOffering = `-- name: GetCourseOffering :one
+SELECT course_offering_id, course_id, academic_year_id, semester_id, section, status, max_capacity, created_at, updated_at, deleted_at
+FROM course_offerings
+WHERE course_offering_id = $1
+`
+
+func (q *Queries) GetCourseOffering(ctx context.Context, courseOfferingID pgtype.UUID) (CourseOffering, error) {
+	row := q.db.QueryRow(ctx, getCourseOffering, courseOfferingID)
+	var i CourseOffering
+	err := row.Scan(
+		&i.CourseOfferingID,
+		&i.CourseID,
+		&i.AcademicYearID,
+		&i.SemesterID,
+		&i.Section,
+		&i.Status,
+		&i.MaxCapacity,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const listCourseOfferings = `-- name: ListCourseOfferings :many
 SELECT course_offering_id, course_id, academic_year_id, semester_id, section, status, max_capacity, created_at, updated_at, deleted_at
 FROM course_offerings

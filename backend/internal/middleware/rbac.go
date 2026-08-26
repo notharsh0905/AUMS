@@ -134,3 +134,45 @@ func RequirePermission(
 		c.Next()
 	}
 }
+
+func RequireAnyPermission(
+	rolePermissionService *rolepermissions.Service,
+	permissionCodes ...string,
+) gin.HandlerFunc {
+
+	return func(c *gin.Context) {
+		userIDString := GetUserID(c)
+
+		userID, err := uuidpkg.Parse(userIDString)
+		if err != nil {
+			c.JSON(
+				http.StatusUnauthorized,
+				gin.H{
+					"error": "invalid user id",
+				},
+			)
+			c.Abort()
+			return
+		}
+
+		for _, code := range permissionCodes {
+			hasPermission, err := rolePermissionService.HasPermission(
+				c.Request.Context(),
+				userID,
+				code,
+			)
+			if err == nil && hasPermission {
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(
+			http.StatusForbidden,
+			gin.H{
+				"error": "insufficient permissions",
+			},
+		)
+		c.Abort()
+	}
+}

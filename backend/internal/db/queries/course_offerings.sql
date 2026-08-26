@@ -3,6 +3,11 @@ SELECT *
 FROM course_offerings
 ORDER BY created_at DESC;
 
+-- name: GetCourseOffering :one
+SELECT *
+FROM course_offerings
+WHERE course_offering_id = $1;
+
 -- name: CreateCourseOffering :exec
 INSERT INTO course_offerings (
     course_offering_id,

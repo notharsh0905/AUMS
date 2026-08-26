@@ -10,6 +10,7 @@ import (
 	"aums/backend/pkg/validator"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -46,36 +47,72 @@ func (h *Handler) List(c *gin.Context) {
 	courseOfferingID := c.Query("course_offering_id")
 	status := c.Query("status")
 
-	offset := (page - 1) * limit
+	callerUserID := c.GetString("user_id")
 
-	results, err := h.service.ListPaginated(
-		c.Request.Context(),
-		int32(limit),
-		int32(offset),
-		enrollmentID,
-		courseOfferingID,
-		status,
-	)
+	// If filtering explicitly, use paginated query
+	if enrollmentID != "" || courseOfferingID != "" || status != "" {
+		offset := (page - 1) * limit
+		results, err := h.service.ListPaginated(
+			c.Request.Context(),
+			int32(limit),
+			int32(offset),
+			enrollmentID,
+			courseOfferingID,
+			status,
+		)
+		if err != nil {
+			response.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		total, err := h.service.Count(c.Request.Context(), enrollmentID, courseOfferingID, status)
+		if err != nil {
+			response.Error(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		response.SuccessWithMeta(
+			c,
+			http.StatusOK,
+			"course results fetched successfully",
+			ToResponses(results),
+			response.PaginationMeta{
+				Page:  page,
+				Limit: limit,
+				Total: int(total),
+			},
+		)
+		return
+	}
+
+	// Scoped listing for current user
+	results, err := h.service.ListScoped(c.Request.Context(), callerUserID)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	total, err := h.service.Count(c.Request.Context(), enrollmentID, courseOfferingID, status)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, err.Error())
-		return
+	start := (page - 1) * limit
+	if start > len(results) {
+		start = len(results)
 	}
+
+	end := start + limit
+	if end > len(results) {
+		end = len(results)
+	}
+
+	paginatedData := results[start:end]
 
 	response.SuccessWithMeta(
 		c,
 		http.StatusOK,
 		"course results fetched successfully",
-		ToResponses(results),
+		ToResponses(paginatedData),
 		response.PaginationMeta{
 			Page:  page,
 			Limit: limit,
-			Total: int(total),
+			Total: len(results),
 		},
 	)
 }
@@ -110,8 +147,8 @@ func (h *Handler) Get(c *gin.Context) {
 }
 
 // Create godoc
-// @Summary      Create Course Result
-// @Description  Record a new course result details
+// @Summary      Create or Upsert Course Result
+// @Description  Record or update course result details (internal assessment / semester marks)
 // @Tags         CourseResults
 // @Accept       json
 // @Produce      json
@@ -120,6 +157,7 @@ func (h *Handler) Get(c *gin.Context) {
 // @Success      201     {object}  response.SuccessResponse
 // @Failure      400     {object}  response.ErrorResponse
 // @Failure      401     {object}  response.ErrorResponse
+// @Failure      403     {object}  response.ErrorResponse
 // @Router       /course-results [post]
 func (h *Handler) Create(c *gin.Context) {
 	var req CreateCourseResultRequest
@@ -133,13 +171,21 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	err := h.service.Create(c.Request.Context(), req)
+	callerUserID := c.GetString("user_id")
+
+	err := h.service.Create(c.Request.Context(), callerUserID, req)
 	if err != nil {
+		if err.Error() == "forbidden: students cannot modify course marks" ||
+			err.Error() == "unauthorized: faculty can only grade allocated courses" {
+			response.Error(c, http.StatusForbidden, err.Error())
+			return
+		}
+
 		response.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	response.Success(c, http.StatusCreated, "course result created successfully", nil)
+	response.Success(c, http.StatusOK, "course result recorded successfully", nil)
 }
 
 // Update godoc
@@ -192,7 +238,7 @@ func (h *Handler) Update(c *gin.Context) {
 // @Param        id   path      string  true  "Course Result ID"
 // @Success      200  {object}  response.SuccessResponse
 // @Failure      400  {object}  response.ErrorResponse
-// @Failure      401  {object}  response.ErrorResponse
+// @Failure      404  {object}  response.ErrorResponse
 // @Router       /course-results/{id} [delete]
 func (h *Handler) Delete(c *gin.Context) {
 	id := c.Param("id")
@@ -210,73 +256,57 @@ func (h *Handler) Delete(c *gin.Context) {
 	response.Success(c, http.StatusOK, "course result deleted successfully", nil)
 }
 
-func ToResponse(res db.CourseResult) CourseResultResponse {
-	var publishedAtStr, createdAtStr, updatedAtStr string
-	if res.PublishedAt.Valid {
-		publishedAtStr = res.PublishedAt.Time.Format(time.RFC3339)
-	}
-	if res.CreatedAt.Valid {
-		createdAtStr = res.CreatedAt.Time.Format(time.RFC3339)
-	}
-	if res.UpdatedAt.Valid {
-		updatedAtStr = res.UpdatedAt.Time.Format(time.RFC3339)
-	}
-
-	var totalMarksVal float64
-	if res.TotalMarks.Valid {
-		var str string
-		err := res.TotalMarks.Scan(&str)
-		if err == nil {
-			val, err := strconv.ParseFloat(str, 64)
-			if err == nil {
-				totalMarksVal = val
-			}
+func ToResponse(r db.CourseResult) CourseResultResponse {
+	totalMarks, _ := strconv.ParseFloat(r.TotalMarks.Int.String(), 64)
+	if r.TotalMarks.Exp < 0 {
+		for i := 0; i < int(-r.TotalMarks.Exp); i++ {
+			totalMarks /= 10
 		}
 	}
 
-	var marksObtainedVal float64
-	if res.MarksObtained.Valid {
-		var str string
-		err := res.MarksObtained.Scan(&str)
-		if err == nil {
-			val, err := strconv.ParseFloat(str, 64)
-			if err == nil {
-				marksObtainedVal = val
-			}
+	marksObtained, _ := strconv.ParseFloat(r.MarksObtained.Int.String(), 64)
+	if r.MarksObtained.Exp < 0 {
+		for i := 0; i < int(-r.MarksObtained.Exp); i++ {
+			marksObtained /= 10
 		}
 	}
 
-	var percentageVal float64
-	if res.Percentage.Valid {
-		var str string
-		err := res.Percentage.Scan(&str)
-		if err == nil {
-			val, err := strconv.ParseFloat(str, 64)
-			if err == nil {
-				percentageVal = val
-			}
+	percentage, _ := strconv.ParseFloat(r.Percentage.Int.String(), 64)
+	if r.Percentage.Exp < 0 {
+		for i := 0; i < int(-r.Percentage.Exp); i++ {
+			percentage /= 10
 		}
+	}
+
+	gradeScaleID := ""
+	if r.GradeScaleID.Valid {
+		gradeScaleID = uuid.UUID(r.GradeScaleID.Bytes).String()
+	}
+
+	publishedAt := ""
+	if r.PublishedAt.Valid {
+		publishedAt = r.PublishedAt.Time.Format(time.RFC3339)
 	}
 
 	return CourseResultResponse{
-		CourseResultID:   res.CourseResultID.String(),
-		EnrollmentID:     res.EnrollmentID.String(),
-		CourseOfferingID: res.CourseOfferingID.String(),
-		TotalMarks:       totalMarksVal,
-		MarksObtained:    marksObtainedVal,
-		Percentage:       percentageVal,
-		GradeScaleID:     res.GradeScaleID.String(),
-		ResultStatus:     string(res.ResultStatus),
-		PublishedAt:      publishedAtStr,
-		CreatedAt:        createdAtStr,
-		UpdatedAt:        updatedAtStr,
+		CourseResultID:   uuid.UUID(r.CourseResultID.Bytes).String(),
+		EnrollmentID:     uuid.UUID(r.EnrollmentID.Bytes).String(),
+		CourseOfferingID: uuid.UUID(r.CourseOfferingID.Bytes).String(),
+		TotalMarks:       totalMarks,
+		MarksObtained:    marksObtained,
+		Percentage:       percentage,
+		GradeScaleID:     gradeScaleID,
+		ResultStatus:     string(r.ResultStatus),
+		PublishedAt:      publishedAt,
+		CreatedAt:        r.CreatedAt.Time.Format(time.RFC3339),
+		UpdatedAt:        r.UpdatedAt.Time.Format(time.RFC3339),
 	}
 }
 
 func ToResponses(results []db.CourseResult) []CourseResultResponse {
-	res := make([]CourseResultResponse, 0, len(results))
-	for _, r := range results {
-		res = append(res, ToResponse(r))
+	responses := make([]CourseResultResponse, len(results))
+	for i, r := range results {
+		responses[i] = ToResponse(r)
 	}
-	return res
+	return responses
 }

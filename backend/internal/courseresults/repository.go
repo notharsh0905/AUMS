@@ -43,6 +43,36 @@ func (r *Repository) ListPaginated(
 	)
 }
 
+func (r *Repository) ListForStudentUser(
+	ctx context.Context,
+	studentUserID pgtype.UUID,
+) ([]db.CourseResult, error) {
+	return r.queries.ListCourseResultsForStudentUser(
+		ctx,
+		studentUserID,
+	)
+}
+
+func (r *Repository) ListForParentUser(
+	ctx context.Context,
+	parentUserID pgtype.UUID,
+) ([]db.CourseResult, error) {
+	return r.queries.ListCourseResultsForParentUser(
+		ctx,
+		parentUserID,
+	)
+}
+
+func (r *Repository) ListForFaculty(
+	ctx context.Context,
+	facultyProfileID pgtype.UUID,
+) ([]db.CourseResult, error) {
+	return r.queries.ListCourseResultsForFaculty(
+		ctx,
+		facultyProfileID,
+	)
+}
+
 func (r *Repository) Count(
 	ctx context.Context,
 	enrollmentID string,
@@ -67,10 +97,40 @@ func (r *Repository) Create(ctx context.Context, params db.CreateCourseResultPar
 	return r.queries.CreateCourseResult(ctx, params)
 }
 
+func (r *Repository) Upsert(ctx context.Context, params db.UpsertCourseResultParams) error {
+	return r.queries.UpsertCourseResult(ctx, params)
+}
+
 func (r *Repository) Update(ctx context.Context, params db.UpdateCourseResultParams) error {
 	return r.queries.UpdateCourseResult(ctx, params)
 }
 
 func (r *Repository) Delete(ctx context.Context, id pgtype.UUID) error {
 	return r.queries.DeleteCourseResult(ctx, id)
+}
+
+func (r *Repository) GetFacultyProfileByUserID(
+	ctx context.Context,
+	userID pgtype.UUID,
+) (db.FacultyProfile, error) {
+	return r.queries.GetFacultyProfileByUserID(
+		ctx,
+		userID,
+	)
+}
+
+func (r *Repository) GetCourseOffering(
+	ctx context.Context,
+	offeringID pgtype.UUID,
+) (db.CourseOffering, error) {
+	return r.queries.GetCourseOffering(
+		ctx,
+		offeringID,
+	)
+}
+
+func (r *Repository) ListFacultyCourseAllocations(
+	ctx context.Context,
+) ([]db.FacultyCourseAllocation, error) {
+	return r.queries.ListFacultyCourseAllocations(ctx)
 }
