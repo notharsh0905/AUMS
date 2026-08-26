@@ -3,7 +3,6 @@ package attendance
 import (
 	"net/http"
 
-	"aums/backend/internal/middleware"
 	"aums/backend/pkg/response"
 	aumsuuid "aums/backend/pkg/uuid"
 	"aums/backend/pkg/validator"
@@ -45,7 +44,7 @@ func (h *Handler) List(
 	page := response.GetPage(c)
 	limit := response.GetLimit(c)
 
-	userIDString := middleware.GetUserID(c)
+	userIDString := c.GetString("user_id")
 	callerUserID, _ := aumsuuid.Parse(userIDString)
 
 	data, err := h.service.ListScoped(
@@ -147,6 +146,81 @@ func (h *Handler) Create(
 		c,
 		http.StatusCreated,
 		"attendance record created successfully",
+		nil,
+	)
+}
+
+// BulkCreate godoc
+// @Summary      Bulk Mark Attendance
+// @Description  Atomically mark attendance for multiple students in a class session
+// @Tags         Attendance
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body      BulkMarkAttendanceRequest  true  "Bulk Attendance Payload"
+// @Success      200     {object}  response.SuccessResponse
+// @Failure      400     {object}  response.ErrorResponse
+// @Failure      401     {object}  response.ErrorResponse
+// @Failure      403     {object}  response.ErrorResponse
+// @Router       /attendance/bulk [post]
+func (h *Handler) BulkCreate(
+	c *gin.Context,
+) {
+
+	var req BulkMarkAttendanceRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	if err := validator.Validate.Struct(req); err != nil {
+
+		response.ValidationError(
+			c,
+			validator.FormatErrors(err),
+		)
+
+		return
+	}
+
+	callerUserID := c.GetString("user_id")
+
+	err := h.service.BulkMark(
+		c.Request.Context(),
+		callerUserID,
+		req,
+	)
+
+	if err != nil {
+		if err.Error() == "forbidden: students are not authorized to mark attendance" ||
+			err.Error() == "unauthorized: faculty can only mark attendance for allocated class sessions" {
+			response.Error(
+				c,
+				http.StatusForbidden,
+				err.Error(),
+			)
+			return
+		}
+
+		response.Error(
+			c,
+			http.StatusBadRequest,
+			err.Error(),
+		)
+
+		return
+	}
+
+	response.Success(
+		c,
+		http.StatusOK,
+		"bulk attendance marked successfully",
 		nil,
 	)
 }

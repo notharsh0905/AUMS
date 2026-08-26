@@ -489,3 +489,47 @@ VALUES
     'Implemented AVL balance rotation with unit benchmarks'
 )
 ON CONFLICT (assignment_id, enrollment_id) DO NOTHING;
+
+-- Seed Demo Class Sessions
+INSERT INTO class_sessions (
+    class_session_id,
+    timetable_entry_id,
+    session_date,
+    start_time,
+    end_time,
+    session_status,
+    conducted_by,
+    remarks
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000851',
+    '00000000-0000-0000-0000-000000000991',
+    CURRENT_DATE - INTERVAL '1 day',
+    '09:00:00',
+    '10:00:00',
+    'COMPLETED'::session_status,
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    'Trees and graphs intro lecture'
+)
+ON CONFLICT (timetable_entry_id, session_date) DO NOTHING;
+
+-- Seed Demo Attendance Records
+INSERT INTO attendance_records (
+    attendance_record_id,
+    class_session_id,
+    enrollment_id,
+    attendance_status,
+    marked_by,
+    remarks
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000861',
+    '00000000-0000-0000-0000-000000000851',
+    (SELECT enrollment_id FROM student_enrollments WHERE enrollment_number = 'CS2026001'),
+    'PRESENT'::attendance_status,
+    (SELECT faculty_profile_id FROM faculty_profiles WHERE employee_code = 'FAC001'),
+    'Attended and participated actively'
+)
+ON CONFLICT (class_session_id, enrollment_id) DO NOTHING;

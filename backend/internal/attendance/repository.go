@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"aums/backend/internal/db/generated"
+	aumsuuid "aums/backend/pkg/uuid"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -64,4 +65,76 @@ func (r *Repository) Create(
 		ctx,
 		params,
 	)
+}
+
+func (r *Repository) GetClassSessionByID(
+	ctx context.Context,
+	classSessionID pgtype.UUID,
+) (generated.GetClassSessionByIDRow, error) {
+
+	return r.queries.GetClassSessionByID(
+		ctx,
+		classSessionID,
+	)
+}
+
+func (r *Repository) GetFacultyProfileByUserID(
+	ctx context.Context,
+	userID pgtype.UUID,
+) (generated.FacultyProfile, error) {
+
+	return r.queries.GetFacultyProfileByUserID(
+		ctx,
+		userID,
+	)
+}
+
+func (r *Repository) BulkUpsert(
+	ctx context.Context,
+	classSessionID pgtype.UUID,
+	markedBy pgtype.UUID,
+	items []BulkAttendanceItem,
+) error {
+
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	qtx := r.queries.WithTx(tx)
+
+	for _, item := range items {
+		recordID, err := aumsuuid.New()
+		if err != nil {
+			return err
+		}
+
+		enrollmentID, err := aumsuuid.Parse(item.EnrollmentID)
+		if err != nil {
+			return err
+		}
+
+		err = qtx.UpsertAttendanceRecord(
+			ctx,
+			generated.UpsertAttendanceRecordParams{
+				AttendanceRecordID: recordID,
+				ClassSessionID:     classSessionID,
+				EnrollmentID:       enrollmentID,
+				AttendanceStatus: generated.AttendanceStatus(
+					item.AttendanceStatus,
+				),
+				MarkedBy: markedBy,
+				Remarks: pgtype.Text{
+					String: item.Remarks,
+					Valid:  item.Remarks != "",
+				},
+			},
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
 }

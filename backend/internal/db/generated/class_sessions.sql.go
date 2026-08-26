@@ -59,6 +59,60 @@ func (q *Queries) CreateClassSession(ctx context.Context, arg CreateClassSession
 	return err
 }
 
+const getClassSessionByID = `-- name: GetClassSessionByID :one
+SELECT
+    cs.class_session_id,
+    cs.timetable_entry_id,
+    cs.session_date,
+    cs.start_time,
+    cs.end_time,
+    cs.session_status,
+    cs.conducted_by,
+    cs.remarks,
+    cs.created_at,
+    cs.updated_at,
+    te.faculty_profile_id AS timetable_faculty_profile_id,
+    te.course_offering_id
+FROM class_sessions cs
+JOIN timetable_entries te ON te.timetable_entry_id = cs.timetable_entry_id
+WHERE cs.class_session_id = $1
+`
+
+type GetClassSessionByIDRow struct {
+	ClassSessionID            pgtype.UUID        `json:"class_session_id"`
+	TimetableEntryID          pgtype.UUID        `json:"timetable_entry_id"`
+	SessionDate               pgtype.Date        `json:"session_date"`
+	StartTime                 pgtype.Time        `json:"start_time"`
+	EndTime                   pgtype.Time        `json:"end_time"`
+	SessionStatus             SessionStatus      `json:"session_status"`
+	ConductedBy               pgtype.UUID        `json:"conducted_by"`
+	Remarks                   pgtype.Text        `json:"remarks"`
+	CreatedAt                 pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                 pgtype.Timestamptz `json:"updated_at"`
+	TimetableFacultyProfileID pgtype.UUID        `json:"timetable_faculty_profile_id"`
+	CourseOfferingID          pgtype.UUID        `json:"course_offering_id"`
+}
+
+func (q *Queries) GetClassSessionByID(ctx context.Context, classSessionID pgtype.UUID) (GetClassSessionByIDRow, error) {
+	row := q.db.QueryRow(ctx, getClassSessionByID, classSessionID)
+	var i GetClassSessionByIDRow
+	err := row.Scan(
+		&i.ClassSessionID,
+		&i.TimetableEntryID,
+		&i.SessionDate,
+		&i.StartTime,
+		&i.EndTime,
+		&i.SessionStatus,
+		&i.ConductedBy,
+		&i.Remarks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TimetableFacultyProfileID,
+		&i.CourseOfferingID,
+	)
+	return i, err
+}
+
 const listClassSessions = `-- name: ListClassSessions :many
 SELECT class_session_id, timetable_entry_id, session_date, start_time, end_time, session_status, conducted_by, remarks, created_at, updated_at
 FROM class_sessions

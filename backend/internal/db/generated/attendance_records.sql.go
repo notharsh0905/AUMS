@@ -172,3 +172,56 @@ func (q *Queries) ListAttendanceRecordsForStudentUser(ctx context.Context, userI
 	}
 	return items, nil
 }
+
+const upsertAttendanceRecord = `-- name: UpsertAttendanceRecord :exec
+INSERT INTO attendance_records (
+    attendance_record_id,
+    class_session_id,
+    enrollment_id,
+    attendance_status,
+    marked_by,
+    remarks,
+    marked_at,
+    created_at,
+    updated_at
+)
+VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    NOW(),
+    NOW(),
+    NOW()
+)
+ON CONFLICT (class_session_id, enrollment_id)
+DO UPDATE SET
+    attendance_status = EXCLUDED.attendance_status,
+    marked_by = EXCLUDED.marked_by,
+    remarks = EXCLUDED.remarks,
+    marked_at = NOW(),
+    updated_at = NOW()
+`
+
+type UpsertAttendanceRecordParams struct {
+	AttendanceRecordID pgtype.UUID      `json:"attendance_record_id"`
+	ClassSessionID     pgtype.UUID      `json:"class_session_id"`
+	EnrollmentID       pgtype.UUID      `json:"enrollment_id"`
+	AttendanceStatus   AttendanceStatus `json:"attendance_status"`
+	MarkedBy           pgtype.UUID      `json:"marked_by"`
+	Remarks            pgtype.Text      `json:"remarks"`
+}
+
+func (q *Queries) UpsertAttendanceRecord(ctx context.Context, arg UpsertAttendanceRecordParams) error {
+	_, err := q.db.Exec(ctx, upsertAttendanceRecord,
+		arg.AttendanceRecordID,
+		arg.ClassSessionID,
+		arg.EnrollmentID,
+		arg.AttendanceStatus,
+		arg.MarkedBy,
+		arg.Remarks,
+	)
+	return err
+}

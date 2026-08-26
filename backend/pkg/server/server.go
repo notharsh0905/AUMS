@@ -1122,6 +1122,7 @@ func New(application *app.Application) *gin.Engine {
 	attendance.RegisterRoutes(
 		attendanceGroup,
 		attendanceHandler,
+		rolePermissionsService,
 	)
 
 	// ==========================================
