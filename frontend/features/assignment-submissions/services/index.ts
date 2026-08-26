@@ -10,6 +10,15 @@ interface RawSubmission {
   remarks?: string;
 }
 
+interface RawAssignmentGrade {
+  assignment_grade_id: string;
+  assignment_submission_id: string;
+  evaluated_by: string;
+  marks_awarded: number | string;
+  feedback?: string;
+  evaluated_at: string;
+}
+
 interface RawAssignment {
   assignment_id: string;
   course_offering_id: string;
@@ -79,31 +88,6 @@ interface RawAcademicYear {
   academic_year_name: string;
 }
 
-const LOCAL_GRADING_MOCK_STORE = new Map<string, { marks: number; feedback: string }>();
-
-const LOCAL_SUBMISSIONS_MOCK: AssignmentSubmission[] = [
-  {
-    assignmentSubmissionId: 'sub-mock-1',
-    assignmentId: 'assign-mock-1',
-    assignmentTitle: 'SQL Joins Homework',
-    dueDate: '2026-07-15',
-    maximumMarks: 100,
-    enrollmentId: 'enroll-mock-1',
-    studentName: 'Jane Doe',
-    rollNumber: '2026CS101',
-    facultyName: 'Dr. Alan Turing',
-    program: 'B.Tech',
-    department: 'Computer Science',
-    semester: 'Fall 2026 Semester',
-    academicYear: 'Academic Year 2026-2027',
-    submissionStatus: 'SUBMITTED',
-    submittedAt: '2026-07-14',
-    attachmentName: 'sql_joins_janedoe.pdf',
-    isLate: false,
-    remarks: 'Solved all tasks',
-  },
-];
-
 export const submissionService = {
   getSubmissions: async (
     filters: SubmissionFilters,
@@ -120,9 +104,22 @@ export const submissionService = {
 
     const list = res.data || [];
 
-
-    // 2. Fetch parallel lookups
-    const [assignmentsRes, enrollmentsRes, studentsRes, offeringsRes, coursesRes, facultyRes, curriculaRes, programsRes, deptsRes, semRes, ayRes] = await Promise.all([
+    // 2. Fetch parallel lookups and grades
+    const [
+      gradesRes,
+      assignmentsRes,
+      enrollmentsRes,
+      studentsRes,
+      offeringsRes,
+      coursesRes,
+      facultyRes,
+      curriculaRes,
+      programsRes,
+      deptsRes,
+      semRes,
+      ayRes,
+    ] = await Promise.all([
+      api.get<RawAssignmentGrade[]>('/assignment-submissions/grades').catch(() => ({ data: [] })),
       api.get<RawAssignment[]>('/assignments', { params: { limit: 1000 } }).catch(() => ({ data: [] })),
       api.get<RawEnrollment[]>('/student-enrollments', { params: { limit: 1000 } }).catch(() => ({ data: [] })),
       api.get<RawStudent[]>('/students', { params: { limit: 1000 } }).catch(() => ({ data: [] })),
@@ -136,6 +133,7 @@ export const submissionService = {
       api.get<RawAcademicYear[]>('/academic-years', { params: { limit: 1000 } }).catch(() => ({ data: [] })),
     ]);
 
+    const gradesList = gradesRes.data || [];
     const assignmentsList = assignmentsRes.data || [];
     const enrollments = enrollmentsRes.data || [];
     const students = studentsRes.data || [];
@@ -148,8 +146,13 @@ export const submissionService = {
     const semesters = semRes.data || [];
     const academicYears = ayRes.data || [];
 
+    const gradesMap = new Map<string, RawAssignmentGrade>();
+    gradesList.forEach((g) => {
+      gradesMap.set(g.assignment_submission_id, g);
+    });
+
     // 3. Map details
-    const dbSubmissions: AssignmentSubmission[] = list.map((item) => {
+    let submissions: AssignmentSubmission[] = list.map((item) => {
       const assignmentObj = assignmentsList.find((a) => a.assignment_id === item.assignment_id);
       const enrollmentObj = enrollments.find((e) => e.enrollment_id === item.enrollment_id);
       const studentObj = enrollmentObj ? students.find((s) => s.student_profile_id === enrollmentObj.student_profile_id) : null;
@@ -184,8 +187,13 @@ export const submissionService = {
 
       const isLate = submittedDate && dueStr ? submittedDate > dueStr : false;
 
-      // Merge local grading mock variables
-      const localGrade = LOCAL_GRADING_MOCK_STORE.get(item.assignment_submission_id);
+      // Check PostgreSQL grade record
+      const dbGrade = gradesMap.get(item.assignment_submission_id);
+      const marksAwardedVal = dbGrade
+        ? typeof dbGrade.marks_awarded === 'string'
+          ? parseFloat(dbGrade.marks_awarded)
+          : dbGrade.marks_awarded
+        : undefined;
 
       return {
         assignmentSubmissionId: item.assignment_submission_id,
@@ -201,17 +209,15 @@ export const submissionService = {
         department: dept?.department_name || 'Computer Science',
         semester: semObj?.semester_name || 'Fall 2026 Semester',
         academicYear: ayObj?.academic_year_name || 'Academic Year 2026-2027',
-        submissionStatus: localGrade ? 'GRADED' : item.submission_status || 'SUBMITTED',
+        submissionStatus: dbGrade ? 'GRADED' : item.submission_status || 'SUBMITTED',
         submittedAt: submittedDate,
-        marksAwarded: localGrade ? localGrade.marks : undefined,
-        feedback: localGrade ? localGrade.feedback : undefined,
+        marksAwarded: marksAwardedVal,
+        feedback: dbGrade?.feedback || undefined,
         attachmentName: 'assignment_file.pdf',
         isLate,
         remarks: item.remarks || '',
       };
     });
-
-    let submissions = [...dbSubmissions, ...LOCAL_SUBMISSIONS_MOCK];
 
     // Filters
     if (filters.search) {
@@ -272,27 +278,13 @@ export const submissionService = {
     marks: number,
     feedback: string
   ): Promise<void> => {
-    // Simulated grading logic (no backend grade routes exist)
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
-    // Save locally
-    LOCAL_GRADING_MOCK_STORE.set(submissionId, { marks, feedback });
-
-    // Try to update mock store matching lists
-    const matched = LOCAL_SUBMISSIONS_MOCK.find((s) => s.assignmentSubmissionId === submissionId);
-    if (matched) {
-      matched.marksAwarded = marks;
-      matched.feedback = feedback;
-      matched.submissionStatus = 'GRADED';
-    }
+    await api.put<unknown>(`/assignment-submissions/${submissionId}/grade`, {
+      marks_awarded: marks,
+      feedback,
+    });
   },
 
   deleteSubmission: async (submissionId: string): Promise<string> => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    const index = LOCAL_SUBMISSIONS_MOCK.findIndex((s) => s.assignmentSubmissionId === submissionId);
-    if (index !== -1) {
-      LOCAL_SUBMISSIONS_MOCK.splice(index, 1);
-    }
     return submissionId;
   },
 };

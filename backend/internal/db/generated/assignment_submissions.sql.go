@@ -21,7 +21,7 @@ INSERT INTO assignment_submissions (
     remarks
 )
 VALUES (
-    $1,$2,$3,$4,$5,$6
+    $1, $2, $3, $4, $5, $6
 )
 `
 
@@ -44,6 +44,113 @@ func (q *Queries) CreateAssignmentSubmission(ctx context.Context, arg CreateAssi
 		arg.Remarks,
 	)
 	return err
+}
+
+const getAssignmentGradeBySubmissionID = `-- name: GetAssignmentGradeBySubmissionID :one
+SELECT assignment_grade_id, assignment_submission_id, evaluated_by, marks_awarded, feedback, evaluated_at, created_at, updated_at
+FROM assignment_grades
+WHERE assignment_submission_id = $1
+`
+
+func (q *Queries) GetAssignmentGradeBySubmissionID(ctx context.Context, assignmentSubmissionID pgtype.UUID) (AssignmentGrade, error) {
+	row := q.db.QueryRow(ctx, getAssignmentGradeBySubmissionID, assignmentSubmissionID)
+	var i AssignmentGrade
+	err := row.Scan(
+		&i.AssignmentGradeID,
+		&i.AssignmentSubmissionID,
+		&i.EvaluatedBy,
+		&i.MarksAwarded,
+		&i.Feedback,
+		&i.EvaluatedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAssignmentSubmissionByID = `-- name: GetAssignmentSubmissionByID :one
+SELECT
+    asub.assignment_submission_id,
+    asub.assignment_id,
+    asub.enrollment_id,
+    asub.submission_status,
+    asub.submitted_at,
+    asub.remarks,
+    asub.created_at,
+    asub.updated_at,
+    a.title AS assignment_title,
+    a.total_marks AS assignment_total_marks,
+    a.faculty_profile_id AS assignment_faculty_profile_id
+FROM assignment_submissions asub
+JOIN assignments a ON a.assignment_id = asub.assignment_id
+WHERE asub.assignment_submission_id = $1
+`
+
+type GetAssignmentSubmissionByIDRow struct {
+	AssignmentSubmissionID     pgtype.UUID        `json:"assignment_submission_id"`
+	AssignmentID               pgtype.UUID        `json:"assignment_id"`
+	EnrollmentID               pgtype.UUID        `json:"enrollment_id"`
+	SubmissionStatus           SubmissionStatus   `json:"submission_status"`
+	SubmittedAt                pgtype.Timestamptz `json:"submitted_at"`
+	Remarks                    pgtype.Text        `json:"remarks"`
+	CreatedAt                  pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                  pgtype.Timestamptz `json:"updated_at"`
+	AssignmentTitle            string             `json:"assignment_title"`
+	AssignmentTotalMarks       pgtype.Numeric     `json:"assignment_total_marks"`
+	AssignmentFacultyProfileID pgtype.UUID        `json:"assignment_faculty_profile_id"`
+}
+
+func (q *Queries) GetAssignmentSubmissionByID(ctx context.Context, assignmentSubmissionID pgtype.UUID) (GetAssignmentSubmissionByIDRow, error) {
+	row := q.db.QueryRow(ctx, getAssignmentSubmissionByID, assignmentSubmissionID)
+	var i GetAssignmentSubmissionByIDRow
+	err := row.Scan(
+		&i.AssignmentSubmissionID,
+		&i.AssignmentID,
+		&i.EnrollmentID,
+		&i.SubmissionStatus,
+		&i.SubmittedAt,
+		&i.Remarks,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.AssignmentTitle,
+		&i.AssignmentTotalMarks,
+		&i.AssignmentFacultyProfileID,
+	)
+	return i, err
+}
+
+const listAssignmentGrades = `-- name: ListAssignmentGrades :many
+SELECT assignment_grade_id, assignment_submission_id, evaluated_by, marks_awarded, feedback, evaluated_at, created_at, updated_at
+FROM assignment_grades
+`
+
+func (q *Queries) ListAssignmentGrades(ctx context.Context) ([]AssignmentGrade, error) {
+	rows, err := q.db.Query(ctx, listAssignmentGrades)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []AssignmentGrade{}
+	for rows.Next() {
+		var i AssignmentGrade
+		if err := rows.Scan(
+			&i.AssignmentGradeID,
+			&i.AssignmentSubmissionID,
+			&i.EvaluatedBy,
+			&i.MarksAwarded,
+			&i.Feedback,
+			&i.EvaluatedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listAssignmentSubmissions = `-- name: ListAssignmentSubmissions :many
@@ -79,4 +186,46 @@ func (q *Queries) ListAssignmentSubmissions(ctx context.Context) ([]AssignmentSu
 		return nil, err
 	}
 	return items, nil
+}
+
+const upsertAssignmentGrade = `-- name: UpsertAssignmentGrade :exec
+INSERT INTO assignment_grades (
+    assignment_grade_id,
+    assignment_submission_id,
+    evaluated_by,
+    marks_awarded,
+    feedback,
+    evaluated_at,
+    created_at,
+    updated_at
+)
+VALUES (
+    $1, $2, $3, $4, $5, NOW(), NOW(), NOW()
+)
+ON CONFLICT (assignment_submission_id)
+DO UPDATE SET
+    evaluated_by = EXCLUDED.evaluated_by,
+    marks_awarded = EXCLUDED.marks_awarded,
+    feedback = EXCLUDED.feedback,
+    evaluated_at = NOW(),
+    updated_at = NOW()
+`
+
+type UpsertAssignmentGradeParams struct {
+	AssignmentGradeID      pgtype.UUID    `json:"assignment_grade_id"`
+	AssignmentSubmissionID pgtype.UUID    `json:"assignment_submission_id"`
+	EvaluatedBy            pgtype.UUID    `json:"evaluated_by"`
+	MarksAwarded           pgtype.Numeric `json:"marks_awarded"`
+	Feedback               pgtype.Text    `json:"feedback"`
+}
+
+func (q *Queries) UpsertAssignmentGrade(ctx context.Context, arg UpsertAssignmentGradeParams) error {
+	_, err := q.db.Exec(ctx, upsertAssignmentGrade,
+		arg.AssignmentGradeID,
+		arg.AssignmentSubmissionID,
+		arg.EvaluatedBy,
+		arg.MarksAwarded,
+		arg.Feedback,
+	)
+	return err
 }

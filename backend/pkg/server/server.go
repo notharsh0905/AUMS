@@ -433,6 +433,7 @@ func New(application *app.Application) *gin.Engine {
 	assignmentSubmissionService :=
 		assignmentsubmissions.NewService(
 			assignmentSubmissionRepository,
+			userRolesService,
 		)
 	assignmentSubmissionHandler :=
 		assignmentsubmissions.NewHandler(
@@ -1162,13 +1163,14 @@ func New(application *app.Application) *gin.Engine {
 	assignmentSubmissionsGroup.Use(
 		middleware.RequirePermission(
 			rolePermissionsService,
-			"assignment_submissions.read",
+			"submissions.read",
 		),
 	)
 
 	assignmentsubmissions.RegisterRoutes(
 		assignmentSubmissionsGroup,
 		assignmentSubmissionHandler,
+		rolePermissionsService,
 	)
 
 	// ==========================================

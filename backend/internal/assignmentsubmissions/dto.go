@@ -12,3 +12,10 @@ type CreateAssignmentSubmissionRequest struct {
 
 	Remarks string `json:"remarks"`
 }
+
+// GradeAssignmentSubmissionRequest represents the request payload to grade an assignment submission.
+type GradeAssignmentSubmissionRequest struct {
+	MarksAwarded float64 `json:"marks_awarded" validate:"min=0"`
+
+	Feedback string `json:"feedback"`
+}
