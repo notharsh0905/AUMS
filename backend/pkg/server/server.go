@@ -1090,7 +1090,7 @@ func New(application *app.Application) *gin.Engine {
 	classSessionsGroup.Use(
 		middleware.RequirePermission(
 			rolePermissionsService,
-			"timetable.read",
+			"timetables.read",
 		),
 	)
 
