@@ -7,6 +7,7 @@ import (
 
 	_ "aums/backend/docs"
 	"aums/backend/internal/academicyears"
+	"aums/backend/internal/analytics"
 	"aums/backend/internal/assignments"
 	"aums/backend/internal/assignmentsubmissions"
 	"aums/backend/internal/attendance"
@@ -566,6 +567,19 @@ func New(application *app.Application) *gin.Engine {
 
 	transcriptsHandler := transcripts.NewHandler(
 		transcriptsService,
+	)
+
+	analyticsRepo := analytics.NewRepository(
+		application.DB,
+	)
+
+	analyticsService := analytics.NewService(
+		analyticsRepo,
+		userRolesService,
+	)
+
+	analyticsHandler := analytics.NewHandler(
+		analyticsService,
 	)
 
 	// ==========================================
@@ -1280,6 +1294,29 @@ func New(application *app.Application) *gin.Engine {
 		transcriptsGroup,
 		transcriptsHandler,
 		rolePermissionsService,
+	)
+
+	// ==========================================
+	// ANALYTICS MODULE
+	// ==========================================
+	analyticsGroup := api.Group("/analytics")
+	analyticsGroup.Use(
+		middleware.Auth(
+			application.Config,
+		),
+	)
+	analyticsGroup.Use(
+		middleware.RequireAnyPermission(
+			rolePermissionsService,
+			"departments.read",
+			"schools.read",
+			"programs.read",
+			"courses.read",
+		),
+	)
+	analytics.RegisterRoutes(
+		analyticsGroup,
+		analyticsHandler,
 	)
 
 	// ==========================================
