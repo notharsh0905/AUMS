@@ -419,6 +419,8 @@ CROSS JOIN permissions p
 WHERE r.role_code = 'STUDENT'
 AND p.permission_code IN (
 
+    'students.read',
+
     'academic_records.read',
 
     'course_registrations.create',

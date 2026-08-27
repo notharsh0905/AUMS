@@ -237,6 +237,24 @@ VALUES
 )
 ON CONFLICT (course_code) DO NOTHING;
 
+-- Seed Academic Year
+INSERT INTO academic_years (
+    academic_year_id,
+    academic_year_name,
+    start_date,
+    end_date,
+    is_current
+)
+VALUES
+(
+    '00000000-0000-0000-0000-000000000201',
+    '2026-2027',
+    '2026-06-01',
+    '2027-05-31',
+    TRUE
+)
+ON CONFLICT (academic_year_name) DO NOTHING;
+
 -- Seed Semesters
 INSERT INTO semesters (
     semester_id,

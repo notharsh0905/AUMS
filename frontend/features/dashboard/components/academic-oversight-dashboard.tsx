@@ -214,78 +214,90 @@ export function AcademicOversightDashboard() {
 
             <CardContent className="p-0">
               {activeTab === 'departments' && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
-                      <tr>
-                        <th className="px-5 py-3">Code</th>
-                        <th className="px-5 py-3">Department Name</th>
-                        <th className="px-5 py-3 text-right">Faculty</th>
-                        <th className="px-5 py-3 text-right">Courses</th>
-                        <th className="px-5 py-3 text-right">Programs</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
-                      {departments.map((dept) => (
-                        <tr key={dept.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
-                          <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{dept.code}</td>
-                          <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{dept.name}</td>
-                          <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.facultyCount}</td>
-                          <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.courseCount}</td>
-                          <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.programCount}</td>
+                departments.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-500">No subordinate departments mapped to this academic unit.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
+                        <tr>
+                          <th className="px-5 py-3">Code</th>
+                          <th className="px-5 py-3">Department Name</th>
+                          <th className="px-5 py-3 text-right">Faculty</th>
+                          <th className="px-5 py-3 text-right">Courses</th>
+                          <th className="px-5 py-3 text-right">Programs</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
+                        {departments.map((dept) => (
+                          <tr key={dept.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
+                            <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{dept.code}</td>
+                            <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{dept.name}</td>
+                            <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.facultyCount}</td>
+                            <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.courseCount}</td>
+                            <td className="px-5 py-3.5 text-right font-medium text-zinc-600 dark:text-zinc-400">{dept.programCount}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
               )}
 
               {activeTab === 'faculty' && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
-                      <tr>
-                        <th className="px-5 py-3">Employee Code</th>
-                        <th className="px-5 py-3">Name</th>
-                        <th className="px-5 py-3">Designation</th>
-                        <th className="px-5 py-3">Department</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
-                      {facultyMembers.map((fac) => (
-                        <tr key={fac.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
-                          <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{fac.employeeCode}</td>
-                          <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{fac.name}</td>
-                          <td className="px-5 py-3.5 text-zinc-600 dark:text-zinc-400">{fac.designation}</td>
-                          <td className="px-5 py-3.5 text-zinc-500">{fac.departmentName}</td>
+                facultyMembers.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-500">No faculty members currently registered in this unit.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
+                        <tr>
+                          <th className="px-5 py-3">Employee Code</th>
+                          <th className="px-5 py-3">Name</th>
+                          <th className="px-5 py-3">Designation</th>
+                          <th className="px-5 py-3">Department</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
+                        {facultyMembers.map((fac) => (
+                          <tr key={fac.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
+                            <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{fac.employeeCode}</td>
+                            <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{fac.name}</td>
+                            <td className="px-5 py-3.5 text-zinc-600 dark:text-zinc-400">{fac.designation}</td>
+                            <td className="px-5 py-3.5 text-zinc-500">{fac.departmentName}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
               )}
 
               {activeTab === 'programs' && (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs text-left">
-                    <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
-                      <tr>
-                        <th className="px-5 py-3">Code</th>
-                        <th className="px-5 py-3">Program Name</th>
-                        <th className="px-5 py-3">Degree Level</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
-                      {programs.map((prog) => (
-                        <tr key={prog.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
-                          <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{prog.code}</td>
-                          <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{prog.name}</td>
-                          <td className="px-5 py-3.5 text-zinc-600 dark:text-zinc-400">{prog.degreeType}</td>
+                programs.length === 0 ? (
+                  <div className="p-8 text-center text-xs text-zinc-500">No degree programs currently registered under this unit.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs text-left">
+                      <thead className="bg-zinc-50 dark:bg-zinc-900/50 text-zinc-400 uppercase font-bold text-[10px] border-b border-zinc-100 dark:border-zinc-850">
+                        <tr>
+                          <th className="px-5 py-3">Code</th>
+                          <th className="px-5 py-3">Program Name</th>
+                          <th className="px-5 py-3">Degree Level</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100 dark:divide-zinc-850">
+                        {programs.map((prog) => (
+                          <tr key={prog.id} className="hover:bg-zinc-50/50 dark:hover:bg-zinc-900/10 transition-colors">
+                            <td className="px-5 py-3.5 font-mono font-bold text-zinc-900 dark:text-zinc-50">{prog.code}</td>
+                            <td className="px-5 py-3.5 font-semibold text-zinc-800 dark:text-zinc-200">{prog.name}</td>
+                            <td className="px-5 py-3.5 text-zinc-600 dark:text-zinc-400">{prog.degreeType}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
               )}
             </CardContent>
           </Card>

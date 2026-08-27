@@ -1,16 +1,16 @@
 import React from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   description: string;
   retryCallback?: () => void;
 }
 
 export function ErrorState({
-  title = 'Something went wrong',
+  title = 'Failed to load records',
   description,
   retryCallback,
   className,
@@ -18,21 +18,23 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
+      role="alert"
+      aria-live="assertive"
       className={cn(
-        "flex flex-col items-center justify-center text-center p-8 md:p-12 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50/20 dark:bg-red-950/5 min-h-[300px] gap-4",
+        "flex flex-col items-center justify-center text-center p-8 md:p-12 rounded-xl border border-red-200/80 dark:border-red-900/40 bg-red-50/30 dark:bg-red-950/10 min-h-[300px] gap-4 w-full shadow-xs",
         className
       )}
       {...props}
     >
-      <div className="flex items-center justify-center h-12 w-12 rounded-lg bg-red-100 dark:bg-red-950/20 text-red-600 dark:text-red-400">
+      <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 shadow-xs">
         <AlertCircle className="h-6 w-6" />
       </div>
 
-      <div className="flex flex-col gap-1.5 max-w-sm">
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
+      <div className="flex flex-col gap-1.5 max-w-md">
+        <h3 className="text-sm md:text-base font-bold text-zinc-900 dark:text-zinc-50 tracking-tight">
           {title}
         </h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="text-xs md:text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
           {description}
         </p>
       </div>
@@ -41,9 +43,11 @@ export function ErrorState({
         <Button
           onClick={retryCallback}
           variant="outline"
-          className="mt-2 border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/20 text-red-700 dark:text-red-400 hover:text-red-800"
+          size="sm"
+          className="mt-2 border-red-200 dark:border-red-900/60 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-700 dark:text-red-400 hover:text-red-800 gap-1.5 h-8.5 text-xs font-semibold"
         >
-          Try Again
+          <RefreshCw className="h-3.5 w-3.5" />
+          <span>Retry Request</span>
         </Button>
       )}
     </div>
