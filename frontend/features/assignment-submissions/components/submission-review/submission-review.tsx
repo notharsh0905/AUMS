@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm, FormProvider, Resolver, DefaultValues } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { gradingFormSchema, GradingFormValues } from '../../schemas';
@@ -16,6 +16,11 @@ interface SubmissionReviewProps {
 }
 
 export function SubmissionReview({ submission, onSubmit, isSubmitting = false }: SubmissionReviewProps) {
+  const [isMac] = useState<boolean>(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    return /Mac|iPod|iPhone|iPad/.test(navigator.userAgent) || navigator.platform?.toUpperCase().indexOf('MAC') >= 0;
+  });
+
   const methods = useForm<GradingFormValues>({
     resolver: zodResolver(gradingFormSchema) as unknown as Resolver<GradingFormValues, unknown>,
     defaultValues: {
@@ -26,6 +31,14 @@ export function SubmissionReview({ submission, onSubmit, isSubmitting = false }:
 
   const handleGradingSubmit = async (values: GradingFormValues) => {
     await onSubmit(Number(values.marksAwarded), values.feedback);
+  };
+
+  // Keyboard shortcut listener for Cmd+Enter / Ctrl+Enter form submission
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      methods.handleSubmit(handleGradingSubmit)();
+    }
   };
 
   const details = [
@@ -82,7 +95,11 @@ export function SubmissionReview({ submission, onSubmit, isSubmitting = false }:
 
       {/* Form Fields */}
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleGradingSubmit)} className="flex flex-col gap-5">
+        <form
+          onSubmit={methods.handleSubmit(handleGradingSubmit)}
+          onKeyDown={handleKeyDown}
+          className="flex flex-col gap-5"
+        >
           <div className="grid grid-cols-1 gap-4">
             <FormInput
               name="marksAwarded"
@@ -98,7 +115,15 @@ export function SubmissionReview({ submission, onSubmit, isSubmitting = false }:
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900 mt-2">
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-900 mt-2">
+            <div className="text-[11px] text-zinc-400 dark:text-zinc-500 flex items-center gap-1.5">
+              <span>Shortcut:</span>
+              <kbd className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 font-mono text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
+                {isMac ? '⌘+Enter' : 'Ctrl+Enter'}
+              </kbd>
+              <span>to submit</span>
+            </div>
+
             <Button
               type="submit"
               disabled={isSubmitting}
