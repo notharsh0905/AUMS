@@ -15,7 +15,7 @@
 - **Comprehensive Academic Lifecycle**: Provide a single unified system for managing multi-campus university operations from admission to graduation.
 - **High Performance & Reliability**: Leverage Go, compiled SQL via `sqlc`, and Redis caching to handle concurrent student and faculty operations with minimal latency.
 - **Granular Security & Compliance**: Enforce strict Role-Based Access Control (RBAC) with fine-grained permissions across Super Admins, Deans, HODs, Faculty, Students, and Parents.
-- **Modern User Experience**: Deliver a fast, accessible, responsive web application with dark/light themes, dynamic data tables, and interactive analytics dashboards.
+- **Modern User Experience**: Deliver a fast, accessible, responsive web application with dark/light themes, dynamic data tables, and interactive analytics dashboards. hehe haha
 - **Modular Enterprise Architecture**: Provide clear separation of concerns across backend handlers, domain services, database queries, object storage, and frontend capsules.
 
 ---
